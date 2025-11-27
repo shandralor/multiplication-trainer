@@ -12,34 +12,61 @@ type Question = {
   factor1: number
   factor2: number
   answer: number
+  operation: 'multiply' | 'divide'
 }
 
-function generateRandomQuestion(tables: number[]): Question {
-  const factor1 = tables[Math.floor(Math.random() * tables.length)]
-  const factor2 = Math.floor(Math.random() * 10) + 1
-  return {
-    factor1,
-    factor2,
-    answer: factor1 * factor2
+function generateRandomQuestion(tables: number[], operation: 'multiply' | 'divide'): Question {
+  const table = tables[Math.floor(Math.random() * tables.length)]
+  const factor = Math.floor(Math.random() * 10) + 1
+
+  if (operation === 'multiply') {
+    return {
+      factor1: table,
+      factor2: factor,
+      answer: table * factor,
+      operation: 'multiply'
+    }
+  } else {
+    // For division: (table × factor) ÷ table = factor
+    // Display as: dividend ÷ divisor = answer
+    const dividend = table * factor
+    return {
+      factor1: dividend,
+      factor2: table,
+      answer: factor,
+      operation: 'divide'
+    }
   }
 }
 
-function generateQuestionSet(tables: number[], count: number): Question[] {
-  // First, generate all possible multiplication facts for selected tables
+function generateQuestionSet(tables: number[], count: number, operation: 'multiply' | 'divide'): Question[] {
+  // First, generate all possible facts for selected tables
   const allFacts: Question[] = []
   tables.forEach(table => {
     for (let i = 1; i <= 10; i++) {
-      allFacts.push({
-        factor1: table,
-        factor2: i,
-        answer: table * i
-      })
+      if (operation === 'multiply') {
+        allFacts.push({
+          factor1: table,
+          factor2: i,
+          answer: table * i,
+          operation: 'multiply'
+        })
+      } else {
+        // For division: (table × i) ÷ table = i
+        const dividend = table * i
+        allFacts.push({
+          factor1: dividend,
+          factor2: table,
+          answer: i,
+          operation: 'divide'
+        })
+      }
     }
   })
 
   // Shuffle all facts
   const shuffled = [...allFacts].sort(() => Math.random() - 0.5)
-  
+
   // If we need more questions than available facts, repeat and shuffle again
   if (count <= shuffled.length) {
     return shuffled.slice(0, count)
@@ -130,20 +157,22 @@ function QuizContent() {
   const searchParams = useSearchParams()
   const tablesParam = searchParams.get('tables')
   const modeParam = searchParams.get('mode') || 'practice'
+  const operationParam = searchParams.get('operation') || 'multiply'
   const timeParam = searchParams.get('time')
   const countParam = searchParams.get('count')
-  
-  const tables = useMemo(() => 
-    tablesParam ? tablesParam.split(',').map(Number) : [], 
+
+  const tables = useMemo(() =>
+    tablesParam ? tablesParam.split(',').map(Number) : [],
     [tablesParam]
   )
   const mode = modeParam as 'quiz' | 'practice' | 'timed'
+  const operation = operationParam as 'multiply' | 'divide'
   const timePerQuestion = timeParam ? parseInt(timeParam) : 5
   const questionCount = countParam ? parseInt(countParam) : 10
-  
+
   const [questions, setQuestions] = useState<Question[]>(() => {
     if (tables.length > 0) {
-      return mode === 'practice' ? [generateRandomQuestion(tables)] : generateQuestionSet(tables, questionCount)
+      return mode === 'practice' ? [generateRandomQuestion(tables, operation)] : generateQuestionSet(tables, questionCount, operation)
     }
     return []
   })
@@ -165,7 +194,7 @@ function QuizContent() {
     setMascotEmotion('neutral')
     
     if (mode === 'practice') {
-      setQuestions([generateRandomQuestion(tables)])
+      setQuestions([generateRandomQuestion(tables, operation)])
       setCurrentQuestion(0)
     } else if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
@@ -178,6 +207,7 @@ function QuizContent() {
       const result: QuizResult = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         mode: mode as 'quiz' | 'timed',
+        operation,
         tables,
         score: finalScore,
         total: questions.length,
@@ -198,7 +228,7 @@ function QuizContent() {
         setMascotEmotion('sad')
       }
     }
-  }, [mode, tables, timePerQuestion, currentQuestion, questions.length, score, isCorrect])
+  }, [mode, tables, operation, timePerQuestion, currentQuestion, questions.length, score, isCorrect])
 
   // Timer for timed mode
   useEffect(() => {
@@ -270,7 +300,7 @@ function QuizContent() {
   }
 
   const restart = () => {
-    const newQuestions = mode === 'practice' ? [generateRandomQuestion(tables)] : generateQuestionSet(tables, questionCount)
+    const newQuestions = mode === 'practice' ? [generateRandomQuestion(tables, operation)] : generateQuestionSet(tables, questionCount, operation)
     setQuestions(newQuestions)
     setCurrentQuestion(0)
     setScore(0)
@@ -430,7 +460,7 @@ function QuizContent() {
             <div className="text-center mb-8">
               <p className="text-gray-600 mb-4 text-lg">Wat is het antwoord?</p>
               <p className="text-6xl md:text-7xl font-bold text-gray-800 mb-8">
-                {currentQ.factor1} × {currentQ.factor2}
+                {currentQ.factor1} {currentQ.operation === 'multiply' ? '×' : '÷'} {currentQ.factor2}
               </p>
 
               {!showResult ? (

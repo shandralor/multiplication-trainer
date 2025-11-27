@@ -31,6 +31,7 @@ export default function ProgressPage() {
   const [exportCode, setExportCode] = useState('')
   const [importCode, setImportCode] = useState('')
   const [leaderboardMode, setLeaderboardMode] = useState<'quiz' | 'timed'>('quiz')
+  const [leaderboardOperation, setLeaderboardOperation] = useState<'multiply' | 'divide'>('multiply')
 
   const loadProfile = useCallback(() => {
     const currentProfile = getCurrentProfile()
@@ -75,7 +76,7 @@ export default function ProgressPage() {
     )
   }
 
-  const leaderboard = getLeaderboard(leaderboardMode, 10)
+  const leaderboard = getLeaderboard(leaderboardMode, leaderboardOperation, 10)
   const totalAccuracy = profile.totalQuestions > 0
     ? Math.round((profile.totalCorrect / profile.totalQuestions) * 100)
     : 0
@@ -136,53 +137,111 @@ export default function ProgressPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <Card className="border-2 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-lg">🏆 Beste Quiz Score</CardTitle>
+              <CardTitle className="text-lg">🏆 Beste Quiz Scores</CardTitle>
             </CardHeader>
             <CardContent>
-              {profile.bestScores.quiz ? (
-                <div className="space-y-2">
-                  <div className="text-3xl font-bold text-green-600">
-                    {profile.bestScores.quiz.percentage}%
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    {profile.bestScores.quiz.score}/{profile.bestScores.quiz.total} vragen goed
+              <div className="space-y-4">
+                {/* Multiplication */}
+                <div>
+                  <p className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-1">
+                    <span className="text-lg">×</span> Vermenigvuldigen
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Tafels: {profile.bestScores.quiz.tables.join(', ')}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(profile.bestScores.quiz.date).toLocaleDateString('nl-NL')}
-                  </p>
+                  {profile.bestScores.quiz.multiply ? (
+                    <div className="space-y-1 pl-6">
+                      <div className="text-2xl font-bold text-green-600">
+                        {profile.bestScores.quiz.multiply.percentage}%
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        {profile.bestScores.quiz.multiply.score}/{profile.bestScores.quiz.multiply.total} vragen · Tafels: {profile.bestScores.quiz.multiply.tables.join(', ')}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(profile.bestScores.quiz.multiply.date).toLocaleDateString('nl-NL')}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 pl-6">Nog niet geoefend</p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-gray-400">Nog geen quiz voltooid</p>
-              )}
+                {/* Division */}
+                <div>
+                  <p className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-1">
+                    <span className="text-lg">÷</span> Delen
+                  </p>
+                  {profile.bestScores.quiz.divide ? (
+                    <div className="space-y-1 pl-6">
+                      <div className="text-2xl font-bold text-green-600">
+                        {profile.bestScores.quiz.divide.percentage}%
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        {profile.bestScores.quiz.divide.score}/{profile.bestScores.quiz.divide.total} vragen · Tafels: {profile.bestScores.quiz.divide.tables.join(', ')}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(profile.bestScores.quiz.divide.date).toLocaleDateString('nl-NL')}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 pl-6">Nog niet geoefend</p>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card className="border-2 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-lg">⏱️ Beste Tijd Score</CardTitle>
+              <CardTitle className="text-lg">⏱️ Beste Tijd Scores</CardTitle>
             </CardHeader>
             <CardContent>
-              {profile.bestScores.timed ? (
-                <div className="space-y-2">
-                  <div className="text-3xl font-bold text-yellow-600">
-                    {profile.bestScores.timed.percentage}%
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    {profile.bestScores.timed.score}/{profile.bestScores.timed.total} vragen goed
+              <div className="space-y-4">
+                {/* Multiplication */}
+                <div>
+                  <p className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-1">
+                    <span className="text-lg">×</span> Vermenigvuldigen
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Tafels: {profile.bestScores.timed.tables.join(', ')} · {profile.bestScores.timed.timePerQuestion}s per vraag
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(profile.bestScores.timed.date).toLocaleDateString('nl-NL')}
-                  </p>
+                  {profile.bestScores.timed.multiply ? (
+                    <div className="space-y-1 pl-6">
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {profile.bestScores.timed.multiply.percentage}%
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        {profile.bestScores.timed.multiply.score}/{profile.bestScores.timed.multiply.total} vragen · {profile.bestScores.timed.multiply.timePerQuestion}s
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Tafels: {profile.bestScores.timed.multiply.tables.join(', ')}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(profile.bestScores.timed.multiply.date).toLocaleDateString('nl-NL')}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 pl-6">Nog niet geoefend</p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-gray-400">Nog geen getimede quiz voltooid</p>
-              )}
+                {/* Division */}
+                <div>
+                  <p className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-1">
+                    <span className="text-lg">÷</span> Delen
+                  </p>
+                  {profile.bestScores.timed.divide ? (
+                    <div className="space-y-1 pl-6">
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {profile.bestScores.timed.divide.percentage}%
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        {profile.bestScores.timed.divide.score}/{profile.bestScores.timed.divide.total} vragen · {profile.bestScores.timed.divide.timePerQuestion}s
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Tafels: {profile.bestScores.timed.divide.tables.join(', ')}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(profile.bestScores.timed.divide.date).toLocaleDateString('nl-NL')}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 pl-6">Nog niet geoefend</p>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -193,41 +252,90 @@ export default function ProgressPage() {
             <CardTitle className="text-lg">📚 Tafel Beheersing</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map(table => {
-                const stats = profile.tableStats[table]
-                const accuracy = stats
-                  ? Math.round((stats.correct / stats.attempts) * 100)
-                  : 0
-                const hasData = stats && stats.attempts > 0
+            {/* Multiplication */}
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-gray-600 mb-3 flex items-center gap-1">
+                <span className="text-lg">×</span> Vermenigvuldigen
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {Array.from({ length: 10 }, (_, i) => i + 1).map(table => {
+                  const stats = profile.tableStats[table]?.multiply
+                  const accuracy = stats && stats.attempts > 0
+                    ? Math.round((stats.correct / stats.attempts) * 100)
+                    : 0
+                  const hasData = stats && stats.attempts > 0
 
-                return (
-                  <div
-                    key={table}
-                    className={`p-4 rounded-xl border-2 text-center transition-all ${
-                      hasData
-                        ? accuracy >= 80
-                          ? 'bg-green-50 border-green-500 dark:bg-green-900/20'
-                          : accuracy >= 60
-                          ? 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900/20'
-                          : 'bg-red-50 border-red-500 dark:bg-red-900/20'
-                        : 'bg-gray-50 border-gray-300 dark:bg-gray-800'
-                    }`}
-                  >
-                    <div className="text-2xl font-bold mb-1">{table}</div>
-                    {hasData ? (
-                      <>
-                        <div className="text-sm font-semibold">{accuracy}%</div>
-                        <div className="text-xs text-gray-500">
-                          {stats.attempts} vragen
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-xs text-gray-400">Nog niet geoefend</div>
-                    )}
-                  </div>
-                )
-              })}
+                  return (
+                    <div
+                      key={`multiply-${table}`}
+                      className={`p-4 rounded-xl border-2 text-center transition-all ${
+                        hasData
+                          ? accuracy >= 80
+                            ? 'bg-green-50 border-green-500 dark:bg-green-900/20'
+                            : accuracy >= 60
+                            ? 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900/20'
+                            : 'bg-red-50 border-red-500 dark:bg-red-900/20'
+                          : 'bg-gray-50 border-gray-300 dark:bg-gray-800'
+                      }`}
+                    >
+                      <div className="text-2xl font-bold mb-1">{table}</div>
+                      {hasData ? (
+                        <>
+                          <div className="text-sm font-semibold">{accuracy}%</div>
+                          <div className="text-xs text-gray-500">
+                            {stats.attempts} vragen
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-xs text-gray-400">Nog niet geoefend</div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Division */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-600 mb-3 flex items-center gap-1">
+                <span className="text-lg">÷</span> Delen
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {Array.from({ length: 10 }, (_, i) => i + 1).map(table => {
+                  const stats = profile.tableStats[table]?.divide
+                  const accuracy = stats && stats.attempts > 0
+                    ? Math.round((stats.correct / stats.attempts) * 100)
+                    : 0
+                  const hasData = stats && stats.attempts > 0
+
+                  return (
+                    <div
+                      key={`divide-${table}`}
+                      className={`p-4 rounded-xl border-2 text-center transition-all ${
+                        hasData
+                          ? accuracy >= 80
+                            ? 'bg-green-50 border-green-500 dark:bg-green-900/20'
+                            : accuracy >= 60
+                            ? 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900/20'
+                            : 'bg-red-50 border-red-500 dark:bg-red-900/20'
+                          : 'bg-gray-50 border-gray-300 dark:bg-gray-800'
+                      }`}
+                    >
+                      <div className="text-2xl font-bold mb-1">{table}</div>
+                      {hasData ? (
+                        <>
+                          <div className="text-sm font-semibold">{accuracy}%</div>
+                          <div className="text-xs text-gray-500">
+                            {stats.attempts} vragen
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-xs text-gray-400">Nog niet geoefend</div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -235,23 +343,47 @@ export default function ProgressPage() {
         {/* Leaderboard */}
         <Card className="border-2 shadow-lg mb-6">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-lg">🏅 Klassement (Dit Apparaat)</CardTitle>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant={leaderboardMode === 'quiz' ? 'default' : 'outline'}
-                  onClick={() => setLeaderboardMode('quiz')}
-                >
-                  Quiz
-                </Button>
-                <Button
-                  size="sm"
-                  variant={leaderboardMode === 'timed' ? 'default' : 'outline'}
-                  onClick={() => setLeaderboardMode('timed')}
-                >
-                  Tijd
-                </Button>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg">🏅 Klassement (Dit Apparaat)</CardTitle>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                  <Button
+                    size="sm"
+                    variant={leaderboardMode === 'quiz' ? 'default' : 'ghost'}
+                    onClick={() => setLeaderboardMode('quiz')}
+                    className="text-xs"
+                  >
+                    Quiz
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={leaderboardMode === 'timed' ? 'default' : 'ghost'}
+                    onClick={() => setLeaderboardMode('timed')}
+                    className="text-xs"
+                  >
+                    Tijd
+                  </Button>
+                </div>
+                <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                  <Button
+                    size="sm"
+                    variant={leaderboardOperation === 'multiply' ? 'default' : 'ghost'}
+                    onClick={() => setLeaderboardOperation('multiply')}
+                    className="text-xs"
+                  >
+                    × Vermenigvuldigen
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={leaderboardOperation === 'divide' ? 'default' : 'ghost'}
+                    onClick={() => setLeaderboardOperation('divide')}
+                    className="text-xs"
+                  >
+                    ÷ Delen
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -315,8 +447,11 @@ export default function ProgressPage() {
                         {result.mode === 'quiz' ? '📝' : result.mode === 'timed' ? '⏱️' : '♾️'}
                       </span>
                       <div>
-                        <div className="text-sm font-medium">
-                          {result.mode === 'quiz' ? 'Quiz' : result.mode === 'timed' ? 'Tijd' : 'Oefen'} Modus
+                        <div className="text-sm font-medium flex items-center gap-2">
+                          <span>{result.mode === 'quiz' ? 'Quiz' : result.mode === 'timed' ? 'Tijd' : 'Oefen'} Modus</span>
+                          <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
+                            {result.operation === 'multiply' ? '×' : '÷'}
+                          </span>
                         </div>
                         <div className="text-xs text-gray-500">
                           Tafels: {result.tables.join(', ')}

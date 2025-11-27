@@ -9,6 +9,7 @@ import { initializeProfiles, getCurrentProfile } from '@/lib/profile-manager'
 import Link from 'next/link'
 
 export default function Home() {
+  const [selectedOperation, setSelectedOperation] = useState<'multiply' | 'divide'>('multiply')
   const [selectedTables, setSelectedTables] = useState<number[]>([])
   const [timePerQuestion, setTimePerQuestion] = useState(5)
   const [questionCount, setQuestionCount] = useState(10)
@@ -76,6 +77,7 @@ export default function Home() {
     const params = new URLSearchParams({
       tables: selectedTables.join(','),
       mode,
+      operation: selectedOperation,
       count: questionCount.toString(),
       ...(mode === 'timed' && { time: timePerQuestion.toString() })
     })
@@ -126,6 +128,47 @@ export default function Home() {
             Kies je tafels en begin met oefenen
           </p>
         </div>
+
+        {/* Operation selector */}
+        <Card className="mb-6 border-2 shadow-xl animate-slide-up">
+          <CardContent className="p-6">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+              Kies je oefening
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setSelectedOperation('multiply')}
+                className={`
+                  py-4 rounded-xl font-bold text-lg transition-all duration-200
+                  ${selectedOperation === 'multiply'
+                    ? 'bg-gradient-success text-white shadow-lg scale-105'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }
+                `}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-2xl">×</span>
+                  <span>Vermenigvuldigen</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setSelectedOperation('divide')}
+                className={`
+                  py-4 rounded-xl font-bold text-lg transition-all duration-200
+                  ${selectedOperation === 'divide'
+                    ? 'bg-gradient-success text-white shadow-lg scale-105'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }
+                `}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-2xl">÷</span>
+                  <span>Delen</span>
+                </div>
+              </button>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="mb-6 border-2 shadow-xl animate-slide-up">
           <CardContent className="p-6">

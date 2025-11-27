@@ -3,6 +3,7 @@
 export type QuizResult = {
   id: string
   mode: 'quiz' | 'practice' | 'timed'
+  operation: 'multiply' | 'divide'
   tables: number[]
   score: number
   total: number
@@ -13,9 +14,16 @@ export type QuizResult = {
 
 export type TableStats = {
   [table: number]: {
-    attempts: number
-    correct: number
-    bestScore: number
+    multiply: {
+      attempts: number
+      correct: number
+      bestScore: number
+    }
+    divide: {
+      attempts: number
+      correct: number
+      bestScore: number
+    }
   }
 }
 
@@ -30,8 +38,14 @@ export type UserProfile = {
   currentStreak: number
   lastPracticeDate: string
   bestScores: {
-    quiz: QuizResult | null
-    timed: QuizResult | null
+    quiz: {
+      multiply: QuizResult | null
+      divide: QuizResult | null
+    }
+    timed: {
+      multiply: QuizResult | null
+      divide: QuizResult | null
+    }
   }
   tableStats: TableStats
   recentResults: QuizResult[]
@@ -91,8 +105,14 @@ export function createProfile(name: string): UserProfile {
     currentStreak: 0,
     lastPracticeDate: '',
     bestScores: {
-      quiz: null,
-      timed: null
+      quiz: {
+        multiply: null,
+        divide: null
+      },
+      timed: {
+        multiply: null,
+        divide: null
+      }
     },
     tableStats: {},
     recentResults: []
@@ -179,23 +199,28 @@ export function addQuizResult(result: QuizResult) {
   const tableStats = { ...profile.tableStats }
   result.tables.forEach(table => {
     if (!tableStats[table]) {
-      tableStats[table] = { attempts: 0, correct: 0, bestScore: 0 }
+      tableStats[table] = {
+        multiply: { attempts: 0, correct: 0, bestScore: 0 },
+        divide: { attempts: 0, correct: 0, bestScore: 0 }
+      }
     }
-    tableStats[table].attempts += result.total
-    tableStats[table].correct += result.score
-    const currentPercentage = (tableStats[table].correct / tableStats[table].attempts) * 100
-    tableStats[table].bestScore = Math.max(tableStats[table].bestScore, currentPercentage)
+    const operation = result.operation
+    tableStats[table][operation].attempts += result.total
+    tableStats[table][operation].correct += result.score
+    const currentPercentage = (tableStats[table][operation].correct / tableStats[table][operation].attempts) * 100
+    tableStats[table][operation].bestScore = Math.max(tableStats[table][operation].bestScore, currentPercentage)
   })
 
   // Update best scores
   const bestScores = { ...profile.bestScores }
+  const operation = result.operation
   if (result.mode === 'quiz') {
-    if (!bestScores.quiz || result.percentage > bestScores.quiz.percentage) {
-      bestScores.quiz = result
+    if (!bestScores.quiz[operation] || result.percentage > bestScores.quiz[operation].percentage) {
+      bestScores.quiz[operation] = result
     }
   } else if (result.mode === 'timed') {
-    if (!bestScores.timed || result.percentage > bestScores.timed.percentage) {
-      bestScores.timed = result
+    if (!bestScores.timed[operation] || result.percentage > bestScores.timed[operation].percentage) {
+      bestScores.timed[operation] = result
     }
   }
 
@@ -215,7 +240,7 @@ export function addQuizResult(result: QuizResult) {
 }
 
 // Get leaderboard (top scores from all profiles)
-export function getLeaderboard(mode: 'quiz' | 'timed', limit: number = 10): Array<{
+export function getLeaderboard(mode: 'quiz' | 'timed', operation: 'multiply' | 'divide', limit: number = 10): Array<{
   profile: UserProfile
   result: QuizResult
 }> {
@@ -223,7 +248,7 @@ export function getLeaderboard(mode: 'quiz' | 'timed', limit: number = 10): Arra
   const entries: Array<{ profile: UserProfile; result: QuizResult }> = []
 
   profiles.forEach(profile => {
-    const bestScore = profile.bestScores[mode]
+    const bestScore = profile.bestScores[mode][operation]
     if (bestScore) {
       entries.push({ profile, result: bestScore })
     }
