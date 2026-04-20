@@ -13,6 +13,7 @@ A fun, Duolingo-style multiplication trainer for Dutch students to practice thei
 - **Quiz Mode**: Test yourself with a set number of questions (10, 20, 30, or 50)
 - **Practice Mode**: Unlimited practice with instant feedback
 - **Timed Mode**: Race against the clock with customizable time per question (3-5 seconds)
+- **Safe Cracker Mode**: Crack combination-dial safes by filling missing answers. Build a persistent zoo — each multiplication table awards one animal, with bronze/silver/gold tiers based on accuracy. Includes Run (10 safes) and Endless sub-modes.
 
 ### 📊 Progress Tracking
 - **Multiple Profiles**: Support for multiple users on one device
@@ -406,7 +407,7 @@ SOFTWARE.
 ## 🙏 Acknowledgments
 
 - Inspired by [Duolingo](https://www.duolingo.com/) for gamified learning
-- Graphics style inspired by [Kenney.nl](https://kenney.nl/) (CC0 assets)
+- Animal artwork from [Kenney Animal Pack Remastered](https://kenney.nl/assets/animal-pack-remastered) by [Kenney.nl](https://kenney.nl/) (CC0)
 - Built with [shadcn/ui](https://ui.shadcn.com/) component library
 - Mascot character designed with SVG for accessibility
 
