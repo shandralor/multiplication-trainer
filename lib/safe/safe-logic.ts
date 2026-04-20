@@ -27,6 +27,16 @@ export function scoreTier(mistakes: number): AnimalTier {
   return 'bronze'
 }
 
+/**
+ * Seconds allowed to crack a safe in Eindeloos mode. Starts generous, ticks
+ * down every 5 safes, bottoms out so the run is always theoretically winnable.
+ * Safe index is 1-based.
+ */
+export function endlessSafeTimer(safeIndex: number): number {
+  const step = Math.floor((safeIndex - 1) / 5)
+  return Math.max(30, 90 - step * 15)
+}
+
 export type BuildSafeArgs = {
   table: number
   gapCount: number

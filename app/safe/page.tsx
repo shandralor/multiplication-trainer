@@ -13,6 +13,7 @@ import { Numpad } from '@/components/safe/numpad'
 import { SafeReveal } from '@/components/safe/safe-reveal'
 import {
   buildSafe,
+  endlessSafeTimer,
   gapsForSafe,
   scoreTier,
   shuffleTables,
@@ -58,11 +59,47 @@ export default function SafePage() {
   const [currentSafe, setCurrentSafe] = useState<InFlightSafe | null>(null)
   const [perSafe, setPerSafe] = useState<SafeRunPerSafe[]>([])
   const [reveal, setReveal] = useState<{ tableIndex: number; tier: AnimalTier; upgraded: boolean } | null>(null)
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
+  const [endlessTimedOut, setEndlessTimedOut] = useState(false)
 
   useEffect(() => {
     initializeProfiles()
     setProfile(getCurrentProfile())
   }, [])
+
+  // Endless countdown: only ticks while on the play screen with an active timer.
+  useEffect(() => {
+    if (screen !== 'play' || mode !== 'safe-endless' || timeRemaining === null) return
+    if (timeRemaining <= 0) return
+    const handle = setInterval(() => {
+      setTimeRemaining((t) => (t === null ? null : t - 1))
+    }, 1000)
+    return () => clearInterval(handle)
+  }, [screen, mode, timeRemaining])
+
+  // When time hits 0 in Endless mode, force the safe to complete.
+  useEffect(() => {
+    if (mode !== 'safe-endless' || screen !== 'play') return
+    if (timeRemaining !== 0 || !currentSafe) return
+    setEndlessTimedOut(true)
+    // Any still-empty gaps count as mistakes; reveal the answers.
+    const runtime = currentSafe.runtime.map((r, i) =>
+      r.status === 'gap-empty'
+        ? { status: 'gap-revealed' as const, display: String(currentSafe.slots[i].answer) }
+        : r,
+    )
+    const newMistakes = currentSafe.runtime.filter((r) => r.status === 'gap-empty').length
+    const timedOutSafe: InFlightSafe = {
+      ...currentSafe,
+      runtime,
+      mistakes: currentSafe.mistakes + newMistakes,
+      activeFactor: null,
+      input: '',
+    }
+    setCurrentSafe(timedOutSafe)
+    completeSafe(timedOutSafe)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRemaining])
 
   const toggleTable = (t: number) =>
     setSelectedTables((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))
@@ -108,6 +145,7 @@ export default function SafePage() {
       })
       setDeck(nextDeck)
       setSafeIndex(nextIndex)
+      setTimeRemaining(mode === 'safe-endless' ? endlessSafeTimer(nextIndex) : null)
     },
     [difficulty, drawTable, mode],
   )
@@ -199,12 +237,13 @@ export default function SafePage() {
   const continueFromReveal = () => {
     setReveal(null)
     const nextIndex = safeIndex + 1
-    const endlessLock = mode === 'safe-endless' && perSafe[perSafe.length - 1]?.tier === 'bronze'
+    const endlessLock = mode === 'safe-endless' && endlessTimedOut
     const runComplete = mode === 'safe-run' && perSafe.length >= selectedTables.length
     if (endlessLock || runComplete) {
       finalizeRun()
       setScreen('scorecard')
     } else {
+      setEndlessTimedOut(false)
       openNextSafe(nextIndex, deck)
       setScreen('play')
     }
@@ -271,10 +310,22 @@ export default function SafePage() {
 
           {profile && <CollectionStrip animals={profile.animals} compact />}
 
-          <div className="text-center my-3 text-sm text-gray-300">
-            {mode === 'safe-run' ? `Kluis ${safeIndex} / ${selectedTables.length}` : `Kluis ${Math.min(safeIndex, 99)}${safeIndex > 99 ? '+' : ''}`}
-            {' · '}
-            {gapsResolved} / {gapsTotal} opgelost · {currentSafe.mistakes} fout
+          <div className="text-center my-3 text-sm text-gray-300 flex items-center justify-center gap-3 flex-wrap">
+            <span>
+              {mode === 'safe-run' ? `Kluis ${safeIndex} / ${selectedTables.length}` : `Kluis ${Math.min(safeIndex, 99)}${safeIndex > 99 ? '+' : ''}`}
+            </span>
+            <span>·</span>
+            <span>{gapsResolved} / {gapsTotal} opgelost</span>
+            <span>·</span>
+            <span>{currentSafe.mistakes} fout</span>
+            {mode === 'safe-endless' && timeRemaining !== null && (
+              <>
+                <span>·</span>
+                <span className={`font-bold ${timeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-emerald-300'}`}>
+                  ⏱ {Math.max(0, timeRemaining)}s
+                </span>
+              </>
+            )}
           </div>
 
           <div className="py-14 md:py-16">

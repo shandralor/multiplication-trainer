@@ -9,9 +9,9 @@ type DifficultyPickerProps = {
 
 export function DifficultyPicker({ value, onChange }: DifficultyPickerProps) {
   const options: { id: Difficulty; label: string; hint: string }[] = [
-    { id: 'easy',   label: 'Makkelijk', hint: 'Begin met 2 gaten' },
-    { id: 'medium', label: 'Medium',    hint: 'Begin met 4 gaten' },
-    { id: 'hard',   label: 'Moeilijk',  hint: 'Begin met 6 gaten' },
+    { id: 'easy',   label: 'Makkelijk', hint: 'Begin met 2 open vakken' },
+    { id: 'medium', label: 'Normaal',   hint: 'Begin met 4 open vakken' },
+    { id: 'hard',   label: 'Moeilijk',  hint: 'Begin met 6 open vakken' },
   ]
 
   return (

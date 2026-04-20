@@ -9,8 +9,8 @@ type ModePickerProps = {
 
 export function ModePicker({ value, onChange }: ModePickerProps) {
   const options: { id: SafeMode; label: string; desc: string }[] = [
-    { id: 'safe-run',     label: 'Run',     desc: '10 kluizen, scorekaart' },
-    { id: 'safe-endless', label: 'Endless', desc: 'Tot je een brons haalt' },
+    { id: 'safe-run',     label: 'Ronde',     desc: 'Elke gekozen tafel één keer' },
+    { id: 'safe-endless', label: 'Eindeloos', desc: 'Hoe ver kom je zonder brons?' },
   ]
 
   return (

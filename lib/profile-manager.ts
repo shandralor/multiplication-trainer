@@ -36,6 +36,7 @@ export type SafeRunResult = {
   date: string
 }
 
+
 export type TableStats = {
   [table: number]: {
     multiply: {

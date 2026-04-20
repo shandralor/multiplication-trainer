@@ -4,6 +4,7 @@ import {
   scoreTier,
   buildSafe,
   shuffleTables,
+  endlessSafeTimer,
   type Difficulty,
   type SafeSlot,
 } from '@/lib/safe/safe-logic'
@@ -91,6 +92,22 @@ describe('buildSafe', () => {
   it('all-gap safe (gapCount=10) marks every slot as gap', () => {
     const slots = buildSafe({ table: 9, gapCount: 10, rng: mulberry32(6) })
     expect(slots.every((s) => s.isGap)).toBe(true)
+  })
+})
+
+describe('endlessSafeTimer', () => {
+  it('starts at 90s for safes 1-5', () => {
+    expect(endlessSafeTimer(1)).toBe(90)
+    expect(endlessSafeTimer(5)).toBe(90)
+  })
+  it('drops by 15s every 5 safes', () => {
+    expect(endlessSafeTimer(6)).toBe(75)
+    expect(endlessSafeTimer(11)).toBe(60)
+    expect(endlessSafeTimer(16)).toBe(45)
+  })
+  it('floors at 30s', () => {
+    expect(endlessSafeTimer(100)).toBe(30)
+    expect(endlessSafeTimer(21)).toBe(30)
   })
 })
 
