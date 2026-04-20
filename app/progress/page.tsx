@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Mascot } from '@/components/mascot'
 import { ProfileSelector } from '@/components/profile-selector'
+import { CollectionStrip } from '@/components/safe/collection-strip'
 import {
   getCurrentProfile,
   initializeProfiles,
@@ -103,6 +104,15 @@ export default function ProgressPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Dieren Verzameling */}
+        {profile && (
+          <Card className="mb-6 border-2 shadow-xl">
+            <CardContent className="p-5">
+              <CollectionStrip animals={profile.animals ?? []} />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Profile Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card className="border-2 shadow-lg">
