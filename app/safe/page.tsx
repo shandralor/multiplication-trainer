@@ -405,12 +405,6 @@ function StartScreen(props: {
           </Link>
         </div>
 
-        {profile && (
-          <div className="mb-6">
-            <CollectionStrip animals={profile.animals} />
-          </div>
-        )}
-
         <Card className="mb-4 bg-white/10 border-white/20 text-white">
           <CardContent className="p-5 space-y-4">
             <div>
