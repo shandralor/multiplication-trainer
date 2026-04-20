@@ -35,21 +35,23 @@ export type BuildSafeArgs = {
 
 const ALL_FACTORS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-/** Build a safe's 10 slots for a given table. Gaps are drawn uniformly at random. */
+/**
+ * Build a safe's 10 slots for a given table. Gaps are drawn uniformly at
+ * random. The returned array is in wheel-position order (index 0 = top of
+ * dial, going clockwise) and the factor at each position is shuffled, so
+ * consecutive runs won't show the same sequential 1,2,3,...,10 layout.
+ */
 export function buildSafe({ table, gapCount, rng = Math.random }: BuildSafeArgs): SafeSlot[] {
   const gaps = pickN(ALL_FACTORS, gapCount, rng)
-
   const gapSet = new Set(gaps)
-  const slots: SafeSlot[] = []
-  for (let factor = 1; factor <= 10; factor++) {
-    slots.push({
-      factor,
-      table,
-      answer: factor * table,
-      isGap: gapSet.has(factor),
-    })
-  }
-  return slots
+  const wheelOrder = pickN(ALL_FACTORS, ALL_FACTORS.length, rng)
+
+  return wheelOrder.map((factor) => ({
+    factor,
+    table,
+    answer: factor * table,
+    isGap: gapSet.has(factor),
+  }))
 }
 
 /** Shuffle a list of tables into a deck for even per-run distribution. */

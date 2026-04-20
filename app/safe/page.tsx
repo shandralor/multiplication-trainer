@@ -115,21 +115,19 @@ export default function SafePage() {
 
   const handleSlotClick = (factor: number) => {
     if (!currentSafe) return
-    const slot = currentSafe.slots.find((s) => s.factor === factor)
-    if (!slot || !slot.isGap) return
-    const idx = factor - 1
+    const idx = currentSafe.slots.findIndex((s) => s.factor === factor)
+    if (idx === -1) return
+    if (!currentSafe.slots[idx].isGap) return
     if (currentSafe.runtime[idx].status !== 'gap-empty') return
     setCurrentSafe({ ...currentSafe, activeFactor: factor, input: '' })
   }
 
   const updateInput = (next: string) => {
     if (!currentSafe || currentSafe.activeFactor === null) return
-    setCurrentSafe({ ...currentSafe, input: next })
-    // Mirror input into the active slot's display
     setCurrentSafe((prev) => {
       if (!prev || prev.activeFactor === null) return prev
-      const idx = prev.activeFactor - 1
-      if (prev.runtime[idx].status !== 'gap-empty') return prev
+      const idx = prev.slots.findIndex((s) => s.factor === prev.activeFactor)
+      if (idx === -1 || prev.runtime[idx].status !== 'gap-empty') return prev
       const runtime = [...prev.runtime]
       runtime[idx] = { ...runtime[idx], display: next.length > 0 ? next : '?' }
       return { ...prev, runtime, input: next }
@@ -139,7 +137,9 @@ export default function SafePage() {
   const submitInput = () => {
     if (!currentSafe || currentSafe.activeFactor === null) return
     const factor = currentSafe.activeFactor
-    const slot = currentSafe.slots[factor - 1]
+    const idx = currentSafe.slots.findIndex((s) => s.factor === factor)
+    if (idx === -1) return
+    const slot = currentSafe.slots[idx]
     const parsed = parseInt(currentSafe.input, 10)
     if (isNaN(parsed)) return
 
@@ -147,14 +147,14 @@ export default function SafePage() {
     let mistakes = currentSafe.mistakes
 
     if (parsed === slot.answer) {
-      runtime[factor - 1] = { status: 'gap-correct', display: String(slot.answer) }
+      runtime[idx] = { status: 'gap-correct', display: String(slot.answer) }
     } else {
-      runtime[factor - 1] = { status: 'gap-revealed', display: String(slot.answer) }
+      runtime[idx] = { status: 'gap-revealed', display: String(slot.answer) }
       mistakes += 1
     }
 
-    // Find next empty gap clockwise from current
-    const nextFactor = findNextGap(runtime, factor)
+    // Find next empty gap clockwise by wheel position.
+    const nextFactor = findNextGap(currentSafe.slots, runtime, idx)
     const updated: InFlightSafe = {
       ...currentSafe,
       runtime,
@@ -164,7 +164,6 @@ export default function SafePage() {
     }
     setCurrentSafe(updated)
 
-    // If all gaps resolved, complete the safe.
     if (nextFactor === null) {
       completeSafe(updated)
     }
@@ -362,10 +361,10 @@ export default function SafePage() {
 
 // ---------- helpers ----------
 
-function findNextGap(runtime: SlotRuntime[], fromFactor: number): number | null {
-  for (let i = 1; i <= 10; i++) {
-    const probe = ((fromFactor - 1 + i) % 10) + 1
-    if (runtime[probe - 1].status === 'gap-empty') return probe
+function findNextGap(slots: SafeSlot[], runtime: SlotRuntime[], fromIndex: number): number | null {
+  for (let i = 1; i <= slots.length; i++) {
+    const probe = (fromIndex + i) % slots.length
+    if (runtime[probe].status === 'gap-empty') return slots[probe].factor
   }
   return null
 }
