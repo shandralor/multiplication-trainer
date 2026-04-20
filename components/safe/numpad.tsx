@@ -59,7 +59,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
         className="h-14 rounded-xl bg-white border-2 border-gray-300 font-bold text-xl text-gray-900 shadow hover:bg-gray-50 disabled:opacity-50"
         aria-label="Backspace"
       >
-        ←
+        Wis
       </button>
       <button
         type="button"

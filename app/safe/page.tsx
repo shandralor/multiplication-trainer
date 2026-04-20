@@ -245,6 +245,24 @@ export default function SafePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
         <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={() => {
+                if (confirm('Stop met deze kluis? Je vooruitgang in deze run gaat verloren.')) {
+                  setScreen('start')
+                  setPerSafe([])
+                  setCurrentSafe(null)
+                }
+              }}
+              className="text-sm text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg"
+            >
+              ← Terug
+            </button>
+            <Link href="/" className="text-sm text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg">
+              Home
+            </Link>
+          </div>
+
           {profile && <CollectionStrip animals={profile.animals} compact />}
 
           <div className="text-center my-3 text-sm text-gray-300">
