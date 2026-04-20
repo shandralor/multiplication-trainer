@@ -154,8 +154,33 @@ export default function SafePage() {
     [difficulty, drawTable, mode],
   )
 
-  const startRun = () => {
+  const resetRunState = () => {
     setPerSafe([])
+    setCurrentSafe(null)
+    setDeck([])
+    setSafeIndex(1)
+    setTimeRemaining(null)
+    setEndlessTimedOut(false)
+    setSafeStartedAt(null)
+    setReveal(null)
+    setJustEarnedAchievements([])
+  }
+
+  const startRun = () => {
+    resetRunState()
+    openNextSafe(1, [])
+    setScreen('play')
+  }
+
+  const abortRun = () => {
+    if (!confirm('Stop met deze ronde? Je voortgang in deze run gaat verloren.')) return
+    resetRunState()
+    setScreen('start')
+  }
+
+  const restartRun = () => {
+    if (!confirm('Deze ronde opnieuw beginnen met dezelfde instellingen?')) return
+    resetRunState()
     openNextSafe(1, [])
     setScreen('play')
   }
@@ -303,20 +328,20 @@ export default function SafePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 gap-2">
             <button
-              onClick={() => {
-                if (confirm('Stop met deze kluis? Je vooruitgang in deze run gaat verloren.')) {
-                  setScreen('start')
-                  setPerSafe([])
-                  setCurrentSafe(null)
-                }
-              }}
-              className="text-sm text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg"
+              onClick={abortRun}
+              className="text-sm font-semibold text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg"
             >
               ← Terug
             </button>
-            <Link href="/" className="text-sm text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg">
+            <button
+              onClick={restartRun}
+              className="text-sm font-semibold text-white bg-amber-600/70 hover:bg-amber-600 px-3 py-1.5 rounded-lg"
+            >
+              ↻ Herstart
+            </button>
+            <Link href="/" className="text-sm font-semibold text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg">
               Home
             </Link>
           </div>
