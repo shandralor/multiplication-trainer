@@ -130,6 +130,15 @@ export function resetAnimalCollection(): void {
   })
 }
 
+/** Remove a single animal so the user can re-earn its tier from scratch. */
+export function resetAnimalForTable(tableIndex: number): void {
+  const profile = getCurrentProfile()
+  if (!profile) return
+  updateProfile(profile.id, {
+    animals: profile.animals.filter((a) => a.tableIndex !== tableIndex),
+  })
+}
+
 /**
  * Persist the end-of-run summary: append a SafeRunResult, bump totalQuizzes,
  * update the daily streak. Per-safe animal/stats updates happen in

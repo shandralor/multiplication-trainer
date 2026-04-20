@@ -21,7 +21,7 @@ import {
   type Difficulty,
   type SafeSlot,
 } from '@/lib/safe/safe-logic'
-import { addSafeRunResult, awardAnimalForSafe, resetAnimalCollection, type SafeRunPerSafe } from '@/lib/safe/safe-progress'
+import { addSafeRunResult, awardAnimalForSafe, resetAnimalCollection, resetAnimalForTable, type SafeRunPerSafe } from '@/lib/safe/safe-progress'
 import { MedalRow } from '@/components/safe/medal-row'
 import { ACHIEVEMENTS, type AchievementId } from '@/lib/safe/achievements'
 import {
@@ -312,6 +312,11 @@ export default function SafePage() {
         clearAll={clearAll}
         canStart={canStart}
         onStart={startRun}
+        onResetTable={(t) => {
+          if (!confirm(`Dier voor de tafel van ${t} resetten? Medailles blijven bewaard.`)) return
+          resetAnimalForTable(t)
+          setProfile(getCurrentProfile())
+        }}
       />
     )
   }
@@ -529,8 +534,9 @@ function StartScreen(props: {
   clearAll: () => void
   canStart: boolean
   onStart: () => void
+  onResetTable: (table: number) => void
 }) {
-  const { profile, mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable, selectAll, clearAll, canStart, onStart } = props
+  const { profile, mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable, selectAll, clearAll, canStart, onStart, onResetTable } = props
   const tierByTable = new Map<number, 'bronze' | 'silver' | 'gold'>(
     (profile?.animals ?? []).map((a) => [a.tableIndex, a.tier]),
   )
@@ -581,24 +587,42 @@ function StartScreen(props: {
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-2">
-                {Array.from({ length: 10 }, (_, i) => i + 1).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => toggleTable(t)}
-                    className={`aspect-square rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 p-1 ${
-                      selectedTables.includes(t)
-                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white scale-105 shadow-lg'
-                        : 'bg-white/10 text-gray-200 hover:bg-white/20'
-                    }`}
-                  >
-                    <span className="text-xl leading-none">{t}</span>
-                    <AnimalBadge
-                      tableIndex={t}
-                      tier={tierByTable.get(t) ?? null}
-                      size="small"
-                    />
-                  </button>
-                ))}
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((t) => {
+                  const earned = tierByTable.has(t)
+                  return (
+                    <div key={t} className="relative">
+                      <button
+                        onClick={() => toggleTable(t)}
+                        className={`w-full aspect-square rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 p-1 ${
+                          selectedTables.includes(t)
+                            ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white scale-105 shadow-lg'
+                            : 'bg-white/10 text-gray-200 hover:bg-white/20'
+                        }`}
+                      >
+                        <span className="text-xl leading-none">{t}</span>
+                        <AnimalBadge
+                          tableIndex={t}
+                          tier={tierByTable.get(t) ?? null}
+                          size="small"
+                        />
+                      </button>
+                      {earned && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onResetTable(t)
+                          }}
+                          className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center justify-center shadow-md border border-white/40"
+                          aria-label={`Reset tafel ${t}`}
+                          title="Reset dit dier"
+                        >
+                          ↻
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </CardContent>

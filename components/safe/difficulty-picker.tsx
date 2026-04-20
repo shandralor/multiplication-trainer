@@ -7,6 +7,12 @@ type DifficultyPickerProps = {
   onChange: (next: Difficulty) => void
 }
 
+const ACTIVE_CLASSES: Record<Difficulty, string> = {
+  easy:   'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white border-emerald-700 shadow-lg scale-105',
+  medium: 'bg-gradient-to-br from-orange-500 to-orange-700 text-white border-orange-700 shadow-lg scale-105',
+  hard:   'bg-gradient-to-br from-red-500 to-red-700 text-white border-red-700 shadow-lg scale-105',
+}
+
 export function DifficultyPicker({ value, onChange }: DifficultyPickerProps) {
   const options: { id: Difficulty; label: string; hint: string }[] = [
     { id: 'easy',   label: 'Makkelijk', hint: 'Begin met 2 open vakken' },
@@ -24,7 +30,7 @@ export function DifficultyPicker({ value, onChange }: DifficultyPickerProps) {
             onClick={() => onChange(opt.id)}
             className={`p-3 rounded-xl font-bold text-center transition-all border-2 ${
               active
-                ? 'bg-gradient-to-br from-rose-500 to-rose-700 text-white border-rose-700 shadow-lg scale-105'
+                ? ACTIVE_CLASSES[opt.id]
                 : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
             }`}
           >
