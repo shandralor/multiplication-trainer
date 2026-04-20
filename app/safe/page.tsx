@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ModePicker, type SafeMode } from '@/components/safe/mode-picker'
 import { DifficultyPicker } from '@/components/safe/difficulty-picker'
 import { CollectionStrip } from '@/components/safe/collection-strip'
+import { AnimalBadge } from '@/components/safe/animal-badge'
 import { SafeDial, type SlotStatus } from '@/components/safe/safe-dial'
 import { Numpad } from '@/components/safe/numpad'
 import { SafeReveal } from '@/components/safe/safe-reveal'
@@ -42,7 +43,7 @@ type InFlightSafe = {
   mistakes: number
 }
 
-const RUN_SAFE_COUNT = 10
+// Run mode length = number of tables the kid selected; Endless keeps going.
 
 export default function SafePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -72,8 +73,14 @@ export default function SafePage() {
   // ------- helpers -------
 
   const drawTable = useCallback(
-    (currentDeck: number[]): { table: number; nextDeck: number[] } => {
-      const d = currentDeck.length > 0 ? currentDeck : shuffleTables(selectedTables)
+    (currentDeck: number[], currentMode: SafeMode): { table: number; nextDeck: number[] } => {
+      // Run mode: deck is drained exactly once (one pass through selectedTables).
+      // Endless mode: reshuffle when empty so the run can continue indefinitely.
+      const d = currentDeck.length > 0
+        ? currentDeck
+        : currentMode === 'safe-endless'
+          ? shuffleTables(selectedTables)
+          : currentDeck
       const [table, ...rest] = d
       return { table, nextDeck: rest }
     },
@@ -82,7 +89,7 @@ export default function SafePage() {
 
   const openNextSafe = useCallback(
     (nextIndex: number, d: number[]) => {
-      const { table, nextDeck } = drawTable(d)
+      const { table, nextDeck } = drawTable(d, mode)
       const gapCount = gapsForSafe(difficulty, nextIndex)
       const slots = buildSafe({ table, gapCount })
       const runtime: SlotRuntime[] = slots.map((s) =>
@@ -102,7 +109,7 @@ export default function SafePage() {
       setDeck(nextDeck)
       setSafeIndex(nextIndex)
     },
-    [difficulty, drawTable],
+    [difficulty, drawTable, mode],
   )
 
   const startRun = () => {
@@ -193,7 +200,7 @@ export default function SafePage() {
     setReveal(null)
     const nextIndex = safeIndex + 1
     const endlessLock = mode === 'safe-endless' && perSafe[perSafe.length - 1]?.tier === 'bronze'
-    const runComplete = mode === 'safe-run' && perSafe.length >= RUN_SAFE_COUNT
+    const runComplete = mode === 'safe-run' && perSafe.length >= selectedTables.length
     if (endlessLock || runComplete) {
       finalizeRun()
       setScreen('scorecard')
@@ -265,7 +272,7 @@ export default function SafePage() {
           {profile && <CollectionStrip animals={profile.animals} compact />}
 
           <div className="text-center my-3 text-sm text-gray-300">
-            {mode === 'safe-run' ? `Kluis ${safeIndex} / ${RUN_SAFE_COUNT}` : `Kluis ${Math.min(safeIndex, 99)}${safeIndex > 99 ? '+' : ''}`}
+            {mode === 'safe-run' ? `Kluis ${safeIndex} / ${selectedTables.length}` : `Kluis ${Math.min(safeIndex, 99)}${safeIndex > 99 ? '+' : ''}`}
             {' · '}
             {gapsResolved} / {gapsTotal} opgelost · {currentSafe.mistakes} fout
           </div>
@@ -383,6 +390,9 @@ function StartScreen(props: {
   onStart: () => void
 }) {
   const { profile, mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable, selectAll, clearAll, canStart, onStart } = props
+  const tierByTable = new Map<number, 'bronze' | 'silver' | 'gold'>(
+    (profile?.animals ?? []).map((a) => [a.tableIndex, a.tier]),
+  )
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
       <div className="max-w-4xl mx-auto px-4 py-6">
@@ -434,13 +444,18 @@ function StartScreen(props: {
                   <button
                     key={t}
                     onClick={() => toggleTable(t)}
-                    className={`aspect-square rounded-xl font-bold text-xl transition-all ${
+                    className={`aspect-square rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 p-1 ${
                       selectedTables.includes(t)
                         ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white scale-105 shadow-lg'
                         : 'bg-white/10 text-gray-200 hover:bg-white/20'
                     }`}
                   >
-                    {t}
+                    <span className="text-xl leading-none">{t}</span>
+                    <AnimalBadge
+                      tableIndex={t}
+                      tier={tierByTable.get(t) ?? null}
+                      size="small"
+                    />
                   </button>
                 ))}
               </div>
