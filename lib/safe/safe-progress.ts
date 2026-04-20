@@ -54,10 +54,51 @@ export type SafeRunPerSafe = {
 }
 
 /**
- * Persist the outcome of a completed safe run to the current profile:
- * - Updates each cracked safe's animal entry (upgrading tier where applicable).
- * - Appends a SafeRunResult to recentSafeResults (cap 20).
- * - Updates totals, streak, and tableStats.
+ * Persist a single cracked safe immediately: upgrade the animal entry if applicable,
+ * update per-table stats and running totals. Called after every safe so the
+ * collection strip reflects progress in real time.
+ */
+export function awardAnimalForSafe(
+  safe: SafeRunPerSafe,
+): { upgraded: boolean } {
+  const profile = getCurrentProfile()
+  if (!profile) return { upgraded: false }
+
+  const now = new Date().toISOString()
+  const { animals, upgraded } = applyAnimalAward(profile.animals, {
+    tableIndex: safe.tableIndex,
+    tier: safe.tier,
+    now,
+  })
+
+  const tableStats: UserProfile['tableStats'] = { ...profile.tableStats }
+  const t = safe.tableIndex
+  if (!tableStats[t]) {
+    tableStats[t] = {
+      multiply: { attempts: 0, correct: 0, bestScore: 0 },
+      divide: { attempts: 0, correct: 0, bestScore: 0 },
+    }
+  }
+  const mult = tableStats[t].multiply
+  mult.attempts += safe.gapsFilled
+  mult.correct += safe.gapsFilled - safe.mistakes
+  const pct = mult.attempts > 0 ? (mult.correct / mult.attempts) * 100 : 0
+  mult.bestScore = Math.max(mult.bestScore, pct)
+
+  updateProfile(profile.id, {
+    animals,
+    tableStats,
+    totalQuestions: profile.totalQuestions + safe.gapsFilled,
+    totalCorrect: profile.totalCorrect + (safe.gapsFilled - safe.mistakes),
+  })
+
+  return { upgraded }
+}
+
+/**
+ * Persist the end-of-run summary: append a SafeRunResult, bump totalQuizzes,
+ * update the daily streak. Per-safe animal/stats updates happen in
+ * awardAnimalForSafe during play, not here.
  */
 export function addSafeRunResult(
   perSafe: SafeRunPerSafe[],
@@ -66,23 +107,11 @@ export function addSafeRunResult(
     difficulty: 'easy' | 'medium' | 'hard'
     tablesPicked: number[]
   },
-): { upgradedAnimals: number[] } {
+): void {
   const profile = getCurrentProfile()
-  if (!profile) return { upgradedAnimals: [] }
+  if (!profile) return
 
   const now = new Date().toISOString()
-  let animals = profile.animals
-  const upgradedAnimals: number[] = []
-
-  for (const safe of perSafe) {
-    const { animals: next, upgraded } = applyAnimalAward(animals, {
-      tableIndex: safe.tableIndex,
-      tier: safe.tier,
-      now,
-    })
-    animals = next
-    if (upgraded) upgradedAnimals.push(safe.tableIndex)
-  }
 
   const tiersEarned = {
     gold: perSafe.filter((s) => s.tier === 'gold').length,
@@ -90,8 +119,6 @@ export function addSafeRunResult(
     bronze: perSafe.filter((s) => s.tier === 'bronze').length,
   }
   const totalMistakes = perSafe.reduce((acc, s) => acc + s.mistakes, 0)
-  const totalGaps = perSafe.reduce((acc, s) => acc + s.gapsFilled, 0)
-  const totalCorrect = totalGaps - totalMistakes
 
   const runResult: SafeRunResult = {
     id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
@@ -106,7 +133,6 @@ export function addSafeRunResult(
 
   const recentSafeResults = [runResult, ...profile.recentSafeResults].slice(0, 20)
 
-  // Streak: bump like addQuizResult does — one "practice session" per day max.
   const today = now.split('T')[0]
   const lastPractice = profile.lastPracticeDate.split('T')[0]
   const newStreak =
@@ -114,33 +140,10 @@ export function addSafeRunResult(
       ? profile.currentStreak
       : profile.currentStreak + 1
 
-  // Table stats — treat each gap as a multiply attempt on the cracked table.
-  const tableStats: UserProfile['tableStats'] = { ...profile.tableStats }
-  for (const safe of perSafe) {
-    const t = safe.tableIndex
-    if (!tableStats[t]) {
-      tableStats[t] = {
-        multiply: { attempts: 0, correct: 0, bestScore: 0 },
-        divide: { attempts: 0, correct: 0, bestScore: 0 },
-      }
-    }
-    const mult = tableStats[t].multiply
-    mult.attempts += safe.gapsFilled
-    mult.correct += safe.gapsFilled - safe.mistakes
-    const pct = mult.attempts > 0 ? (mult.correct / mult.attempts) * 100 : 0
-    mult.bestScore = Math.max(mult.bestScore, pct)
-  }
-
   updateProfile(profile.id, {
-    animals,
     recentSafeResults,
     totalQuizzes: profile.totalQuizzes + 1,
-    totalQuestions: profile.totalQuestions + totalGaps,
-    totalCorrect: profile.totalCorrect + totalCorrect,
     currentStreak: newStreak,
     lastPracticeDate: now,
-    tableStats,
   })
-
-  return { upgradedAnimals }
 }

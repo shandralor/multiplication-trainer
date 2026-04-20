@@ -18,11 +18,10 @@ import {
   type Difficulty,
   type SafeSlot,
 } from '@/lib/safe/safe-logic'
-import { addSafeRunResult, applyAnimalAward, type SafeRunPerSafe } from '@/lib/safe/safe-progress'
+import { addSafeRunResult, awardAnimalForSafe, type SafeRunPerSafe } from '@/lib/safe/safe-progress'
 import {
   getCurrentProfile,
   initializeProfiles,
-  type AnimalEntry,
   type AnimalTier,
   type UserProfile,
 } from '@/lib/profile-manager'
@@ -182,13 +181,9 @@ export default function SafePage() {
       gapsFilled,
     }
 
-    // Compute upgrade relative to current profile state (for interstitial banner).
-    const currentAnimals: AnimalEntry[] = profile?.animals ?? []
-    const { upgraded } = applyAnimalAward(currentAnimals, {
-      tableIndex: safe.table,
-      tier,
-      now: new Date().toISOString(),
-    })
+    // Persist this safe immediately so the collection strip updates between safes.
+    const { upgraded } = awardAnimalForSafe(entry)
+    setProfile(getCurrentProfile())
 
     setPerSafe((prev) => [...prev, entry])
     setReveal({ tableIndex: safe.table, tier, upgraded })
@@ -258,14 +253,16 @@ export default function SafePage() {
             {gapsResolved} / {gapsTotal} opgelost · {currentSafe.mistakes} fout
           </div>
 
-          <SafeDial
-            slots={currentSafe.slots}
-            statuses={statuses}
-            activeFactor={currentSafe.activeFactor}
-            onSlotClick={handleSlotClick}
-            label={`×${currentSafe.table}`}
-            subLabel={`${gapsResolved} / ${gapsTotal} ingevuld`}
-          />
+          <div className="py-14 md:py-16">
+            <SafeDial
+              slots={currentSafe.slots}
+              statuses={statuses}
+              activeFactor={currentSafe.activeFactor}
+              onSlotClick={handleSlotClick}
+              label={`×${currentSafe.table}`}
+              subLabel={`${gapsResolved} / ${gapsTotal} ingevuld`}
+            />
+          </div>
 
           <div className="mt-6">
             <Numpad
