@@ -1,20 +1,49 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ModePicker, type SafeMode } from '@/components/safe/mode-picker'
 import { DifficultyPicker } from '@/components/safe/difficulty-picker'
 import { CollectionStrip } from '@/components/safe/collection-strip'
-import type { Difficulty } from '@/lib/safe/safe-logic'
+import { SafeDial, type SlotStatus } from '@/components/safe/safe-dial'
+import { Numpad } from '@/components/safe/numpad'
+import { SafeReveal } from '@/components/safe/safe-reveal'
+import {
+  buildSafe,
+  gapsForSafe,
+  scoreTier,
+  shuffleTables,
+  type Difficulty,
+  type SafeSlot,
+} from '@/lib/safe/safe-logic'
+import { addSafeRunResult, applyAnimalAward, type SafeRunPerSafe } from '@/lib/safe/safe-progress'
 import {
   getCurrentProfile,
   initializeProfiles,
+  type AnimalEntry,
+  type AnimalTier,
   type UserProfile,
 } from '@/lib/profile-manager'
 
-type Screen = 'start' | 'play' | 'scorecard'
+type Screen = 'start' | 'play' | 'reveal' | 'scorecard'
+
+type SlotRuntime = {
+  status: SlotStatus['state']
+  display: string             // what's in the slot right now (number, partial entry, or '?')
+}
+
+type InFlightSafe = {
+  table: number
+  slots: SafeSlot[]
+  runtime: SlotRuntime[]
+  activeFactor: number | null
+  input: string
+  mistakes: number
+}
+
+const RUN_SAFE_COUNT = 10
 
 export default function SafePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -23,27 +52,323 @@ export default function SafePage() {
   const [difficulty, setDifficulty] = useState<Difficulty>('medium')
   const [selectedTables, setSelectedTables] = useState<number[]>([])
 
+  // Run state
+  const [safeIndex, setSafeIndex] = useState(1)       // 1-based
+  const [deck, setDeck] = useState<number[]>([])      // shuffled table queue
+  const [currentSafe, setCurrentSafe] = useState<InFlightSafe | null>(null)
+  const [perSafe, setPerSafe] = useState<SafeRunPerSafe[]>([])
+  const [reveal, setReveal] = useState<{ tableIndex: number; tier: AnimalTier; upgraded: boolean } | null>(null)
+
   useEffect(() => {
     initializeProfiles()
     setProfile(getCurrentProfile())
   }, [])
 
-  const toggleTable = (t: number) => {
-    setSelectedTables((prev) =>
-      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
+  const toggleTable = (t: number) =>
+    setSelectedTables((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))
+  const selectAll = () => setSelectedTables([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+  const clearAll = () => setSelectedTables([])
+  const canStart = selectedTables.length > 0
+
+  // ------- helpers -------
+
+  const drawTable = useCallback(
+    (currentDeck: number[]): { table: number; nextDeck: number[] } => {
+      const d = currentDeck.length > 0 ? currentDeck : shuffleTables(selectedTables)
+      const [table, ...rest] = d
+      return { table, nextDeck: rest }
+    },
+    [selectedTables],
+  )
+
+  const openNextSafe = useCallback(
+    (nextIndex: number, d: number[]) => {
+      const { table, nextDeck } = drawTable(d)
+      const gapCount = gapsForSafe(difficulty, nextIndex)
+      const slots = buildSafe({ table, gapCount })
+      const runtime: SlotRuntime[] = slots.map((s) =>
+        s.isGap
+          ? { status: 'gap-empty', display: '?' }
+          : { status: 'prefilled', display: String(s.answer) },
+      )
+      const firstGap = slots.find((s) => s.isGap)?.factor ?? null
+      setCurrentSafe({
+        table,
+        slots,
+        runtime,
+        activeFactor: firstGap,
+        input: '',
+        mistakes: 0,
+      })
+      setDeck(nextDeck)
+      setSafeIndex(nextIndex)
+    },
+    [difficulty, drawTable],
+  )
+
+  const startRun = () => {
+    setPerSafe([])
+    openNextSafe(1, [])
+    setScreen('play')
+  }
+
+  // ------- play interactions -------
+
+  const handleSlotClick = (factor: number) => {
+    if (!currentSafe) return
+    const slot = currentSafe.slots.find((s) => s.factor === factor)
+    if (!slot || !slot.isGap) return
+    const idx = factor - 1
+    if (currentSafe.runtime[idx].status !== 'gap-empty') return
+    setCurrentSafe({ ...currentSafe, activeFactor: factor, input: '' })
+  }
+
+  const updateInput = (next: string) => {
+    if (!currentSafe || currentSafe.activeFactor === null) return
+    setCurrentSafe({ ...currentSafe, input: next })
+    // Mirror input into the active slot's display
+    setCurrentSafe((prev) => {
+      if (!prev || prev.activeFactor === null) return prev
+      const idx = prev.activeFactor - 1
+      if (prev.runtime[idx].status !== 'gap-empty') return prev
+      const runtime = [...prev.runtime]
+      runtime[idx] = { ...runtime[idx], display: next.length > 0 ? next : '?' }
+      return { ...prev, runtime, input: next }
+    })
+  }
+
+  const submitInput = () => {
+    if (!currentSafe || currentSafe.activeFactor === null) return
+    const factor = currentSafe.activeFactor
+    const slot = currentSafe.slots[factor - 1]
+    const parsed = parseInt(currentSafe.input, 10)
+    if (isNaN(parsed)) return
+
+    const runtime = [...currentSafe.runtime]
+    let mistakes = currentSafe.mistakes
+
+    if (parsed === slot.answer) {
+      runtime[factor - 1] = { status: 'gap-correct', display: String(slot.answer) }
+    } else {
+      runtime[factor - 1] = { status: 'gap-revealed', display: String(slot.answer) }
+      mistakes += 1
+    }
+
+    // Find next empty gap clockwise from current
+    const nextFactor = findNextGap(runtime, factor)
+    const updated: InFlightSafe = {
+      ...currentSafe,
+      runtime,
+      mistakes,
+      input: '',
+      activeFactor: nextFactor,
+    }
+    setCurrentSafe(updated)
+
+    // If all gaps resolved, complete the safe.
+    if (nextFactor === null) {
+      completeSafe(updated)
+    }
+  }
+
+  const completeSafe = (safe: InFlightSafe) => {
+    const gapsFilled = safe.slots.filter((s) => s.isGap).length
+    const tier: AnimalTier = scoreTier(safe.mistakes)
+
+    const entry: SafeRunPerSafe = {
+      tableIndex: safe.table,
+      tier,
+      mistakes: safe.mistakes,
+      gapsFilled,
+    }
+
+    // Compute upgrade relative to current profile state (for interstitial banner).
+    const currentAnimals: AnimalEntry[] = profile?.animals ?? []
+    const { upgraded } = applyAnimalAward(currentAnimals, {
+      tableIndex: safe.table,
+      tier,
+      now: new Date().toISOString(),
+    })
+
+    setPerSafe((prev) => [...prev, entry])
+    setReveal({ tableIndex: safe.table, tier, upgraded })
+    setScreen('reveal')
+  }
+
+  const continueFromReveal = () => {
+    setReveal(null)
+    const nextIndex = safeIndex + 1
+    const endlessLock = mode === 'safe-endless' && perSafe[perSafe.length - 1]?.tier === 'bronze'
+    const runComplete = mode === 'safe-run' && perSafe.length >= RUN_SAFE_COUNT
+    if (endlessLock || runComplete) {
+      finalizeRun()
+      setScreen('scorecard')
+    } else {
+      openNextSafe(nextIndex, deck)
+      setScreen('play')
+    }
+  }
+
+  const finalizeRun = () => {
+    addSafeRunResult(perSafe, {
+      mode,
+      difficulty,
+      tablesPicked: selectedTables,
+    })
+    setProfile(getCurrentProfile())
+  }
+
+  // ------- screens -------
+
+  if (screen === 'start') {
+    return (
+      <StartScreen
+        profile={profile}
+        mode={mode}
+        setMode={setMode}
+        difficulty={difficulty}
+        setDifficulty={setDifficulty}
+        selectedTables={selectedTables}
+        toggleTable={toggleTable}
+        selectAll={selectAll}
+        clearAll={clearAll}
+        canStart={canStart}
+        onStart={startRun}
+      />
     )
   }
 
-  const selectAll = () => setSelectedTables([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-  const clearAll = () => setSelectedTables([])
+  if (screen === 'play' && currentSafe) {
+    const gapsTotal = currentSafe.slots.filter((s) => s.isGap).length
+    const gapsResolved = currentSafe.runtime.filter(
+      (r) => r.status === 'gap-correct' || r.status === 'gap-revealed',
+    ).length
+    const statuses: SlotStatus[] = currentSafe.runtime.map((r) => ({
+      state: r.status,
+      displayValue: r.display,
+    }))
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          {profile && <CollectionStrip animals={profile.animals} compact />}
 
-  const canStart = selectedTables.length > 0
+          <div className="text-center my-3 text-sm text-gray-300">
+            {mode === 'safe-run' ? `Kluis ${safeIndex} / ${RUN_SAFE_COUNT}` : `Kluis ${Math.min(safeIndex, 99)}${safeIndex > 99 ? '+' : ''}`}
+            {' · '}
+            {gapsResolved} / {gapsTotal} opgelost · {currentSafe.mistakes} fout
+          </div>
 
-  if (screen !== 'start') {
-    // Placeholder; filled in later tasks.
-    return null
+          <SafeDial
+            slots={currentSafe.slots}
+            statuses={statuses}
+            activeFactor={currentSafe.activeFactor}
+            onSlotClick={handleSlotClick}
+            label={`×${currentSafe.table}`}
+            subLabel={`${gapsResolved} / ${gapsTotal} ingevuld`}
+          />
+
+          <div className="mt-6">
+            <Numpad
+              value={currentSafe.input}
+              onChange={updateInput}
+              onSubmit={submitInput}
+              disabled={currentSafe.activeFactor === null}
+            />
+          </div>
+        </div>
+
+        {screen === 'play' && reveal === null && null}
+      </div>
+    )
   }
 
+  if (screen === 'reveal' && reveal) {
+    return (
+      <SafeReveal
+        tableIndex={reveal.tableIndex}
+        tier={reveal.tier}
+        upgraded={reveal.upgraded}
+        onContinue={continueFromReveal}
+      />
+    )
+  }
+
+  if (screen === 'scorecard') {
+    const tiers = {
+      gold: perSafe.filter((s) => s.tier === 'gold').length,
+      silver: perSafe.filter((s) => s.tier === 'silver').length,
+      bronze: perSafe.filter((s) => s.tier === 'bronze').length,
+    }
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
+        <div className="max-w-2xl mx-auto px-4 py-8">
+          <h1 className="text-3xl font-extrabold text-center mb-6">Scorekaart</h1>
+          {profile && (
+            <div className="mb-6">
+              <CollectionStrip animals={profile.animals} />
+            </div>
+          )}
+          <Card className="bg-white/10 border-white/20 text-white mb-6">
+            <CardContent className="p-5 space-y-2">
+              <div className="text-lg">Kluizen gekraakt: <span className="font-extrabold">{perSafe.length}</span></div>
+              <div className="flex gap-4 text-lg">
+                <span className="text-yellow-300">🥇 {tiers.gold}</span>
+                <span className="text-gray-200">🥈 {tiers.silver}</span>
+                <span className="text-amber-600">🥉 {tiers.bronze}</span>
+              </div>
+              <div className="text-sm text-gray-300">
+                Totaal fout: {perSafe.reduce((a, s) => a + s.mistakes, 0)}
+              </div>
+            </CardContent>
+          </Card>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => {
+                setScreen('start')
+                setPerSafe([])
+              }}
+              className="py-3 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 text-white font-bold shadow-lg"
+            >
+              Nog een keer
+            </button>
+            <Link href="/" className="block">
+              <button className="w-full py-3 rounded-xl bg-white/10 border border-white/30 text-white font-bold">
+                Home
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return null
+}
+
+// ---------- helpers ----------
+
+function findNextGap(runtime: SlotRuntime[], fromFactor: number): number | null {
+  for (let i = 1; i <= 10; i++) {
+    const probe = ((fromFactor - 1 + i) % 10) + 1
+    if (runtime[probe - 1].status === 'gap-empty') return probe
+  }
+  return null
+}
+
+function StartScreen(props: {
+  profile: UserProfile | null
+  mode: SafeMode
+  setMode: (m: SafeMode) => void
+  difficulty: Difficulty
+  setDifficulty: (d: Difficulty) => void
+  selectedTables: number[]
+  toggleTable: (t: number) => void
+  selectAll: () => void
+  clearAll: () => void
+  canStart: boolean
+  onStart: () => void
+}) {
+  const { profile, mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable, selectAll, clearAll, canStart, onStart } = props
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
       <div className="max-w-4xl mx-auto px-4 py-6">
@@ -76,12 +401,8 @@ export default function SafePage() {
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-bold">Tafels</h2>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={selectAll} className="text-white border-white/40">
-                    Alles
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={clearAll} className="text-white border-white/40">
-                    Wissen
-                  </Button>
+                  <Button size="sm" variant="outline" onClick={selectAll} className="text-white border-white/40">Alles</Button>
+                  <Button size="sm" variant="outline" onClick={clearAll} className="text-white border-white/40">Wissen</Button>
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-2">
@@ -104,7 +425,7 @@ export default function SafePage() {
         </Card>
 
         <button
-          onClick={() => canStart && setScreen('play')}
+          onClick={() => canStart && onStart()}
           disabled={!canStart}
           className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${
             canStart
