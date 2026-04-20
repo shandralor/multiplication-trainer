@@ -22,6 +22,8 @@ import {
   type SafeSlot,
 } from '@/lib/safe/safe-logic'
 import { addSafeRunResult, awardAnimalForSafe, resetAnimalCollection, resetAnimalForTable, type SafeRunPerSafe } from '@/lib/safe/safe-progress'
+import { confirmToast } from '@/lib/confirm-toast'
+import { toast } from 'sonner'
 import { MedalRow } from '@/components/safe/medal-row'
 import { ACHIEVEMENTS, type AchievementId } from '@/lib/safe/achievements'
 import {
@@ -173,16 +175,50 @@ export default function SafePage() {
   }
 
   const abortRun = () => {
-    if (!confirm('Stop met deze ronde? Je voortgang in deze run gaat verloren.')) return
-    resetRunState()
-    setScreen('start')
+    confirmToast({
+      message: 'Stop met deze ronde? Je voortgang gaat verloren.',
+      confirmLabel: 'Stop',
+      onConfirm: () => {
+        resetRunState()
+        setScreen('start')
+      },
+    })
   }
 
   const restartRun = () => {
-    if (!confirm('Deze ronde opnieuw beginnen met dezelfde instellingen?')) return
-    resetRunState()
-    openNextSafe(1, [])
-    setScreen('play')
+    confirmToast({
+      message: 'Deze ronde opnieuw beginnen met dezelfde instellingen?',
+      confirmLabel: 'Herstart',
+      onConfirm: () => {
+        resetRunState()
+        openNextSafe(1, [])
+        setScreen('play')
+      },
+    })
+  }
+
+  const handleResetTable = (t: number) => {
+    confirmToast({
+      message: `Dier voor de tafel van ${t} resetten? Medailles blijven bewaard.`,
+      confirmLabel: 'Reset',
+      onConfirm: () => {
+        resetAnimalForTable(t)
+        setProfile(getCurrentProfile())
+        toast.success(`Tafel van ${t} gereset.`)
+      },
+    })
+  }
+
+  const handleResetAll = () => {
+    confirmToast({
+      message: 'Alle dieren resetten? Medailles blijven bewaard.',
+      confirmLabel: 'Reset alles',
+      onConfirm: () => {
+        resetAnimalCollection()
+        setProfile(getCurrentProfile())
+        toast.success('Verzameling gereset.')
+      },
+    })
   }
 
   // ------- play interactions -------
@@ -312,11 +348,8 @@ export default function SafePage() {
         clearAll={clearAll}
         canStart={canStart}
         onStart={startRun}
-        onResetTable={(t) => {
-          if (!confirm(`Dier voor de tafel van ${t} resetten? Medailles blijven bewaard.`)) return
-          resetAnimalForTable(t)
-          setProfile(getCurrentProfile())
-        }}
+        onResetTable={handleResetTable}
+        onResetAll={handleResetAll}
       />
     )
   }
@@ -535,8 +568,10 @@ function StartScreen(props: {
   canStart: boolean
   onStart: () => void
   onResetTable: (table: number) => void
+  onResetAll: () => void
 }) {
-  const { profile, mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable, selectAll, clearAll, canStart, onStart, onResetTable } = props
+  const { profile, mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable, selectAll, clearAll, canStart, onStart, onResetTable, onResetAll } = props
+  const hasAnyAnimals = (profile?.animals?.length ?? 0) > 0
   const tierByTable = new Map<number, 'bronze' | 'silver' | 'gold'>(
     (profile?.animals ?? []).map((a) => [a.tableIndex, a.tier]),
   )
@@ -624,6 +659,16 @@ function StartScreen(props: {
                   )
                 })}
               </div>
+              {hasAnyAnimals && (
+                <div className="mt-3 text-right">
+                  <button
+                    onClick={onResetAll}
+                    className="text-xs font-semibold text-rose-300 hover:text-rose-200 underline-offset-2 hover:underline"
+                  >
+                    Verzameling resetten
+                  </button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
