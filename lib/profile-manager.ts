@@ -12,6 +12,30 @@ export type QuizResult = {
   timePerQuestion?: number
 }
 
+export type AnimalTier = 'bronze' | 'silver' | 'gold'
+
+export type AnimalEntry = {
+  tableIndex: number
+  tier: AnimalTier
+  firstEarnedAt: string
+  lastUpgradedAt: string
+}
+
+export type SafeRunResult = {
+  id: string
+  mode: 'safe-run' | 'safe-endless'
+  difficulty: 'easy' | 'medium' | 'hard'
+  tablesPicked: number[]
+  safesCracked: number
+  tiersEarned: {
+    gold: number
+    silver: number
+    bronze: number
+  }
+  totalMistakes: number
+  date: string
+}
+
 export type TableStats = {
   [table: number]: {
     multiply: {
@@ -49,6 +73,33 @@ export type UserProfile = {
   }
   tableStats: TableStats
   recentResults: QuizResult[]
+  animals: AnimalEntry[]
+  recentSafeResults: SafeRunResult[]
+}
+
+/** Raw shape read from localStorage — may be missing new fields from older profile versions. */
+export type RawProfile = Partial<UserProfile> & Pick<UserProfile, 'id' | 'name'>
+
+/** Fill in missing fields on an older profile so it matches the current UserProfile shape. */
+export function hydrateProfile(raw: RawProfile): UserProfile {
+  return {
+    createdAt: '',
+    lastActive: '',
+    totalQuizzes: 0,
+    totalQuestions: 0,
+    totalCorrect: 0,
+    currentStreak: 0,
+    lastPracticeDate: '',
+    bestScores: {
+      quiz: { multiply: null, divide: null },
+      timed: { multiply: null, divide: null },
+    },
+    tableStats: {},
+    recentResults: [],
+    ...raw,
+    animals: raw.animals ?? [],
+    recentSafeResults: raw.recentSafeResults ?? [],
+  }
 }
 
 const STORAGE_KEY = 'tafel-trainer-profiles'
@@ -60,7 +111,8 @@ export function getAllProfiles(): UserProfile[] {
   const data = localStorage.getItem(STORAGE_KEY)
   if (!data) return []
   try {
-    return JSON.parse(data)
+    const raw = JSON.parse(data) as RawProfile[]
+    return raw.map(hydrateProfile)
   } catch {
     return []
   }
@@ -115,7 +167,9 @@ export function createProfile(name: string): UserProfile {
       }
     },
     tableStats: {},
-    recentResults: []
+    recentResults: [],
+    animals: [],
+    recentSafeResults: [],
   }
 
   const profiles = getAllProfiles()
