@@ -42,3 +42,6 @@ next-env.d.ts
 
 # superpowers brainstorming session artifacts
 .superpowers/
+
+# superpowers git worktrees
+.worktrees/
