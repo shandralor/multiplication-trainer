@@ -36,6 +36,12 @@ export type SafeRunResult = {
   date: string
 }
 
+export type EarnedAchievement = {
+  id: string
+  earnedAt: string
+  cycle: number   // which full-collection cycle this was earned in
+}
+
 
 export type TableStats = {
   [table: number]: {
@@ -76,6 +82,8 @@ export type UserProfile = {
   recentResults: QuizResult[]
   animals: AnimalEntry[]
   recentSafeResults: SafeRunResult[]
+  achievements: EarnedAchievement[]
+  collectionCycle: number  // bumps each time Alle Goud triggers a reset
 }
 
 /** Raw shape read from localStorage — may be missing new fields from older profile versions. */
@@ -100,6 +108,8 @@ export function hydrateProfile(raw: RawProfile): UserProfile {
     ...raw,
     animals: raw.animals ?? [],
     recentSafeResults: raw.recentSafeResults ?? [],
+    achievements: raw.achievements ?? [],
+    collectionCycle: raw.collectionCycle ?? 1,
   }
 }
 
@@ -171,6 +181,8 @@ export function createProfile(name: string): UserProfile {
     recentResults: [],
     animals: [],
     recentSafeResults: [],
+    achievements: [],
+    collectionCycle: 1,
   }
 
   const profiles = getAllProfiles()

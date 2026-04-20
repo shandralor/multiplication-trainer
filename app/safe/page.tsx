@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -20,7 +21,9 @@ import {
   type Difficulty,
   type SafeSlot,
 } from '@/lib/safe/safe-logic'
-import { addSafeRunResult, awardAnimalForSafe, type SafeRunPerSafe } from '@/lib/safe/safe-progress'
+import { addSafeRunResult, awardAnimalForSafe, resetAnimalCollection, type SafeRunPerSafe } from '@/lib/safe/safe-progress'
+import { MedalRow } from '@/components/safe/medal-row'
+import { ACHIEVEMENTS, type AchievementId } from '@/lib/safe/achievements'
 import {
   getCurrentProfile,
   initializeProfiles,
@@ -61,6 +64,8 @@ export default function SafePage() {
   const [reveal, setReveal] = useState<{ tableIndex: number; tier: AnimalTier; upgraded: boolean } | null>(null)
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const [endlessTimedOut, setEndlessTimedOut] = useState(false)
+  const [safeStartedAt, setSafeStartedAt] = useState<number | null>(null)
+  const [justEarnedAchievements, setJustEarnedAchievements] = useState<AchievementId[]>([])
 
   useEffect(() => {
     initializeProfiles()
@@ -146,6 +151,7 @@ export default function SafePage() {
       setDeck(nextDeck)
       setSafeIndex(nextIndex)
       setTimeRemaining(mode === 'safe-endless' ? endlessSafeTimer(nextIndex) : null)
+      setSafeStartedAt(Date.now())
     },
     [difficulty, drawTable, mode],
   )
@@ -217,17 +223,23 @@ export default function SafePage() {
   const completeSafe = (safe: InFlightSafe) => {
     const gapsFilled = safe.slots.filter((s) => s.isGap).length
     const tier: AnimalTier = scoreTier(safe.mistakes)
+    const durationMs = safeStartedAt !== null ? Date.now() - safeStartedAt : undefined
 
     const entry: SafeRunPerSafe = {
       tableIndex: safe.table,
       tier,
       mistakes: safe.mistakes,
       gapsFilled,
+      durationMs,
+      mode,
     }
 
     // Persist this safe immediately so the collection strip updates between safes.
-    const { upgraded } = awardAnimalForSafe(entry)
+    const { upgraded, newAchievements } = awardAnimalForSafe(entry)
     setProfile(getCurrentProfile())
+    if (newAchievements.length > 0) {
+      setJustEarnedAchievements((prev) => [...prev, ...newAchievements])
+    }
 
     setPerSafe((prev) => [...prev, entry])
     setReveal({ tableIndex: safe.table, tier, upgraded })
@@ -250,11 +262,14 @@ export default function SafePage() {
   }
 
   const finalizeRun = () => {
-    addSafeRunResult(perSafe, {
+    const { newAchievements } = addSafeRunResult(perSafe, {
       mode,
       difficulty,
       tablesPicked: selectedTables,
     })
+    if (newAchievements.length > 0) {
+      setJustEarnedAchievements((prev) => [...prev, ...newAchievements])
+    }
     setProfile(getCurrentProfile())
   }
 
@@ -393,11 +408,63 @@ export default function SafePage() {
               </div>
             </CardContent>
           </Card>
+
+          {justEarnedAchievements.length > 0 && (
+            <Card className="bg-yellow-500/20 border-yellow-400/50 text-white mb-6">
+              <CardContent className="p-5">
+                <div className="text-sm font-bold uppercase tracking-wider text-yellow-300 mb-3">
+                  Nieuwe medailles!
+                </div>
+                <div className="space-y-2">
+                  {justEarnedAchievements.map((id) => (
+                    <div key={id} className="flex items-center gap-3">
+                      <Image
+                        src={ACHIEVEMENTS[id].medalPath}
+                        alt={ACHIEVEMENTS[id].label}
+                        width={32}
+                        height={54}
+                        className="object-contain"
+                      />
+                      <div>
+                        <div className="font-bold">{ACHIEVEMENTS[id].label}</div>
+                        <div className="text-xs opacity-80">{ACHIEVEMENTS[id].description}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {justEarnedAchievements.includes('all-gold') && (
+            <Card className="bg-gradient-to-br from-yellow-500/30 to-amber-600/30 border-yellow-400 text-white mb-6">
+              <CardContent className="p-5 space-y-3">
+                <div className="text-lg font-extrabold">🏆 Kluis Compleet!</div>
+                <div className="text-sm opacity-90">
+                  Alle dieren op goud — een nieuwe ronde start de verzameling opnieuw, maar je medailles blijven bewaard.
+                </div>
+                <button
+                  onClick={() => {
+                    resetAnimalCollection()
+                    setProfile(getCurrentProfile())
+                    setJustEarnedAchievements([])
+                    setScreen('start')
+                    setPerSafe([])
+                  }}
+                  className="w-full py-3 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 text-white font-bold shadow-lg"
+                >
+                  Verzameling resetten en opnieuw beginnen
+                </button>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => {
                 setScreen('start')
                 setPerSafe([])
+                setJustEarnedAchievements([])
               }}
               className="py-3 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 text-white font-bold shadow-lg"
             >
@@ -455,6 +522,12 @@ function StartScreen(props: {
             </Button>
           </Link>
         </div>
+
+        {profile && profile.achievements && profile.achievements.length > 0 && (
+          <div className="mb-4">
+            <MedalRow earned={profile.achievements} />
+          </div>
+        )}
 
         <Card className="mb-4 bg-white/10 border-white/20 text-white">
           <CardContent className="p-5 space-y-4">

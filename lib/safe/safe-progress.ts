@@ -1,5 +1,10 @@
-import type { AnimalEntry, AnimalTier, SafeRunResult, UserProfile } from '@/lib/profile-manager'
+import type { AnimalEntry, AnimalTier, EarnedAchievement, SafeRunResult, UserProfile } from '@/lib/profile-manager'
 import { getCurrentProfile, updateProfile } from '@/lib/profile-manager'
+import {
+  type AchievementId,
+  alreadyEarnedForCycle,
+  evaluateAchievements,
+} from '@/lib/safe/achievements'
 
 const TIER_RANK: Record<AnimalTier, number> = { bronze: 1, silver: 2, gold: 3 }
 
@@ -51,18 +56,20 @@ export type SafeRunPerSafe = {
   tier: AnimalTier
   mistakes: number
   gapsFilled: number
+  durationMs?: number
+  mode?: 'safe-run' | 'safe-endless'
 }
 
 /**
  * Persist a single cracked safe immediately: upgrade the animal entry if applicable,
- * update per-table stats and running totals. Called after every safe so the
- * collection strip reflects progress in real time.
+ * update per-table stats and running totals, evaluate any newly earned achievements.
+ * Called after every safe so the collection strip reflects progress in real time.
  */
 export function awardAnimalForSafe(
   safe: SafeRunPerSafe,
-): { upgraded: boolean } {
+): { upgraded: boolean; newAchievements: AchievementId[] } {
   const profile = getCurrentProfile()
-  if (!profile) return { upgraded: false }
+  if (!profile) return { upgraded: false, newAchievements: [] }
 
   const now = new Date().toISOString()
   const { animals, upgraded } = applyAnimalAward(profile.animals, {
@@ -85,14 +92,42 @@ export function awardAnimalForSafe(
   const pct = mult.attempts > 0 ? (mult.correct / mult.attempts) * 100 : 0
   mult.bestScore = Math.max(mult.bestScore, pct)
 
+  const alreadyEarned = alreadyEarnedForCycle(profile.achievements, profile.collectionCycle)
+  const newlyEarned = evaluateAchievements({
+    animals,
+    alreadyEarned,
+    collectionCycle: profile.collectionCycle,
+    lastSafe: safe.mode ? { ...safe, mode: safe.mode } : undefined,
+  })
+  const achievements: EarnedAchievement[] = [
+    ...profile.achievements,
+    ...newlyEarned.map((id) => ({ id, earnedAt: now, cycle: profile.collectionCycle })),
+  ]
+
   updateProfile(profile.id, {
     animals,
     tableStats,
     totalQuestions: profile.totalQuestions + safe.gapsFilled,
     totalCorrect: profile.totalCorrect + (safe.gapsFilled - safe.mistakes),
+    achievements,
   })
 
-  return { upgraded }
+  return { upgraded, newAchievements: newlyEarned }
+}
+
+/**
+ * Resets the animal collection so the user can go for Alle Goud again in a
+ * new cycle. Does NOT wipe earned achievements; bumps collectionCycle so the
+ * cycle-gated achievements (all-bronze / all-silver / all-gold) become
+ * re-earnable.
+ */
+export function resetAnimalCollection(): void {
+  const profile = getCurrentProfile()
+  if (!profile) return
+  updateProfile(profile.id, {
+    animals: [],
+    collectionCycle: profile.collectionCycle + 1,
+  })
 }
 
 /**
@@ -107,9 +142,9 @@ export function addSafeRunResult(
     difficulty: 'easy' | 'medium' | 'hard'
     tablesPicked: number[]
   },
-): void {
+): { newAchievements: AchievementId[] } {
   const profile = getCurrentProfile()
-  if (!profile) return
+  if (!profile) return { newAchievements: [] }
 
   const now = new Date().toISOString()
 
@@ -140,10 +175,25 @@ export function addSafeRunResult(
       ? profile.currentStreak
       : profile.currentStreak + 1
 
+  const alreadyEarned = alreadyEarnedForCycle(profile.achievements, profile.collectionCycle)
+  const newlyEarned = evaluateAchievements({
+    animals: profile.animals,
+    alreadyEarned,
+    collectionCycle: profile.collectionCycle,
+    lastRun: runResult,
+  })
+  const achievements: EarnedAchievement[] = [
+    ...profile.achievements,
+    ...newlyEarned.map((id) => ({ id, earnedAt: now, cycle: profile.collectionCycle })),
+  ]
+
   updateProfile(profile.id, {
     recentSafeResults,
     totalQuizzes: profile.totalQuizzes + 1,
     currentStreak: newStreak,
     lastPracticeDate: now,
+    achievements,
   })
+
+  return { newAchievements: newlyEarned }
 }
