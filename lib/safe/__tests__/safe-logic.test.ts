@@ -70,21 +70,22 @@ describe('buildSafe', () => {
     expect(slots.filter((s) => s.isGap)).toHaveLength(3)
   })
 
-  it('prefers hard-half factors (>= 4) when gapCount <= 6', () => {
+  it('gap factors are drawn without duplicates from 1..10', () => {
     const slots = buildSafe({ table: 7, gapCount: 6, rng: mulberry32(4) })
-    const gapFactors = slots.filter((s) => s.isGap).map((s) => s.factor).sort((a, b) => a - b)
+    const gapFactors = slots.filter((s) => s.isGap).map((s) => s.factor)
+    expect(new Set(gapFactors).size).toBe(gapFactors.length)
     for (const f of gapFactors) {
-      expect(f).toBeGreaterThanOrEqual(4)
-      expect(f).toBeLessThanOrEqual(9)
+      expect(f).toBeGreaterThanOrEqual(1)
+      expect(f).toBeLessThanOrEqual(10)
     }
   })
 
-  it('spills into easy factors when gapCount > 6', () => {
-    const slots = buildSafe({ table: 4, gapCount: 8, rng: mulberry32(5) })
-    const gaps = slots.filter((s) => s.isGap)
-    expect(gaps).toHaveLength(8)
-    const easyGapCount = gaps.filter((s) => [1, 2, 3, 10].includes(s.factor)).length
-    expect(easyGapCount).toBeGreaterThanOrEqual(2)
+  it('gap placement varies across seeds (not always the same set)', () => {
+    const a = buildSafe({ table: 4, gapCount: 5, rng: mulberry32(11) })
+      .filter((s) => s.isGap).map((s) => s.factor).sort((x, y) => x - y)
+    const b = buildSafe({ table: 4, gapCount: 5, rng: mulberry32(12) })
+      .filter((s) => s.isGap).map((s) => s.factor).sort((x, y) => x - y)
+    expect(a).not.toEqual(b)
   })
 
   it('all-gap safe (gapCount=10) marks every slot as gap', () => {

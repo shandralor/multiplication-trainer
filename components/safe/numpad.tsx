@@ -47,7 +47,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
           type="button"
           onClick={() => press(d)}
           disabled={disabled}
-          className="h-14 rounded-xl bg-white border-2 border-gray-300 font-bold text-2xl shadow hover:bg-gray-50 active:translate-y-0.5 disabled:opacity-50"
+          className="h-14 rounded-xl bg-white border-2 border-gray-300 font-bold text-2xl text-gray-900 shadow hover:bg-gray-50 active:translate-y-0.5 disabled:opacity-50"
         >
           {d}
         </button>
@@ -56,7 +56,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
         type="button"
         onClick={backspace}
         disabled={disabled}
-        className="h-14 rounded-xl bg-white border-2 border-gray-300 font-bold text-xl shadow hover:bg-gray-50 disabled:opacity-50"
+        className="h-14 rounded-xl bg-white border-2 border-gray-300 font-bold text-xl text-gray-900 shadow hover:bg-gray-50 disabled:opacity-50"
         aria-label="Backspace"
       >
         ←

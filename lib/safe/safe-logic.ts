@@ -33,14 +33,11 @@ export type BuildSafeArgs = {
   rng?: () => number
 }
 
-const HARD_FACTORS = [4, 5, 6, 7, 8, 9]
-const EASY_FACTORS = [1, 2, 3, 10]
+const ALL_FACTORS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-/** Build a safe's 10 slots for a given table. Gaps are drawn from hard-half first. */
+/** Build a safe's 10 slots for a given table. Gaps are drawn uniformly at random. */
 export function buildSafe({ table, gapCount, rng = Math.random }: BuildSafeArgs): SafeSlot[] {
-  const gaps = gapCount <= HARD_FACTORS.length
-    ? pickN(HARD_FACTORS, gapCount, rng)
-    : [...HARD_FACTORS, ...pickN(EASY_FACTORS, gapCount - HARD_FACTORS.length, rng)]
+  const gaps = pickN(ALL_FACTORS, gapCount, rng)
 
   const gapSet = new Set(gaps)
   const slots: SafeSlot[] = []
