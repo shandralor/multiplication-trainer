@@ -115,14 +115,12 @@ export default function SafePage() {
   // ------- helpers -------
 
   const drawTable = useCallback(
-    (currentDeck: number[], currentMode: SafeMode): { table: number; nextDeck: number[] } => {
-      // Run mode: deck is drained exactly once (one pass through selectedTables).
-      // Endless mode: reshuffle when empty so the run can continue indefinitely.
-      const d = currentDeck.length > 0
-        ? currentDeck
-        : currentMode === 'safe-endless'
-          ? shuffleTables(selectedTables)
-          : currentDeck
+    (currentDeck: number[]): { table: number; nextDeck: number[] } => {
+      // Empty deck means either the very first draw of a run or a subsequent
+      // exhaustion. In both cases we (re)shuffle. Run mode's end-of-run check
+      // in continueFromReveal prevents us from reshuffling mid-run — we only
+      // hit this path for the very first safe or in Eindeloos mode.
+      const d = currentDeck.length > 0 ? currentDeck : shuffleTables(selectedTables)
       const [table, ...rest] = d
       return { table, nextDeck: rest }
     },
@@ -131,7 +129,7 @@ export default function SafePage() {
 
   const openNextSafe = useCallback(
     (nextIndex: number, d: number[]) => {
-      const { table, nextDeck } = drawTable(d, mode)
+      const { table, nextDeck } = drawTable(d)
       const gapCount = gapsForSafe(difficulty, nextIndex)
       const slots = buildSafe({ table, gapCount })
       const runtime: SlotRuntime[] = slots.map((s) =>
