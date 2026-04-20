@@ -416,8 +416,18 @@ function StartScreen(props: {
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-bold">Tafels</h2>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={selectAll} className="text-white border-white/40">Alles</Button>
-                  <Button size="sm" variant="outline" onClick={clearAll} className="text-white border-white/40">Wissen</Button>
+                  <button
+                    onClick={selectAll}
+                    className="text-sm font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/40 px-3 py-1 rounded-md"
+                  >
+                    Alles
+                  </button>
+                  <button
+                    onClick={clearAll}
+                    className="text-sm font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/40 px-3 py-1 rounded-md"
+                  >
+                    Wissen
+                  </button>
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-2">

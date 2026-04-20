@@ -27,11 +27,11 @@ export function CollectionStrip({ animals, highlightTable = null, compact = fals
           <span className="text-xs font-bold text-yellow-600">🏆 Kluis Compleet!</span>
         )}
       </div>
-      <div className={`flex gap-2 p-3 rounded-2xl border-2 border-amber-200 bg-amber-50 dark:bg-amber-950/30 justify-center flex-wrap ${compact ? 'py-2' : ''}`}>
+      <div className={`flex gap-1.5 p-3 rounded-2xl border-2 border-amber-200 bg-amber-50 dark:bg-amber-950/30 justify-center flex-nowrap overflow-x-auto ${compact ? 'py-2' : ''}`}>
         {ANIMALS.map((animal) => (
           <div
             key={animal.tableIndex}
-            className={highlightTable === animal.tableIndex ? 'animate-bounce' : ''}
+            className={`shrink-0 ${highlightTable === animal.tableIndex ? 'animate-bounce' : ''}`}
           >
             <AnimalBadge
               tableIndex={animal.tableIndex}
