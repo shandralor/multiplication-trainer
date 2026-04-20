@@ -1,0 +1,3 @@
+Medal artwork: Kenney Medals pack
+Source: https://kenney.nl/assets/medals
+License: CC0 1.0 Universal (Public Domain)

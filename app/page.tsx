@@ -341,6 +341,22 @@ export default function Home() {
             </div>
           </button>
         </div>
+
+        <div className="mt-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <Link href="/safe">
+            <button
+              className="w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all duration-200 bg-gradient-to-br from-amber-500 via-rose-500 to-indigo-700 text-white hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-2xl">🔐</span>
+                <div className="text-left">
+                  <div>Kraak de Kluis</div>
+                  <div className="text-xs opacity-90">Verzamel dieren door tafels te kraken</div>
+                </div>
+              </div>
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   )
