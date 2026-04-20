@@ -10,7 +10,7 @@ type ModePickerProps = {
 export function ModePicker({ value, onChange }: ModePickerProps) {
   const options: { id: SafeMode; label: string; desc: string }[] = [
     { id: 'safe-run',     label: 'Ronde',     desc: 'Elke gekozen tafel één keer' },
-    { id: 'safe-endless', label: 'Eindeloos', desc: 'Hoe ver kom je zonder brons?' },
+    { id: 'safe-endless', label: 'Eindeloos', desc: 'De tijd tikt steeds sneller' },
   ]
 
   return (

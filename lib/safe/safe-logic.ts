@@ -28,13 +28,16 @@ export function scoreTier(mistakes: number): AnimalTier {
 }
 
 /**
- * Seconds allowed to crack a safe in Eindeloos mode. Starts generous, ticks
- * down every 5 safes, bottoms out so the run is always theoretically winnable.
- * Safe index is 1-based.
+ * Seconds allowed to crack a safe in Eindeloos mode. Drops every 5 safes.
+ * First five steps drop 15 s (90 → 75 → 60 → 45 → 30); after that each
+ * step drops 5 s (30 → 25 → 20 → 15 → 10). Floored at 10 s so extreme
+ * runs stay theoretically playable. Safe index is 1-based.
  */
 export function endlessSafeTimer(safeIndex: number): number {
   const step = Math.floor((safeIndex - 1) / 5)
-  return Math.max(30, 90 - step * 15)
+  if (step <= 4) return 90 - step * 15
+  const smallStep = step - 4
+  return Math.max(10, 30 - smallStep * 5)
 }
 
 export type BuildSafeArgs = {

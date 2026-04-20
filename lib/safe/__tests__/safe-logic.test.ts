@@ -100,14 +100,21 @@ describe('endlessSafeTimer', () => {
     expect(endlessSafeTimer(1)).toBe(90)
     expect(endlessSafeTimer(5)).toBe(90)
   })
-  it('drops by 15s every 5 safes', () => {
+  it('drops 15s per tier until safe 21', () => {
     expect(endlessSafeTimer(6)).toBe(75)
     expect(endlessSafeTimer(11)).toBe(60)
     expect(endlessSafeTimer(16)).toBe(45)
-  })
-  it('floors at 30s', () => {
-    expect(endlessSafeTimer(100)).toBe(30)
     expect(endlessSafeTimer(21)).toBe(30)
+  })
+  it('after safe 21, drops 5s per tier', () => {
+    expect(endlessSafeTimer(26)).toBe(25)
+    expect(endlessSafeTimer(31)).toBe(20)
+    expect(endlessSafeTimer(36)).toBe(15)
+    expect(endlessSafeTimer(41)).toBe(10)
+  })
+  it('floors at 10s', () => {
+    expect(endlessSafeTimer(46)).toBe(10)
+    expect(endlessSafeTimer(100)).toBe(10)
   })
 })
 
