@@ -12,7 +12,7 @@ export type QuizResult = {
   timePerQuestion?: number
 }
 
-export type AnimalTier = 'bronze' | 'silver' | 'gold'
+export type AnimalTier = 'bronze' | 'silver' | 'gold' | 'platinum'
 
 export type AnimalEntry = {
   tableIndex: number
