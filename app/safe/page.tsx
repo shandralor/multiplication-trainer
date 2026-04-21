@@ -281,7 +281,7 @@ export default function SafePage() {
 
   const completeSafe = (safe: InFlightSafe) => {
     const gapsFilled = safe.slots.filter((s) => s.isGap).length
-    const tier: AnimalTier = scoreTier(safe.mistakes)
+    const tier: AnimalTier = scoreTier(safe.mistakes, difficulty)
     const durationMs = safeStartedAt !== null ? Date.now() - safeStartedAt : undefined
 
     const entry: SafeRunPerSafe = {
