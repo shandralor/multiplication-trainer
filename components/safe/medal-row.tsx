@@ -13,12 +13,15 @@ const ALL_IDS: AchievementId[] = [
   'first-safe',
   'perfect-safe',
   'fast-safe',
+  'hard-safe',
   'all-bronze',
   'all-silver',
   'all-gold',
+  'all-platinum',
   'perfect-ronde',
   'endless-10',
   'endless-20',
+  'loyal-player',
 ]
 
 export function MedalRow({ earned }: MedalRowProps) {
