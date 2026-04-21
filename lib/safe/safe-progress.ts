@@ -6,7 +6,12 @@ import {
   evaluateAchievements,
 } from '@/lib/safe/achievements'
 
-const TIER_RANK: Record<AnimalTier, number> = { bronze: 1, silver: 2, gold: 3 }
+const TIER_RANK: Record<AnimalTier, number> = {
+  bronze: 1,
+  silver: 2,
+  gold: 3,
+  platinum: 4,
+}
 
 export type AnimalAwardInput = {
   tableIndex: number
