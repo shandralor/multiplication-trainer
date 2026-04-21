@@ -35,18 +35,27 @@ describe('gapsForSafe', () => {
 })
 
 describe('scoreTier', () => {
-  it('0 mistakes → gold', () => {
-    expect(scoreTier(0)).toBe('gold')
+  it('Makkelijk: 0 mistakes → silver, any mistakes → bronze', () => {
+    expect(scoreTier(0, 'easy')).toBe('silver')
+    expect(scoreTier(1, 'easy')).toBe('bronze')
+    expect(scoreTier(2, 'easy')).toBe('bronze')
+    expect(scoreTier(5, 'easy')).toBe('bronze')
   })
 
-  it('1 or 2 mistakes → silver', () => {
-    expect(scoreTier(1)).toBe('silver')
-    expect(scoreTier(2)).toBe('silver')
+  it('Normaal: 0 → gold, 1-2 → silver, 3+ → bronze', () => {
+    expect(scoreTier(0, 'medium')).toBe('gold')
+    expect(scoreTier(1, 'medium')).toBe('silver')
+    expect(scoreTier(2, 'medium')).toBe('silver')
+    expect(scoreTier(3, 'medium')).toBe('bronze')
+    expect(scoreTier(10, 'medium')).toBe('bronze')
   })
 
-  it('3+ mistakes → bronze', () => {
-    expect(scoreTier(3)).toBe('bronze')
-    expect(scoreTier(10)).toBe('bronze')
+  it('Moeilijk: 0 → platinum, 1-2 → gold, 3+ → silver (no bronze)', () => {
+    expect(scoreTier(0, 'hard')).toBe('platinum')
+    expect(scoreTier(1, 'hard')).toBe('gold')
+    expect(scoreTier(2, 'hard')).toBe('gold')
+    expect(scoreTier(3, 'hard')).toBe('silver')
+    expect(scoreTier(10, 'hard')).toBe('silver')
   })
 })
 
