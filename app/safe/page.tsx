@@ -291,6 +291,7 @@ export default function SafePage() {
       gapsFilled,
       durationMs,
       mode,
+      difficulty,
     }
 
     // Persist this safe immediately so the collection strip updates between safes.
