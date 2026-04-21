@@ -573,7 +573,7 @@ function StartScreen(props: {
 }) {
   const { profile, mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable, selectAll, clearAll, canStart, onStart, onResetTable, onResetAll } = props
   const hasAnyAnimals = (profile?.animals?.length ?? 0) > 0
-  const tierByTable = new Map<number, 'bronze' | 'silver' | 'gold'>(
+  const tierByTable = new Map<number, 'bronze' | 'silver' | 'gold' | 'platinum'>(
     (profile?.animals ?? []).map((a) => [a.tableIndex, a.tier]),
   )
   return (
