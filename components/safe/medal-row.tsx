@@ -31,7 +31,7 @@ export function MedalRow({ earned }: MedalRowProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-2 px-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
+        <span className="text-xs font-bold tracking-wider text-amber-300">
           Medailles · {earnedIds.size} / {ALL_IDS.length}
         </span>
       </div>

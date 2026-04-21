@@ -59,7 +59,7 @@ export function SafeDial({
       >
         {/* Center label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white pointer-events-none">
-          <span className="text-xs tracking-[0.3em] text-gray-300">KRAAK DE KLUIS</span>
+          <span className="text-xs tracking-[0.2em] text-gray-300">Kraak de kluis</span>
           <span className="text-5xl font-extrabold mt-1">{label}</span>
           {subLabel && <span className="text-xs text-emerald-200 mt-2">{subLabel}</span>}
         </div>

@@ -95,7 +95,7 @@ export default function ProgressPage() {
                 </Button>
               </Link>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                Mijn Voortgang
+                Mijn voortgang
               </h1>
             </div>
             <ProfileSelector onProfileChange={loadProfile} />

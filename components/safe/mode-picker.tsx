@@ -14,7 +14,7 @@ export function ModePicker({ value, onChange }: ModePickerProps) {
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-3 md:gap-5">
       {options.map((opt) => {
         const active = opt.id === value
         return (

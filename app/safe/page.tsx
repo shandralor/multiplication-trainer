@@ -474,7 +474,7 @@ export default function SafePage() {
           {justEarnedAchievements.length > 0 && (
             <Card className="bg-yellow-500/20 border-yellow-400/50 text-white mb-6">
               <CardContent className="p-5">
-                <div className="text-sm font-bold uppercase tracking-wider text-yellow-300 mb-3">
+                <div className="text-sm font-bold tracking-wider text-yellow-300 mb-3">
                   Nieuwe medailles!
                 </div>
                 <div className="space-y-2">
@@ -501,7 +501,7 @@ export default function SafePage() {
           {justEarnedAchievements.includes('all-gold') && (
             <Card className="bg-gradient-to-br from-yellow-500/30 to-amber-600/30 border-yellow-400 text-white mb-6">
               <CardContent className="p-5 space-y-3">
-                <div className="text-lg font-extrabold">🏆 Kluis Compleet!</div>
+                <div className="text-lg font-extrabold">🏆 Kluis compleet!</div>
                 <div className="text-sm opacity-90">
                   Alle dieren op goud — een nieuwe ronde start de verzameling opnieuw, maar je medailles blijven bewaard.
                 </div>
@@ -578,9 +578,9 @@ function StartScreen(props: {
   )
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-extrabold tracking-tight">🔐 Kraak de Kluis</h1>
+      <div className="max-w-4xl mx-auto px-4 py-6 md:py-10">
+        <div className="flex items-center justify-between mb-6 md:mb-10">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">🔐 Kraak de kluis</h1>
           <Link href="/">
             <Button variant="ghost" className="text-white hover:bg-white/10">
               ← Terug
@@ -589,13 +589,13 @@ function StartScreen(props: {
         </div>
 
         {profile && profile.achievements && profile.achievements.length > 0 && (
-          <div className="mb-4">
+          <div className="mb-4 md:mb-8">
             <MedalRow earned={profile.achievements} />
           </div>
         )}
 
-        <Card className="mb-4 bg-white/10 border-white/20 text-white">
-          <CardContent className="p-5 space-y-4">
+        <Card className="mb-4 md:mb-8 bg-white/10 border-white/20 text-white">
+          <CardContent className="p-5 md:p-8 space-y-4 md:space-y-8">
             <div>
               <h2 className="text-lg font-bold mb-2">Modus</h2>
               <ModePicker value={mode} onChange={setMode} />
@@ -622,7 +622,7 @@ function StartScreen(props: {
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 gap-2 md:gap-4">
                 {Array.from({ length: 10 }, (_, i) => i + 1).map((t) => {
                   const earned = tierByTable.has(t)
                   return (
@@ -683,7 +683,7 @@ function StartScreen(props: {
               : 'bg-gray-500/40 text-gray-300 cursor-not-allowed'
           }`}
         >
-          🔓 Start Kraken
+          🔓 Start kraken
         </button>
       </div>
     </div>
