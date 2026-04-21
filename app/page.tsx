@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Mascot } from '@/components/mascot'
-import { ProfileSelector } from '@/components/profile-selector'
-import { initializeProfiles, getCurrentProfile } from '@/lib/profile-manager'
+import { AppHeader } from '@/components/app-header'
 import Link from 'next/link'
 
 export default function Home() {
@@ -13,24 +12,8 @@ export default function Home() {
   const [selectedTables, setSelectedTables] = useState<number[]>([])
   const [timePerQuestion, setTimePerQuestion] = useState(5)
   const [questionCount, setQuestionCount] = useState(10)
-  const [streak, setStreak] = useState(0)
-  const [totalQuizzes, setTotalQuizzes] = useState(0)
   const [mascotEmotion, setMascotEmotion] = useState<'happy' | 'sad' | 'neutral' | 'excited' | 'thinking'>('neutral')
   const [animate, setAnimate] = useState(false)
-
-  const loadProfileData = useCallback(() => {
-    const profile = getCurrentProfile()
-    if (profile) {
-      setStreak(profile.currentStreak)
-      setTotalQuizzes(profile.totalQuizzes)
-    }
-  }, [])
-
-  useEffect(() => {
-    // Initialize profiles on mount
-    initializeProfiles()
-    loadProfileData()
-  }, [loadProfileData])
 
   const toggleTable = (table: number) => {
     setSelectedTables(prev => {
@@ -86,34 +69,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Header with stats */}
-      <div className="bg-white dark:bg-gray-800 shadow-md">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex justify-between items-center mb-3">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              Tafel Trainer
-            </h1>
-            <div className="flex items-center gap-3">
-              <Link href="/progress">
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                  📊 Mijn voortgang
-                </Button>
-              </Link>
-              <ProfileSelector onProfileChange={loadProfileData} />
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 bg-orange-100 dark:bg-orange-900 px-3 py-1 rounded-full">
-              <span className="text-xl">🔥</span>
-              <span className="font-bold text-orange-600 dark:text-orange-300 text-sm">{streak} dagen</span>
-            </div>
-            <div className="flex items-center gap-2 bg-green-100 dark:bg-green-900 px-3 py-1 rounded-full">
-              <span className="text-xl">✅</span>
-              <span className="font-bold text-green-600 dark:text-green-300 text-sm">{totalQuizzes} quizzen</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <AppHeader />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Mascot and welcome message */}
