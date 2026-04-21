@@ -37,7 +37,16 @@ export function SafeDial({
   }, [])
 
   return (
-    <div className="relative mx-auto" style={{ width: 'min(480px, 92vw)', aspectRatio: '1 / 1' }}>
+    <div
+      className="relative mx-auto"
+      style={{
+        // The dial width needs to leave room for slots that orbit at 56% of
+        // its width plus their own half-width (~32px). Shrink aggressively on
+        // narrow viewports so nothing clips the screen edge.
+        width: 'min(480px, calc(100vw - 7rem))',
+        aspectRatio: '1 / 1',
+      }}
+    >
       <div
         ref={dialRef}
         className={`relative w-full h-full rounded-full border-8 border-gray-400 bg-gradient-to-br from-gray-600 to-gray-900 shadow-2xl transition-transform duration-700 ${

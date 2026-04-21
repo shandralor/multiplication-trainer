@@ -24,14 +24,14 @@ export function SafeSlot({ factor, table, displayValue, state, onClick }: SafeSl
       type="button"
       onClick={onClick}
       disabled={state === 'prefilled' || state === 'gap-correct' || state === 'gap-revealed'}
-      className={`absolute w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all ${stateClasses[state]}`}
+      className={`absolute w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all ${stateClasses[state]}`}
       style={{ transform: 'translate(-50%, -50%)' }}
       data-factor={factor}
     >
-      <span className="text-[10px] md:text-xs text-gray-500 font-semibold leading-none">
+      <span className="text-[9px] sm:text-[10px] md:text-xs text-gray-500 font-semibold leading-none">
         {factor}&times;{table}
       </span>
-      <span className="text-xl md:text-2xl font-extrabold leading-tight">{displayValue}</span>
+      <span className="text-base sm:text-lg md:text-2xl font-extrabold leading-tight">{displayValue}</span>
     </button>
   )
 }
