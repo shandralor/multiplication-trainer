@@ -30,7 +30,7 @@ export default function Home() {
       : `${animals
           .slice(0, 5)
           .map((a) => ANIMAL_EMOJI[a.tableIndex] ?? '•')
-          .join(' ')}  ${collectedCount}/10 dieren`
+          .join(' ')} · ${collectedCount}/10 dieren`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -51,36 +51,39 @@ export default function Home() {
         </div>
 
         {/* Kluis portal */}
-        <Link href="/safe" className="block">
-          <button className="w-full py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all bg-gradient-to-br from-amber-500 via-rose-500 to-indigo-700 text-white">
-            <div className="flex items-center justify-center gap-2 text-xl">
-              <span className="text-2xl">🔐</span>
-              <span>Kraak de kluis</span>
-            </div>
-            <div className="text-xs font-normal opacity-95 mt-1">{kluisSub}</div>
-          </button>
+        <Link
+          href="/safe"
+          className="block w-full py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all bg-gradient-to-br from-amber-500 via-rose-500 to-indigo-700 text-white text-center"
+        >
+          <div className="flex items-center justify-center gap-2 text-xl">
+            <span className="text-2xl">🔐</span>
+            <span>Kraak de kluis</span>
+          </div>
+          <div className="text-xs font-normal opacity-95 mt-1">{kluisSub}</div>
         </Link>
 
         {/* Vermenigvuldigen portal */}
-        <Link href="/vermenigvuldigen" className="block">
-          <button className="w-full py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all bg-gradient-to-br from-emerald-500 to-emerald-700 text-white">
-            <div className="flex items-center justify-center gap-2 text-xl">
-              <span className="text-2xl">×</span>
-              <span>Vermenigvuldigen</span>
-            </div>
-            <div className="text-xs font-normal opacity-95 mt-1">Quiz · oefen · tijdrace</div>
-          </button>
+        <Link
+          href="/vermenigvuldigen"
+          className="block w-full py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all bg-gradient-to-br from-emerald-500 to-emerald-700 text-white text-center"
+        >
+          <div className="flex items-center justify-center gap-2 text-xl">
+            <span className="text-2xl">×</span>
+            <span>Vermenigvuldigen</span>
+          </div>
+          <div className="text-xs font-normal opacity-95 mt-1">Quiz · oefen · tijdrace</div>
         </Link>
 
         {/* Delen portal */}
-        <Link href="/delen" className="block">
-          <button className="w-full py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white">
-            <div className="flex items-center justify-center gap-2 text-xl">
-              <span className="text-2xl">÷</span>
-              <span>Delen</span>
-            </div>
-            <div className="text-xs font-normal opacity-95 mt-1">Quiz · oefen · tijdrace</div>
-          </button>
+        <Link
+          href="/delen"
+          className="block w-full py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white text-center"
+        >
+          <div className="flex items-center justify-center gap-2 text-xl">
+            <span className="text-2xl">÷</span>
+            <span>Delen</span>
+          </div>
+          <div className="text-xs font-normal opacity-95 mt-1">Quiz · oefen · tijdrace</div>
         </Link>
       </div>
     </div>
