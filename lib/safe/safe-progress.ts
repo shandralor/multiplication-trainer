@@ -63,6 +63,7 @@ export type SafeRunPerSafe = {
   gapsFilled: number
   durationMs?: number
   mode?: 'safe-run' | 'safe-endless'
+  difficulty?: 'easy' | 'medium' | 'hard'
 }
 
 /**
@@ -102,7 +103,10 @@ export function awardAnimalForSafe(
     animals,
     alreadyEarned,
     collectionCycle: profile.collectionCycle,
-    lastSafe: safe.mode ? { ...safe, mode: safe.mode } : undefined,
+    lastSafe: safe.mode
+      ? { ...safe, mode: safe.mode, difficulty: safe.difficulty }
+      : undefined,
+    currentStreak: profile.currentStreak,
   })
   const achievements: EarnedAchievement[] = [
     ...profile.achievements,
@@ -195,6 +199,7 @@ export function addSafeRunResult(
     alreadyEarned,
     collectionCycle: profile.collectionCycle,
     lastRun: runResult,
+    currentStreak: newStreak,
   })
   const achievements: EarnedAchievement[] = [
     ...profile.achievements,
