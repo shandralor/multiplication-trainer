@@ -21,7 +21,7 @@ export function DifficultyPicker({ value, onChange }: DifficultyPickerProps) {
   ]
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-2 md:gap-4">
       {options.map((opt) => {
         const active = opt.id === value
         return (

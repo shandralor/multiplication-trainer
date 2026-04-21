@@ -96,7 +96,7 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <Link href="/progress">
                 <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                  📊 Mijn Voortgang
+                  📊 Mijn voortgang
                 </Button>
               </Link>
               <ProfileSelector onProfileChange={loadProfileData} />
@@ -295,7 +295,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-2">
               <span className="text-2xl">📝</span>
               <div className="text-left">
-                <div>Quiz Modus</div>
+                <div>Quiz modus</div>
                 <div className="text-xs opacity-90">{questionCount} vragen, test jezelf!</div>
               </div>
             </div>
@@ -315,7 +315,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-2">
               <span className="text-2xl">♾️</span>
               <div className="text-left">
-                <div>Oefen Modus</div>
+                <div>Oefen modus</div>
                 <div className="text-xs opacity-90">Onbeperkt oefenen</div>
               </div>
             </div>
@@ -335,7 +335,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-2">
               <span className="text-2xl">⏱️</span>
               <div className="text-left">
-                <div>Tijd Modus</div>
+                <div>Tijd modus</div>
                 <div className="text-xs opacity-90">{questionCount} vragen · {timePerQuestion}s per vraag</div>
               </div>
             </div>
@@ -350,7 +350,7 @@ export default function Home() {
               <div className="flex items-center justify-center gap-2">
                 <span className="text-2xl">🔐</span>
                 <div className="text-left">
-                  <div>Kraak de Kluis</div>
+                  <div>Kraak de kluis</div>
                   <div className="text-xs opacity-90">Verzamel dieren door tafels te kraken</div>
                 </div>
               </div>
