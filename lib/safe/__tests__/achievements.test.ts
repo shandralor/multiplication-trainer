@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { evaluateAchievements, alreadyEarnedForCycle } from '@/lib/safe/achievements'
 import type { AnimalEntry, EarnedAchievement } from '@/lib/profile-manager'
 
-const animal = (tableIndex: number, tier: 'bronze' | 'silver' | 'gold'): AnimalEntry => ({
+const animal = (tableIndex: number, tier: 'bronze' | 'silver' | 'gold' | 'platinum'): AnimalEntry => ({
   tableIndex,
   tier,
   firstEarnedAt: '2026-01-01',
@@ -139,6 +139,87 @@ describe('evaluateAchievements', () => {
     expect(out20).toContain('endless-10')
     expect(out20).toContain('endless-20')
   })
+
+  it('awards all-platinum when every animal is platinum', () => {
+    const animals = Array.from({ length: 10 }, (_, i) => animal(i + 1, 'platinum'))
+    const out = evaluateAchievements({
+      animals,
+      alreadyEarned: new Set(),
+      collectionCycle: 1,
+    })
+    expect(out).toContain('all-platinum')
+    expect(out).toContain('all-gold')
+    expect(out).toContain('all-silver')
+    expect(out).toContain('all-bronze')
+  })
+
+  it('does not award all-platinum when any animal is below platinum', () => {
+    const mixed = [
+      ...Array.from({ length: 9 }, (_, i) => animal(i + 1, 'platinum')),
+      animal(10, 'gold'),
+    ]
+    const out = evaluateAchievements({
+      animals: mixed,
+      alreadyEarned: new Set(),
+      collectionCycle: 1,
+    })
+    expect(out).not.toContain('all-platinum')
+    expect(out).toContain('all-gold')
+  })
+
+  it('awards hard-safe for 0 mistakes on a hard safe', () => {
+    const out = evaluateAchievements({
+      animals: [],
+      alreadyEarned: new Set(),
+      collectionCycle: 1,
+      lastSafe: {
+        tableIndex: 7,
+        tier: 'platinum',
+        mistakes: 0,
+        gapsFilled: 10,
+        mode: 'safe-run',
+        difficulty: 'hard',
+      },
+    })
+    expect(out).toContain('hard-safe')
+  })
+
+  it('does not award hard-safe on medium/easy even with 0 mistakes', () => {
+    const medium = evaluateAchievements({
+      animals: [],
+      alreadyEarned: new Set(),
+      collectionCycle: 1,
+      lastSafe: {
+        tableIndex: 7,
+        tier: 'gold',
+        mistakes: 0,
+        gapsFilled: 4,
+        mode: 'safe-run',
+        difficulty: 'medium',
+      },
+    })
+    expect(medium).not.toContain('hard-safe')
+  })
+
+  it('awards loyal-player when currentStreak >= 7', () => {
+    const out = evaluateAchievements({
+      animals: [],
+      alreadyEarned: new Set(),
+      collectionCycle: 1,
+      currentStreak: 7,
+    })
+    expect(out).toContain('loyal-player')
+  })
+
+  it('does not award loyal-player at streak 6', () => {
+    const out = evaluateAchievements({
+      animals: [],
+      alreadyEarned: new Set(),
+      collectionCycle: 1,
+      currentStreak: 6,
+    })
+    expect(out).not.toContain('loyal-player')
+  })
 })
 
 describe('alreadyEarnedForCycle', () => {
@@ -155,5 +236,11 @@ describe('alreadyEarnedForCycle', () => {
     const s2 = alreadyEarnedForCycle(earned, 2)
     expect(s2.has('all-gold')).toBe(false)     // re-earnable in new cycle
     expect(s2.has('first-safe')).toBe(true)    // lifetime-once
+  })
+
+  it('cycle-gates all-platinum', () => {
+    const earned = [mk('all-platinum', 1)]
+    expect(alreadyEarnedForCycle(earned, 1).has('all-platinum')).toBe(true)
+    expect(alreadyEarnedForCycle(earned, 2).has('all-platinum')).toBe(false)
   })
 })
