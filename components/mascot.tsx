@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 
+type Emotion = 'happy' | 'sad' | 'neutral' | 'excited' | 'thinking'
+
 type MascotProps = {
-  emotion?: 'happy' | 'sad' | 'neutral' | 'excited' | 'thinking'
+  emotion?: Emotion
   size?: 'small' | 'medium' | 'large'
   animate?: boolean
 }
@@ -13,125 +15,180 @@ export function Mascot({ emotion = 'neutral', size = 'medium', animate = false }
 
   useEffect(() => {
     if (!animate) return
-    
-    const startBounce = () => {
-      setBounce(true)
-      const timer = setTimeout(() => setBounce(false), 600)
-      return timer
-    }
-    
-    const timer = startBounce()
+    setBounce(true)
+    const timer = setTimeout(() => setBounce(false), 600)
     return () => clearTimeout(timer)
   }, [animate, emotion])
 
   const sizeClasses = {
     small: 'w-16 h-16',
     medium: 'w-24 h-24',
-    large: 'w-32 h-32'
-  }
-
-  const getEyeExpression = () => {
-    switch (emotion) {
-      case 'happy':
-      case 'excited':
-        return (
-          <>
-            {/* Happy eyes - curved */}
-            <path d="M 25 35 Q 30 30 35 35" stroke="#2d3748" strokeWidth="3" fill="none" strokeLinecap="round" />
-            <path d="M 65 35 Q 70 30 75 35" stroke="#2d3748" strokeWidth="3" fill="none" strokeLinecap="round" />
-          </>
-        )
-      case 'sad':
-        return (
-          <>
-            {/* Sad eyes */}
-            <circle cx="30" cy="35" r="3" fill="#2d3748" />
-            <circle cx="70" cy="35" r="3" fill="#2d3748" />
-            <path d="M 25 32 L 28 30" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" />
-            <path d="M 65 32 L 68 30" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" />
-          </>
-        )
-      case 'thinking':
-        return (
-          <>
-            {/* Thinking eyes - looking up */}
-            <circle cx="30" cy="32" r="3" fill="#2d3748" />
-            <circle cx="70" cy="32" r="3" fill="#2d3748" />
-          </>
-        )
-      default:
-        return (
-          <>
-            {/* Normal eyes */}
-            <circle cx="30" cy="35" r="4" fill="#2d3748" />
-            <circle cx="70" cy="35" r="4" fill="#2d3748" />
-          </>
-        )
-    }
-  }
-
-  const getMouthExpression = () => {
-    switch (emotion) {
-      case 'happy':
-        return <path d="M 35 55 Q 50 65 65 55" stroke="#2d3748" strokeWidth="3" fill="none" strokeLinecap="round" />
-      case 'excited':
-        return (
-          <>
-            <path d="M 35 55 Q 50 70 65 55" stroke="#2d3748" strokeWidth="3" fill="none" strokeLinecap="round" />
-            <circle cx="50" cy="60" r="15" fill="#ff6b6b" opacity="0.3" />
-          </>
-        )
-      case 'sad':
-        return <path d="M 35 65 Q 50 55 65 65" stroke="#2d3748" strokeWidth="3" fill="none" strokeLinecap="round" />
-      case 'thinking':
-        return <line x1="40" y1="60" x2="60" y2="60" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" />
-      default:
-        return <path d="M 40 60 Q 50 62 60 60" stroke="#2d3748" strokeWidth="2" fill="none" strokeLinecap="round" />
-    }
+    large: 'w-32 h-32',
   }
 
   return (
     <div className={`${sizeClasses[size]} ${bounce ? 'animate-bounce' : ''}`}>
       <svg viewBox="0 0 100 100" className="w-full h-full">
-        {/* Main body - cute blob shape */}
-        <ellipse cx="50" cy="55" rx="35" ry="40" fill="#58cc02" />
-        
-        {/* Face area */}
-        <ellipse cx="50" cy="45" rx="30" ry="25" fill="#7ed321" />
-        
-        {/* Cheeks */}
-        {(emotion === 'happy' || emotion === 'excited') && (
+        {/* Tail — striped, curving to the left behind the body */}
+        <path
+          d="M 12 72 Q -4 55 8 32 Q 22 22 28 40"
+          fill="#4b5563"
+          stroke="#1f2937"
+          strokeWidth="1"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M 10 64 Q 4 55 12 46"
+          stroke="#18181b"
+          strokeWidth="2.5"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 6 52 Q 1 45 10 38"
+          stroke="#18181b"
+          strokeWidth="2.5"
+          fill="none"
+          strokeLinecap="round"
+        />
+
+        {/* Body + belly */}
+        <ellipse cx="50" cy="72" rx="28" ry="22" fill="#4b5563" />
+        <ellipse cx="50" cy="76" rx="16" ry="13" fill="#d4d4d8" />
+
+        {/* Left arm (always at rest) */}
+        <ellipse cx="23" cy="70" rx="5" ry="9" fill="#4b5563" />
+
+        {/* Feet */}
+        <ellipse cx="40" cy="92" rx="7" ry="4" fill="#4b5563" />
+        <ellipse cx="60" cy="92" rx="7" ry="4" fill="#4b5563" />
+
+        {/* Right arm — raised to chin while thinking, otherwise at rest */}
+        {emotion === 'thinking' ? (
           <>
-            <circle cx="20" cy="50" r="6" fill="#ff6b6b" opacity="0.3" />
-            <circle cx="80" cy="50" r="6" fill="#ff6b6b" opacity="0.3" />
+            <ellipse
+              cx="74"
+              cy="60"
+              rx="5"
+              ry="10"
+              fill="#4b5563"
+              transform="rotate(-35 74 60)"
+            />
+            <circle cx="67" cy="54" r="4.5" fill="#4b5563" />
+            <circle cx="67" cy="53" r="1" fill="#d4d4d8" />
+          </>
+        ) : (
+          <ellipse cx="77" cy="70" rx="5" ry="9" fill="#4b5563" />
+        )}
+
+        {/* Head + fluffy cheeks */}
+        <circle cx="50" cy="40" r="26" fill="#6b7280" />
+        <circle cx="28" cy="46" r="7" fill="#6b7280" />
+        <circle cx="72" cy="46" r="7" fill="#6b7280" />
+
+        {/* Ears with pink inner */}
+        <polygon points="28,24 32,9 40,22" fill="#4b5563" />
+        <polygon points="60,22 68,9 72,24" fill="#4b5563" />
+        <polygon points="31,22 33,14 37,20" fill="#fca5a5" />
+        <polygon points="63,20 67,14 69,22" fill="#fca5a5" />
+
+        {/* Signature black eye mask */}
+        <path
+          d="M 24 36 Q 30 28 50 30 Q 70 28 76 36 Q 75 46 50 46 Q 25 46 24 36 Z"
+          fill="#18181b"
+        />
+
+        {/* Muzzle (light patch) + nose */}
+        <ellipse cx="50" cy="55" rx="14" ry="9" fill="#e5e7eb" />
+        <ellipse cx="50" cy="49" rx="3" ry="2.3" fill="#18181b" />
+
+        {/* Rosy cheeks when happy */}
+        {emotion === 'happy' && (
+          <>
+            <ellipse cx="28" cy="52" rx="4" ry="2.5" fill="#fda4af" opacity="0.6" />
+            <ellipse cx="72" cy="52" rx="4" ry="2.5" fill="#fda4af" opacity="0.6" />
           </>
         )}
-        
+
         {/* Eyes */}
-        {getEyeExpression()}
-        
-        {/* Mouth */}
-        {getMouthExpression()}
-        
-        {/* Small arms */}
-        <ellipse cx="15" cy="60" rx="8" ry="15" fill="#58cc02" transform="rotate(-20 15 60)" />
-        <ellipse cx="85" cy="60" rx="8" ry="15" fill="#58cc02" transform="rotate(20 85 60)" />
-        
-        {/* Excited sparkles */}
+        {emotion === 'happy' && (
+          <>
+            <path d="M 34 38 Q 38 34 42 38" stroke="#fff" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+            <path d="M 58 38 Q 62 34 66 38" stroke="#fff" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          </>
+        )}
         {emotion === 'excited' && (
           <>
-            <text x="10" y="20" fontSize="12" fill="#ffd700">✨</text>
-            <text x="80" y="25" fontSize="12" fill="#ffd700">✨</text>
-            <text x="45" y="10" fontSize="12" fill="#ffd700">⭐</text>
+            <circle cx="38" cy="38" r="4" fill="#fff" />
+            <circle cx="62" cy="38" r="4" fill="#fff" />
+            <circle cx="39" cy="37" r="1.5" fill="#18181b" />
+            <circle cx="63" cy="37" r="1.5" fill="#18181b" />
           </>
         )}
-        
-        {/* Thinking bubble */}
+        {emotion === 'sad' && (
+          <>
+            <circle cx="38" cy="40" r="3" fill="#fff" />
+            <circle cx="62" cy="40" r="3" fill="#fff" />
+            <path d="M 34 34 L 40 36" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+            <path d="M 60 36 L 66 34" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+          </>
+        )}
         {emotion === 'thinking' && (
           <>
-            <circle cx="75" cy="15" r="2" fill="#cbd5e0" />
-            <circle cx="82" cy="10" r="3" fill="#cbd5e0" />
-            <circle cx="90" cy="8" r="5" fill="#e2e8f0" stroke="#cbd5e0" strokeWidth="1" />
+            <circle cx="38" cy="38" r="3.5" fill="#fff" />
+            <circle cx="62" cy="38" r="3.5" fill="#fff" />
+            <circle cx="39" cy="36" r="1.8" fill="#18181b" />
+            <circle cx="63" cy="36" r="1.8" fill="#18181b" />
+            <path d="M 58 30 Q 62 27 67 30" stroke="#fff" strokeWidth="1.3" fill="none" strokeLinecap="round" opacity="0.9" />
+          </>
+        )}
+        {emotion === 'neutral' && (
+          <>
+            <circle cx="38" cy="38" r="3" fill="#fff" />
+            <circle cx="62" cy="38" r="3" fill="#fff" />
+          </>
+        )}
+
+        {/* Mouth */}
+        {emotion === 'happy' && (
+          <path d="M 42 56 Q 50 63 58 56" stroke="#18181b" strokeWidth="2" fill="none" strokeLinecap="round" />
+        )}
+        {emotion === 'excited' && (
+          <path d="M 40 56 Q 50 66 60 56 Q 50 60 40 56 Z" fill="#7f1d1d" stroke="#18181b" strokeWidth="1.5" />
+        )}
+        {emotion === 'sad' && (
+          <path d="M 42 62 Q 50 56 58 62" stroke="#18181b" strokeWidth="2" fill="none" strokeLinecap="round" />
+        )}
+        {emotion === 'thinking' && (
+          <>
+            <path d="M 46 58 Q 50 56 54 58" stroke="#18181b" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+            <circle cx="54" cy="58" r="1" fill="#18181b" />
+          </>
+        )}
+        {emotion === 'neutral' && (
+          <path d="M 44 58 Q 50 60 56 58" stroke="#18181b" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+        )}
+
+        {/* Sparkles when excited */}
+        {emotion === 'excited' && (
+          <>
+            <text x="10" y="18" fontSize="10" fill="#fbbf24">✨</text>
+            <text x="82" y="20" fontSize="10" fill="#fbbf24">⭐</text>
+          </>
+        )}
+
+        {/* Tear when sad */}
+        {emotion === 'sad' && (
+          <path d="M 36 44 Q 34 50 32 44 Z" fill="#60a5fa" opacity="0.8" />
+        )}
+
+        {/* Thought bubble when thinking */}
+        {emotion === 'thinking' && (
+          <>
+            <circle cx="82" cy="18" r="2.2" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="0.8" />
+            <circle cx="87" cy="12" r="3.2" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="0.8" />
+            <circle cx="94" cy="6" r="6" fill="#fff" stroke="#94a3b8" strokeWidth="1" />
+            <text x="90.5" y="9.8" fontSize="8" fill="#334155" fontWeight="800">?</text>
           </>
         )}
       </svg>
