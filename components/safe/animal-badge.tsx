@@ -17,15 +17,17 @@ const SIZE_PX: Record<'small' | 'medium' | 'large', number> = {
 }
 
 const TIER_FRAME: Record<AnimalTier, string> = {
-  bronze: 'bg-gradient-to-br from-amber-700 to-amber-500 ring-amber-600',
-  silver: 'bg-gradient-to-br from-slate-300 to-slate-100 ring-slate-400',
-  gold:   'bg-gradient-to-br from-yellow-300 to-yellow-500 ring-yellow-600',
+  bronze:   'bg-gradient-to-br from-amber-700 to-amber-500 ring-amber-600',
+  silver:   'bg-gradient-to-br from-slate-300 to-slate-100 ring-slate-400',
+  gold:     'bg-gradient-to-br from-yellow-300 to-yellow-500 ring-yellow-600',
+  platinum: 'bg-gradient-to-br from-cyan-200 via-sky-300 to-violet-400 ring-cyan-300',
 }
 
 const TIER_IMG_FILTER: Record<AnimalTier, string> = {
-  bronze: 'saturate-50 brightness-95',
-  silver: 'saturate-75',
-  gold:   '',
+  bronze:   'saturate-50 brightness-95',
+  silver:   'saturate-75',
+  gold:     '',
+  platinum: 'drop-shadow-[0_0_4px_rgba(167,139,250,0.6)]',
 }
 
 export function AnimalBadge({
@@ -48,7 +50,7 @@ export function AnimalBadge({
   return (
     <div
       className={`inline-flex items-center justify-center rounded-2xl overflow-hidden ${frameClass} ${
-        tier === 'gold' ? 'animate-pulse' : ''
+        tier === 'gold' || tier === 'platinum' ? 'animate-pulse' : ''
       }`}
       style={{ width: px, height: px }}
       title={`${animal.nameNl} (×${tableIndex})`}

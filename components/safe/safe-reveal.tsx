@@ -12,9 +12,10 @@ type SafeRevealProps = {
 }
 
 const TIER_LABEL: Record<AnimalTier, string> = {
-  bronze: 'Brons',
-  silver: 'Zilver',
-  gold:   'Goud',
+  bronze:   'Brons',
+  silver:   'Zilver',
+  gold:     'Goud',
+  platinum: 'Platina',
 }
 
 export function SafeReveal({ tableIndex, tier, upgraded, onContinue }: SafeRevealProps) {

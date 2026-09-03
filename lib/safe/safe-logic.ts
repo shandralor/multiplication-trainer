@@ -1,5 +1,5 @@
 export type Difficulty = 'easy' | 'medium' | 'hard'
-export type AnimalTier = 'bronze' | 'silver' | 'gold'
+export type AnimalTier = 'bronze' | 'silver' | 'gold' | 'platinum'
 
 export type SafeSlot = {
   factor: number         // 1..10 (the multiplier)
@@ -20,11 +20,25 @@ export function gapsForSafe(difficulty: Difficulty, safeIndex: number): number {
   return Math.min(10, base + (safeIndex - 1))
 }
 
-/** Map mistake count to earned tier. */
-export function scoreTier(mistakes: number): AnimalTier {
-  if (mistakes === 0) return 'gold'
-  if (mistakes <= 2) return 'silver'
-  return 'bronze'
+/**
+ * Map mistake count + difficulty to an earned tier using the α mapping.
+ * Makkelijk: 0 → silver,   any → bronze.
+ * Normaal:   0 → gold,     1-2 → silver,   3+ → bronze.
+ * Moeilijk:  0 → platinum, 1-2 → gold,     3+ → silver (no bronze).
+ */
+export function scoreTier(mistakes: number, difficulty: Difficulty): AnimalTier {
+  if (difficulty === 'easy') {
+    return mistakes === 0 ? 'silver' : 'bronze'
+  }
+  if (difficulty === 'medium') {
+    if (mistakes === 0) return 'gold'
+    if (mistakes <= 2) return 'silver'
+    return 'bronze'
+  }
+  // hard
+  if (mistakes === 0) return 'platinum'
+  if (mistakes <= 2) return 'gold'
+  return 'silver'
 }
 
 /**

@@ -1,3 +1,9 @@
-Medal artwork: Kenney Medals pack
-Source: https://kenney.nl/assets/medals
-License: CC0 1.0 Universal (Public Domain)
+Medal artwork sources (all CC0 1.0 Universal — Public Domain):
+
+- Kenney Medals pack                https://kenney.nl/assets/medals
+  Files: shaded_medal1.png .. shaded_medal9.png, medals_vector.svg
+
+- Kenney Puzzle Pack 2              https://kenney.nl/assets/puzzle-pack-2
+  Files: alle-platina.png (from coin_01.png)
+         moeilijke-kraker.png (from particleYellow_3.png)
+         trouwe-speler.png (from coin_19.png)

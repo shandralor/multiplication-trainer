@@ -64,4 +64,32 @@ describe('applyAnimalAward', () => {
     expect(result.animals).toHaveLength(2)
     expect(result.animals.find((a) => a.tableIndex === 2)?.tier).toBe('bronze')
   })
+
+  it('upgrades gold → platinum', () => {
+    const existing: AnimalEntry[] = [
+      { tableIndex: 4, tier: 'gold', firstEarnedAt: '2025-01-01', lastUpgradedAt: '2025-01-01' },
+    ]
+    const result = applyAnimalAward(existing, { tableIndex: 4, tier: 'platinum', now })
+    expect(result.animals[0].tier).toBe('platinum')
+    expect(result.upgraded).toBe(true)
+  })
+
+  it('does not downgrade platinum → gold', () => {
+    const existing: AnimalEntry[] = [
+      { tableIndex: 4, tier: 'platinum', firstEarnedAt: '2025-01-01', lastUpgradedAt: '2025-01-01' },
+    ]
+    const result = applyAnimalAward(existing, { tableIndex: 4, tier: 'gold', now })
+    expect(result.animals[0].tier).toBe('platinum')
+    expect(result.upgraded).toBe(false)
+  })
+
+  it('grandfathered gold-from-Makkelijk stays gold when a new Makkelijk result comes in at silver', () => {
+    const existing: AnimalEntry[] = [
+      { tableIndex: 4, tier: 'gold', firstEarnedAt: '2025-01-01', lastUpgradedAt: '2025-01-01' },
+    ]
+    // New Makkelijk perfect safe would now score silver — below current gold.
+    const result = applyAnimalAward(existing, { tableIndex: 4, tier: 'silver', now })
+    expect(result.animals[0].tier).toBe('gold')
+    expect(result.upgraded).toBe(false)
+  })
 })

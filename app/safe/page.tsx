@@ -281,7 +281,7 @@ export default function SafePage() {
 
   const completeSafe = (safe: InFlightSafe) => {
     const gapsFilled = safe.slots.filter((s) => s.isGap).length
-    const tier: AnimalTier = scoreTier(safe.mistakes)
+    const tier: AnimalTier = scoreTier(safe.mistakes, difficulty)
     const durationMs = safeStartedAt !== null ? Date.now() - safeStartedAt : undefined
 
     const entry: SafeRunPerSafe = {
@@ -291,6 +291,7 @@ export default function SafePage() {
       gapsFilled,
       durationMs,
       mode,
+      difficulty,
     }
 
     // Persist this safe immediately so the collection strip updates between safes.
@@ -572,7 +573,7 @@ function StartScreen(props: {
 }) {
   const { profile, mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable, selectAll, clearAll, canStart, onStart, onResetTable, onResetAll } = props
   const hasAnyAnimals = (profile?.animals?.length ?? 0) > 0
-  const tierByTable = new Map<number, 'bronze' | 'silver' | 'gold'>(
+  const tierByTable = new Map<number, 'bronze' | 'silver' | 'gold' | 'platinum'>(
     (profile?.animals ?? []).map((a) => [a.tableIndex, a.tier]),
   )
   return (
