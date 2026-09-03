@@ -18,6 +18,7 @@ import {
   scoreTier,
   shuffleTables,
   type Difficulty,
+  type SafeOperation,
   type SafeSlot,
 } from '@/lib/safe/safe-logic'
 import { addSafeRunResult, awardAnimalForSafe, resetAnimalCollection, resetAnimalForTable, type SafeRunPerSafe } from '@/lib/safe/safe-progress'
@@ -50,7 +51,20 @@ type InFlightSafe = {
 
 // Run mode length = number of tables the kid selected; Endless keeps going.
 
-export default function SafePage() {
+export type SafePageProps = {
+  /**
+   * Which sum the slots pose. The dial, numpad, tiers, animals and medals
+   * are all identical — a deelkluis is the same safe read backwards.
+   */
+  operation?: SafeOperation
+}
+
+export default function SafePage({ operation = 'multiply' }: SafePageProps) {
+  const isDivide = operation === 'divide'
+  const worldClass = isDivide ? 'world-delen' : 'world-tafels'
+  const backHref = isDivide ? '/delen' : '/tafels'
+  const backLabel = isDivide ? 'Delen' : 'Tafels'
+
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [screen, setScreen] = useState<Screen>('start')
   const [mode, setMode] = useState<SafeMode>('safe-run')
@@ -132,7 +146,7 @@ export default function SafePage() {
     (nextIndex: number, d: number[]) => {
       const { table, nextDeck } = drawTable(d)
       const gapCount = gapsForSafe(difficulty, nextIndex)
-      const slots = buildSafe({ table, gapCount })
+      const slots = buildSafe({ table, gapCount, operation })
       const runtime: SlotRuntime[] = slots.map((s) =>
         s.isGap
           ? { status: 'gap-empty', display: '?' }
@@ -152,7 +166,7 @@ export default function SafePage() {
       setTimeRemaining(mode === 'safe-endless' ? endlessSafeTimer(nextIndex) : null)
       setSafeStartedAt(Date.now())
     },
-    [difficulty, drawTable, mode],
+    [difficulty, drawTable, mode, operation],
   )
 
   const resetRunState = () => {
@@ -338,6 +352,10 @@ export default function SafePage() {
     return (
       <StartScreen
         profile={profile}
+        worldClass={worldClass}
+        isDivide={isDivide}
+        backHref={backHref}
+        backLabel={backLabel}
         mode={mode}
         setMode={setMode}
         difficulty={difficulty}
@@ -364,7 +382,7 @@ export default function SafePage() {
       displayValue: r.display,
     }))
     return (
-      <div className="min-h-screen bg-vault world-tafels text-vault-ink">
+      <div className={`min-h-screen bg-vault ${worldClass} text-vault-ink`}>
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-3 gap-2">
             <button
@@ -375,18 +393,21 @@ export default function SafePage() {
             </button>
             <button
               onClick={restartRun}
-              className="text-sm font-semibold text-white bg-amber-600/70 hover:bg-amber-600 px-3 py-1.5 rounded-lg"
+              className="rounded-lg border border-vault-line bg-vault-card px-3 py-1.5 font-display text-sm font-bold text-vault-dim transition-colors hover:border-world hover:text-vault-ink"
             >
               ↻ Herstart
             </button>
-            <Link href="/tafels" className="rounded-lg border border-vault-line bg-vault-card px-3 py-1.5 font-display text-sm font-bold text-vault-ink transition-colors hover:border-brass">
-              Home
+            <Link
+              href={backHref}
+              className="rounded-lg border border-vault-line bg-vault-card px-3 py-1.5 font-display text-sm font-bold text-vault-ink transition-colors hover:border-world"
+            >
+              {backLabel}
             </Link>
           </div>
 
           {profile && <CollectionStrip animals={profile.animals} compact />}
 
-          <div className="text-center my-3 text-sm text-gray-300 flex items-center justify-center gap-3 flex-wrap">
+          <div className="my-3 flex flex-wrap items-center justify-center gap-3 text-center font-mono text-xs text-vault-dim">
             <span>
               {mode === 'safe-run' ? `Kluis ${safeIndex} / ${selectedTables.length}` : `Kluis ${Math.min(safeIndex, 99)}${safeIndex > 99 ? '+' : ''}`}
             </span>
@@ -410,7 +431,8 @@ export default function SafePage() {
               statuses={statuses}
               activeFactor={currentSafe.activeFactor}
               onSlotClick={handleSlotClick}
-              label={`×${currentSafe.table}`}
+              label={`${isDivide ? '\u00f7' : '\u00d7'}${currentSafe.table}`}
+              title={isDivide ? 'Kraak de deelkluis' : 'Kraak de kluis'}
               subLabel={`${gapsResolved} / ${gapsTotal} ingevuld`}
             />
           </div>
@@ -448,7 +470,7 @@ export default function SafePage() {
       bronze: perSafe.filter((s) => s.tier === 'bronze').length,
     }
     return (
-      <div className="min-h-screen bg-vault world-tafels text-vault-ink">
+      <div className={`min-h-screen bg-vault ${worldClass} text-vault-ink`}>
         <div className="max-w-2xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-extrabold text-center mb-6">Scorekaart</h1>
           {profile && (
@@ -464,7 +486,7 @@ export default function SafePage() {
                 <span className="text-vault-dim">🥈 {tiers.silver}</span>
                 <span className="text-amber-600">🥉 {tiers.bronze}</span>
               </div>
-              <div className="text-sm text-gray-300">
+              <div className="font-mono text-xs text-vault-dim">
                 Totaal fout: {perSafe.reduce((a, s) => a + s.mistakes, 0)}
               </div>
             </CardContent>
@@ -531,7 +553,7 @@ export default function SafePage() {
             >
               Nog een keer
             </button>
-            <Link href="/tafels" className="block">
+            <Link href={backHref} className="block">
               <button className="w-full rounded-xl border border-vault-line bg-vault-card py-3 font-display font-bold text-vault-ink transition-colors hover:border-brass">
                 Home
               </button>
@@ -557,6 +579,10 @@ function findNextGap(slots: SafeSlot[], runtime: SlotRuntime[], fromIndex: numbe
 
 function StartScreen(props: {
   profile: UserProfile | null
+  worldClass: string
+  isDivide: boolean
+  backHref: string
+  backLabel: string
   mode: SafeMode
   setMode: (m: SafeMode) => void
   difficulty: Difficulty
@@ -570,23 +596,27 @@ function StartScreen(props: {
   onResetTable: (table: number) => void
   onResetAll: () => void
 }) {
-  const { profile, mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable, selectAll, clearAll, canStart, onStart, onResetTable, onResetAll } = props
+  const {
+    profile, worldClass, isDivide, backHref, backLabel,
+    mode, setMode, difficulty, setDifficulty, selectedTables, toggleTable,
+    selectAll, clearAll, canStart, onStart, onResetTable, onResetAll,
+  } = props
   const hasAnyAnimals = (profile?.animals?.length ?? 0) > 0
   const tierByTable = new Map<number, 'bronze' | 'silver' | 'gold' | 'platinum'>(
     (profile?.animals ?? []).map((a) => [a.tableIndex, a.tier]),
   )
   return (
-    <div className="min-h-screen bg-vault world-tafels text-vault-ink">
+    <div className={`min-h-screen bg-vault ${worldClass} text-vault-ink`}>
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-10">
         <div className="mb-6 flex items-center justify-between md:mb-10">
           <h1 className="font-display text-3xl font-extrabold tracking-tight md:text-4xl">
-            <span aria-hidden>🔐</span> Kraak de kluis
+            <span aria-hidden>🔐</span> {isDivide ? 'Kraak de deelkluis' : 'Kraak de kluis'}
           </h1>
           <Link
-            href="/tafels"
+            href={backHref}
             className="font-mono text-[11px] uppercase tracking-[0.12em] text-vault-dim transition-colors hover:text-vault-ink"
           >
-            ← Tafels
+            ← {backLabel}
           </Link>
         </div>
 

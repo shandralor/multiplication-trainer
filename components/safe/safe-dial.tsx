@@ -16,8 +16,10 @@ type SafeDialProps = {
   onSlotClick: (factor: number) => void
   spinning?: boolean
   flash?: boolean
-  label?: string                  // e.g., "×7"
+  label?: string                  // e.g., "×7" or "÷7"
   subLabel?: string               // e.g., "3 / 10 ingevuld"
+  /** Sits above the label; names the safe rather than assuming it is a × one. */
+  title?: string
 }
 
 export function SafeDial({
@@ -29,6 +31,7 @@ export function SafeDial({
   flash = false,
   label = '',
   subLabel = '',
+  title = 'Kraak de kluis',
 }: SafeDialProps) {
   const dialRef = useRef<HTMLDivElement | null>(null)
 
@@ -49,19 +52,23 @@ export function SafeDial({
     >
       <div
         ref={dialRef}
-        className={`relative w-full h-full rounded-full border-8 border-gray-400 bg-gradient-to-br from-gray-600 to-gray-900 shadow-2xl transition-transform duration-700 ${
+        className={`relative h-full w-full rounded-full border-4 border-vault-line bg-gradient-to-br from-vault-card to-vault-night transition-transform duration-700 ${
           spinning ? 'animate-[spin_0.9s_ease-in-out]' : ''
-        } ${flash ? 'ring-8 ring-yellow-300' : ''}`}
+        } ${flash ? 'ring-4 ring-world' : ''}`}
         style={{
           boxShadow:
             '0 10px 30px rgba(0,0,0,0.4), inset 0 4px 20px rgba(255,255,255,0.1)',
         }}
       >
         {/* Center label */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-white pointer-events-none">
-          <span className="text-xs tracking-[0.2em] text-gray-300">Kraak de kluis</span>
-          <span className="text-5xl font-extrabold mt-1">{label}</span>
-          {subLabel && <span className="text-xs text-emerald-200 mt-2">{subLabel}</span>}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-vault-ink">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-vault-dim">
+            {title}
+          </span>
+          <span className="mt-1 font-display text-5xl font-extrabold tracking-tight">{label}</span>
+          {subLabel && (
+            <span className="mt-2 font-mono text-[10px] text-world">{subLabel}</span>
+          )}
         </div>
       </div>
 
@@ -80,7 +87,7 @@ export function SafeDial({
           >
             <SafeSlot
               factor={slot.factor}
-              table={slot.table}
+              label={slot.label}
               displayValue={status.displayValue}
               state={
                 activeFactor === slot.factor && status.state === 'gap-empty'

@@ -5,8 +5,6 @@ import {
   buildSafe,
   shuffleTables,
   endlessSafeTimer,
-  type Difficulty,
-  type SafeSlot,
 } from '@/lib/safe/safe-logic'
 
 describe('gapsForSafe', () => {
@@ -151,3 +149,31 @@ function mulberry32(seed: number): () => number {
     return ((r ^ (r >>> 14)) >>> 0) / 4294967296
   }
 }
+
+describe('buildSafe — operation', () => {
+  it('poses multiplication by default, unchanged from before', () => {
+    const slots = buildSafe({ table: 3, gapCount: 2 })
+    for (const slot of slots) {
+      expect(slot.answer).toBe(slot.factor * 3)
+      expect(slot.label).toBe(`${slot.factor}\u00d73`)
+    }
+  })
+
+  it('poses division when asked, as the same fact read backwards', () => {
+    const slots = buildSafe({ table: 3, gapCount: 2, operation: 'divide' })
+    for (const slot of slots) {
+      // 21 ÷ 3 = 7 — the answer is the factor, not the product.
+      expect(slot.answer).toBe(slot.factor)
+      expect(slot.label).toBe(`${slot.factor * 3}\u00f73`)
+    }
+  })
+
+  it('keeps the same gap count and wheel size either way', () => {
+    for (const operation of ['multiply', 'divide'] as const) {
+      const slots = buildSafe({ table: 7, gapCount: 4, operation })
+      expect(slots).toHaveLength(10)
+      expect(slots.filter((s) => s.isGap)).toHaveLength(4)
+      expect(new Set(slots.map((s) => s.factor)).size).toBe(10)
+    }
+  })
+})

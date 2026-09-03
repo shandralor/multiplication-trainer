@@ -257,3 +257,15 @@
 .bg-gradient-error   { background: linear-gradient(135deg, var(--fout) 0%, color-mix(in srgb, var(--fout) 70%, #ffffff) 100%); }
 .bg-gradient-primary { background: linear-gradient(135deg, var(--steel) 0%, var(--vault-green) 100%); }
 .bg-gradient-warning { background: linear-gradient(135deg, var(--brass) 0%, var(--brass-lit) 100%); }
+
+/* Numeric answer fields. The native spinner is a mis-tap waiting to
+   happen on a phone, and it pushes the centred numeral off-axis. */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

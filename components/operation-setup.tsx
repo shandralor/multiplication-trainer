@@ -65,7 +65,7 @@ export function OperationSetup({ operation, showKluis = false }: OperationSetupP
 
   return (
     <div className="space-y-4 pt-4">
-      {showKluis && <KluisHero animals={animals} />}
+      {showKluis && <KluisHero animals={animals} operation={operation} />}
 
       <Shelf title="Oefenen">
         <div className="grid grid-cols-3 gap-2">
@@ -169,16 +169,23 @@ export function OperationSetup({ operation, showKluis = false }: OperationSetupP
   )
 }
 
-function KluisHero({ animals }: { animals: { tableIndex: number }[] }) {
+function KluisHero({
+  animals,
+  operation,
+}: {
+  animals: { tableIndex: number }[]
+  operation: Operation
+}) {
   const remaining = 10 - animals.length
+  const isDivide = operation === 'divide'
   return (
     <Link
-      href="/tafels/kluis"
+      href={isDivide ? '/delen/kluis' : '/tafels/kluis'}
       className="flex items-center gap-3.5 rounded-2xl vault-card-lit p-4 transition-transform hover:-translate-y-px"
     >
       <span className="flex-1">
         <span className="block font-display text-lg font-extrabold tracking-tight">
-          Kraak de kluis
+          {isDivide ? 'Kraak de deelkluis' : 'Kraak de kluis'}
         </span>
         <span className="mt-1 block font-mono text-[10px] text-vault-dim">
           {remaining === 0

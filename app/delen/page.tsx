@@ -8,7 +8,7 @@ export default function DelenPage() {
   return (
     <WorldShell world="delen" backHref="/">
       <AppHeader />
-      <OperationSetup operation="divide" />
+      <OperationSetup operation="divide" showKluis />
     </WorldShell>
   )
 }

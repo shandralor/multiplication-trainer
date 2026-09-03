@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Mascot } from '@/components/mascot'
@@ -312,23 +311,28 @@ function QuizContent() {
     setShowConfetti(false)
   }
 
+  // Back goes up to the world you came from, not all the way home.
+  const worldHref = operation === 'multiply' ? '/tafels' : '/delen'
+  const worldClass = operation === 'multiply' ? 'world-tafels' : 'world-delen'
   const goHome = () => {
-    window.location.href = '/'
+    window.location.href = worldHref
   }
 
   if (tables.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-xl">
+      <div className="flex min-h-screen items-center justify-center bg-vault world-tafels p-4 text-vault-ink">
+        <Card className="vault-card w-full max-w-md rounded-2xl">
           <CardContent className="p-8 text-center">
             <Mascot emotion="sad" size="large" />
-            <h2 className="text-2xl font-bold mt-4 mb-2">Geen tafels geselecteerd</h2>
-            <p className="text-gray-600 mb-6">Kies eerst je tafels om te beginnen!</p>
+            <h2 className="mt-4 mb-2 font-display text-2xl font-extrabold tracking-tight">
+              Geen tafels geselecteerd
+            </h2>
+            <p className="mb-6 text-sm text-vault-dim">Kies eerst je tafels om te beginnen!</p>
             <button
               onClick={goHome}
-              className="w-full py-3 px-6 rounded-xl font-bold text-white shadow-lg transition-all duration-200 bg-gradient-primary hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+              className="w-full rounded-xl bg-world px-6 py-3 font-display font-bold text-vault-night transition-transform hover:-translate-y-px"
             >
-              Terug naar Home
+              Terug naar de tafels
             </button>
           </CardContent>
         </Card>
@@ -338,10 +342,10 @@ function QuizContent() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="flex min-h-screen items-center justify-center bg-vault p-4 text-vault-ink">
+        <Card className="vault-card w-full max-w-md rounded-2xl">
           <CardContent className="py-8">
-            <p className="text-center">Laden...</p>
+            <p className="text-center font-mono text-xs text-vault-dim">Laden…</p>
           </CardContent>
         </Card>
       </div>
@@ -352,46 +356,37 @@ function QuizContent() {
     const percentage = Math.round((score / questions.length) * 100)
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 flex items-center justify-center p-4">
+      <div className={`flex min-h-screen items-center justify-center bg-vault ${worldClass} p-4 text-vault-ink`}>
         {showConfetti && <Confetti />}
-        <Card className="w-full max-w-md shadow-xl animate-slide-up">
-          <CardContent className="p-8">
-            <div className="text-center space-y-6">
-              <Mascot emotion={mascotEmotion} size="large" animate={true} />
-              
-              <div>
-                <h2 className="text-3xl font-bold mb-2">
-                  {percentage >= 80 ? '🎉 Geweldig!' : percentage >= 50 ? '👍 Goed gedaan!' : '💪 Blijf oefenen!'}
-                </h2>
-                <p className="text-gray-600">
-                  {percentage >= 80 ? 'Fantastisch resultaat!' : percentage >= 50 ? 'Je bent goed bezig!' : 'Volgende keer beter!'}
-                </p>
-              </div>
+        <div className="w-full max-w-sm animate-slide-up text-center">
+          <Mascot emotion={mascotEmotion} size="large" animate={true} />
 
-              <div className={`p-6 rounded-2xl ${percentage >= 80 ? 'bg-gradient-success' : percentage >= 50 ? 'bg-gradient-primary' : 'bg-gradient-warning'}`}>
-                <p className="text-6xl font-bold text-white mb-2">{percentage}%</p>
-                <p className="text-white text-lg">
-                  {score} van de {questions.length} vragen goed
-                </p>
-              </div>
+          <h2 className="mt-5 font-display text-2xl font-extrabold tracking-tight text-balance">
+            {percentage >= 80 ? 'Geweldig!' : percentage >= 50 ? 'Goed gedaan!' : 'Blijf oefenen!'}
+          </h2>
 
-              <div className="space-y-3">
-                <button
-                  onClick={restart}
-                  className="w-full py-3 px-6 rounded-xl font-bold text-white shadow-lg transition-all duration-200 bg-gradient-success hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  🔄 Opnieuw Proberen
-                </button>
-                <button
-                  onClick={goHome}
-                  className="w-full py-3 px-6 rounded-xl font-bold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
-                >
-                  ← Terug naar Home
-                </button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          {/* The score is the point of this screen, so it gets the size. */}
+          <p className="mt-5 font-display text-[3.25rem] font-extrabold leading-none tabular tracking-tight text-world">
+            {score}
+            <span className="text-vault-dim">/{questions.length}</span>
+          </p>
+          <p className="mt-2 font-mono text-xs text-vault-dim">{percentage}% goed</p>
+
+          <div className="mt-8 space-y-2">
+            <button
+              onClick={restart}
+              className="w-full rounded-2xl bg-world py-3.5 font-display text-base font-extrabold tracking-tight text-vault-night transition-transform hover:-translate-y-px"
+            >
+              Nog een ronde
+            </button>
+            <button
+              onClick={goHome}
+              className="w-full rounded-2xl border border-vault-line bg-vault-card py-3 font-display text-sm font-bold text-vault-dim transition-colors hover:border-world hover:text-vault-ink"
+            >
+              Terug naar {operation === 'multiply' ? 'de tafels' : 'delen'}
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
@@ -401,35 +396,30 @@ function QuizContent() {
   const progressPercentage = mode === 'quiz' ? ((currentQuestion + 1) / questions.length) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50">
+    <div className={`min-h-screen bg-vault ${worldClass} text-vault-ink`}>
       {/* Header with progress */}
-      <div className="bg-white shadow-md sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-2">
-            <Button 
-              onClick={goHome} 
-              variant="ghost" 
-              size="sm"
-              className="text-gray-600 hover:text-gray-800"
+      <div className="sticky top-0 z-10 border-b border-vault-line bg-vault-night/90 backdrop-blur">
+        <div className="mx-auto max-w-2xl px-4 py-3">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <button
+              onClick={goHome}
+              className="font-mono text-[11px] uppercase tracking-[0.12em] text-vault-dim transition-colors hover:text-vault-ink"
             >
               ✕ Stop
-            </Button>
-            <div className="text-center flex-1">
-              <p className="font-bold text-lg">
-                {mode === 'quiz' && `Vraag ${currentQuestion + 1}/${questions.length}`}
-                {mode === 'practice' && 'Oefen Modus'}
-                {mode === 'timed' && 'Tijd Modus'}
-              </p>
-            </div>
-            <div className="text-right min-w-[80px]">
-              <p className="text-sm text-gray-600">Score</p>
-              <p className="font-bold text-green-600">{score}/{totalQuestions}</p>
-            </div>
+            </button>
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-vault-dim">
+              {mode === 'quiz' && `Vraag ${currentQuestion + 1} / ${questions.length}`}
+              {mode === 'practice' && 'Oefenmodus'}
+              {mode === 'timed' && 'Tijdmodus'}
+            </p>
+            <p className="font-mono text-[11px] tabular text-world">
+              {score}/{totalQuestions}
+            </p>
           </div>
           {mode === 'quiz' && (
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-              <div 
-                className="h-full bg-gradient-success transition-all duration-300"
+            <div className="h-[3px] w-full overflow-hidden rounded-sm bg-vault-line">
+              <div
+                className="h-full rounded-sm bg-world transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -437,30 +427,39 @@ function QuizContent() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <Card className="shadow-xl border-2 animate-slide-up">
-          <CardContent className="p-8">
+      <div className="mx-auto max-w-sm px-4 py-6">
+        <div className="animate-slide-up">
             {/* Mascot */}
-            <div className="flex justify-center mb-6">
+            <div className="mb-5 flex justify-center">
               <Mascot emotion={mascotEmotion} size="large" animate={animateMascot} />
             </div>
 
             {/* Timer for timed mode */}
             {mode === 'timed' && !showResult && (
-              <div className="text-center mb-6">
-                <div className={`inline-block px-6 py-3 rounded-full font-bold text-2xl ${
-                  timeLeft <= 2 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-yellow-100 text-yellow-600'
-                }`}>
-                  ⏱️ {timeLeft}s
+              <div className="mb-5 text-center">
+                <div
+                  className={`inline-block rounded-full border px-5 py-2 font-mono text-xl font-semibold tabular ${
+                    timeLeft <= 2
+                      ? 'animate-pulse border-fout bg-fout/15 text-fout'
+                      : 'border-brass bg-brass/15 text-brass'
+                  }`}
+                >
+                  {timeLeft}s
                 </div>
               </div>
             )}
 
             {/* Question */}
-            <div className="text-center mb-8">
-              <p className="text-gray-600 mb-4 text-lg">Wat is het antwoord?</p>
-              <p className="text-6xl md:text-7xl font-bold text-gray-800 mb-8">
-                {currentQ.factor1} {currentQ.operation === 'multiply' ? '×' : '÷'} {currentQ.factor2}
+            <div className="mb-6 text-center">
+              <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
+                Wat is het antwoord?
+              </p>
+              <p className="mb-7 font-display text-[3.5rem] font-extrabold leading-none tabular tracking-tight">
+                {currentQ.factor1}{' '}
+                <span className="text-world">
+                  {currentQ.operation === 'multiply' ? '×' : '÷'}
+                </span>{' '}
+                {currentQ.factor2}
               </p>
 
               {!showResult ? (
@@ -476,49 +475,57 @@ function QuizContent() {
                     }}
                     placeholder="?"
                     disabled={showResult}
-                    className="text-center text-4xl h-20 border-4 border-gray-300 rounded-2xl focus:border-blue-500"
+                    className="h-16 rounded-2xl border border-vault-line bg-vault-card text-center font-mono text-3xl font-semibold tabular text-vault-ink focus-visible:border-world focus-visible:ring-0"
                     autoFocus
                   />
-                  
+
                   <button
                     onClick={checkAnswer}
                     disabled={userAnswer.trim() === ''}
-                    className={`w-full py-3 px-6 rounded-xl font-bold shadow-lg transition-all duration-200 ${
-                      userAnswer.trim() === '' 
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                        : 'bg-gradient-success text-white hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
+                    className={`w-full rounded-2xl py-3.5 font-display text-base font-extrabold tracking-tight transition-all ${
+                      userAnswer.trim() === ''
+                        ? 'cursor-not-allowed border border-vault-line bg-vault-card text-vault-dim'
+                        : 'bg-world text-vault-night hover:-translate-y-px'
                     }`}
                   >
-                    Controleer
+                    Nakijken
                   </button>
                 </div>
               ) : (
-                <div className={`max-w-md mx-auto p-6 rounded-2xl ${
-                  isCorrect ? 'bg-green-50 border-4 border-green-500 animate-celebrate' : 'bg-red-50 border-4 border-red-500 animate-shake'
-                }`}>
-                  <p className={`text-3xl font-bold mb-2 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                    {isCorrect ? '✓ Perfect!' : '✗ Oeps!'}
+                <div
+                  className={`mx-auto max-w-md rounded-2xl border p-5 ${
+                    isCorrect
+                      ? 'animate-celebrate border-goed bg-goed/10'
+                      : 'animate-shake border-fout bg-fout/10'
+                  }`}
+                >
+                  <p
+                    className={`font-display text-2xl font-extrabold tracking-tight ${
+                      isCorrect ? 'text-goed' : 'text-fout'
+                    }`}
+                  >
+                    {isCorrect ? 'Goed zo!' : 'Bijna.'}
                   </p>
                   {!isCorrect && (
-                    <p className="text-xl text-gray-700 mb-4">
-                      Het juiste antwoord is <span className="font-bold text-2xl">{currentQ.answer}</span>
+                    <p className="mt-2 mb-4 text-sm text-vault-dim">
+                      Het juiste antwoord is{' '}
+                      <span className="font-mono text-xl font-semibold tabular text-vault-ink">
+                        {currentQ.answer}
+                      </span>
                     </p>
                   )}
                   {mode !== 'timed' && (
                     <button
                       onClick={handleNextQuestion}
-                      className={`w-full py-3 px-6 rounded-xl font-bold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 ${
-                        isCorrect ? 'bg-gradient-success' : 'bg-gradient-primary'
-                      }`}
+                      className="mt-4 w-full rounded-xl bg-world py-3 font-display font-bold text-vault-night transition-transform hover:-translate-y-px"
                     >
-                      Volgende →
+                      Volgende
                     </button>
                   )}
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   )
@@ -527,10 +534,10 @@ function QuizContent() {
 export default function Quiz() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="flex min-h-screen items-center justify-center bg-vault p-4 text-vault-ink">
+        <Card className="vault-card w-full max-w-md rounded-2xl">
           <CardContent className="py-8">
-            <p className="text-center">Laden...</p>
+            <p className="text-center font-mono text-xs text-vault-dim">Laden…</p>
           </CardContent>
         </Card>
       </div>

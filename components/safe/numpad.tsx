@@ -47,7 +47,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
           type="button"
           onClick={() => press(d)}
           disabled={disabled}
-          className="h-14 rounded-xl bg-white border-2 border-gray-300 font-bold text-2xl text-gray-900 shadow hover:bg-gray-50 active:translate-y-0.5 disabled:opacity-50"
+          className="h-14 rounded-xl border border-vault-line bg-vault-card font-mono text-2xl font-semibold tabular text-vault-ink transition-colors hover:border-vault-dim active:translate-y-px disabled:opacity-50"
         >
           {d}
         </button>
@@ -56,7 +56,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
         type="button"
         onClick={backspace}
         disabled={disabled}
-        className="h-14 rounded-xl bg-white border-2 border-gray-300 font-bold text-xl text-gray-900 shadow hover:bg-gray-50 disabled:opacity-50"
+        className="h-14 rounded-xl border border-vault-line bg-vault-card font-display text-base font-bold text-vault-dim transition-colors hover:border-vault-dim disabled:opacity-50"
         aria-label="Backspace"
       >
         Wis
@@ -65,7 +65,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
         type="button"
         onClick={() => press('0')}
         disabled={disabled}
-        className="h-14 rounded-xl bg-white border-2 border-gray-300 font-bold text-2xl shadow hover:bg-gray-50 disabled:opacity-50"
+        className="h-14 rounded-xl border border-vault-line bg-vault-card font-mono text-2xl font-semibold tabular text-vault-ink transition-colors hover:border-vault-dim active:translate-y-px disabled:opacity-50"
       >
         0
       </button>
@@ -73,7 +73,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
         type="button"
         onClick={onSubmit}
         disabled={disabled}
-        className="h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white font-bold text-lg shadow hover:shadow-lg disabled:opacity-50"
+        className="h-14 rounded-xl bg-world font-display text-lg font-extrabold text-vault-night transition-transform hover:-translate-y-px disabled:opacity-50"
       >
         OK
       </button>
