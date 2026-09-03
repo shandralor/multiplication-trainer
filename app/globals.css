@@ -37,6 +37,22 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* Direction A - "De Kraak" world tokens */
+  --color-vault-night: var(--vault-night);
+  --color-vault-card: var(--vault-card);
+  --color-vault-line: var(--vault-line);
+  --color-vault-ink: var(--vault-ink);
+  --color-vault-dim: var(--vault-dim);
+  --color-brass: var(--brass);
+  --color-brass-lit: var(--brass-lit);
+  --color-steel: var(--steel);
+  --color-steel-lit: var(--steel-lit);
+  --color-plum: var(--plum);
+  --color-plum-lit: var(--plum-lit);
+  --color-vault-green: var(--vault-green);
+  --color-goed: var(--goed);
+  --color-fout: var(--fout);
+  --font-display: var(--font-bricolage);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -45,6 +61,26 @@
 
 :root {
   --radius: 0.625rem;
+
+  /* --- Direction A: "De Kraak" -------------------------------------
+     One hue per world. Tafels take brass, Delen steel, Breuken plum,
+     and the vault green is reserved for the Kluiskamer. These are
+     theme-independent: a world keeps its colour in either theme. */
+  --vault-night: #0A1718;
+  --vault-card:  #132526;
+  --vault-line:  #24403E;
+  --vault-ink:   #E9EFE8;
+  --vault-dim:   #8AA09A;
+  --brass:       #D9A441;
+  --brass-lit:   #EFC066;
+  --steel:       #57A8CB;
+  --steel-lit:   #7FC1DD;
+  --plum:        #C97BA6;
+  --plum-lit:    #DCA0C1;
+  --vault-green: #3E948E;
+  --goed:        #4FB477;
+  --fout:        #E0644F;
+
   --background: oklch(0.98 0.005 240);
   --foreground: oklch(0.2 0.02 240);
   --card: oklch(1 0 0);
@@ -79,23 +115,23 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --background: var(--vault-night);
+  --foreground: var(--vault-ink);
+  --card: var(--vault-card);
+  --card-foreground: var(--vault-ink);
+  --popover: var(--vault-card);
+  --popover-foreground: var(--vault-ink);
+  --primary: var(--brass);
+  --primary-foreground: var(--vault-night);
+  --secondary: var(--vault-line);
+  --secondary-foreground: var(--vault-ink);
+  --muted: var(--vault-line);
+  --muted-foreground: var(--vault-dim);
+  --accent: var(--vault-line);
+  --accent-foreground: var(--vault-ink);
+  --destructive: var(--fout);
+  --border: var(--vault-line);
+  --input: var(--vault-line);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
@@ -172,19 +208,52 @@
   animation: confetti 2s ease-out forwards;
 }
 
-/* Duolingo-inspired gradient backgrounds */
-.bg-gradient-success {
-  background: linear-gradient(135deg, #58cc02 0%, #7ed321 100%);
+/* --- Direction A surfaces ------------------------------------------
+   One ground for the whole app, and one accent ramp per world. Pages
+   set --world; every accent below reads from it, so a screen only ever
+   declares which world it is in. */
+.bg-vault {
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--world, var(--vault-green)) 11%, transparent) 0%, transparent 60%),
+    var(--vault-night);
+  background-attachment: fixed;
 }
 
-.bg-gradient-error {
-  background: linear-gradient(135deg, #ff4b4b 0%, #ff6b6b 100%);
+.world-tafels  { --world: var(--brass);       --world-lit: var(--brass-lit); }
+.world-delen   { --world: var(--steel);       --world-lit: var(--steel-lit); }
+.world-breuken { --world: var(--plum);        --world-lit: var(--plum-lit); }
+.world-kluis   { --world: var(--vault-green); --world-lit: var(--vault-green); }
+
+.text-world   { color: var(--world); }
+.border-world { border-color: var(--world); }
+.bg-world     { background-color: var(--world); }
+.bg-world-dim { background-color: color-mix(in srgb, var(--world) 15%, transparent); }
+.ring-world   { box-shadow: 0 0 0 1px color-mix(in srgb, var(--world) 45%, transparent); }
+
+/* A card in the vault: flat surface, hairline edge, no drop shadow.
+   Depth comes from the edge, not from a blur. */
+.vault-card {
+  background: var(--vault-card);
+  border: 1px solid var(--vault-line);
+}
+.vault-card-lit {
+  background: linear-gradient(150deg, color-mix(in srgb, var(--world) 20%, var(--vault-card)), var(--vault-card));
+  border: 1px solid color-mix(in srgb, var(--world) 40%, transparent);
 }
 
-.bg-gradient-primary {
-  background: linear-gradient(135deg, #1cb0f6 0%, #58cc02 100%);
+/* Numerals that line up: dial readouts, scores, fractions. */
+.tabular { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-celebrate,
+  .animate-shake,
+  .animate-slide-up,
+  .animate-confetti { animation: none; }
 }
 
-.bg-gradient-warning {
-  background: linear-gradient(135deg, #ffc800 0%, #ffdf00 100%);
-}
+/* Kept for the screens that still reference them (quiz, profile picker),
+   repointed from the old Duolingo greens onto the vault palette. */
+.bg-gradient-success { background: linear-gradient(135deg, var(--goed) 0%, color-mix(in srgb, var(--goed) 70%, #ffffff) 100%); }
+.bg-gradient-error   { background: linear-gradient(135deg, var(--fout) 0%, color-mix(in srgb, var(--fout) 70%, #ffffff) 100%); }
+.bg-gradient-primary { background: linear-gradient(135deg, var(--steel) 0%, var(--vault-green) 100%); }
+.bg-gradient-warning { background: linear-gradient(135deg, var(--brass) 0%, var(--brass-lit) 100%); }

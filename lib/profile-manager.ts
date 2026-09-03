@@ -1,5 +1,9 @@
 // Profile and progress tracking system
 
+import { emptyFractionProgress, type FractionProgress, type Rung } from '@/lib/fractions/types'
+import type { PastryEntry } from '@/lib/fractions/pastries'
+
+
 export type QuizResult = {
   id: string
   mode: 'quiz' | 'practice' | 'timed'
@@ -34,6 +38,30 @@ export type SafeRunResult = {
   }
   totalMistakes: number
   date: string
+}
+
+/**
+ * One finished round of a breuken rung. Deliberately *not* a QuizResult:
+ * that type is indexed straight into tableStats and bestScores by
+ * operation, and a fraction round has no tafels to key on.
+ */
+export type FractionRoundResult = {
+  id: string
+  rung: Rung
+  score: number
+  total: number
+  mistakes: number
+  date: string
+}
+
+/** Per-profile settings, set by a parent from /instellingen. */
+export type ProfileSettings = {
+  /** Open every breuken rung regardless of what came before it. */
+  unlockAllRungs: boolean
+}
+
+export const DEFAULT_SETTINGS: ProfileSettings = {
+  unlockAllRungs: false,
 }
 
 export type EarnedAchievement = {
@@ -84,6 +112,12 @@ export type UserProfile = {
   recentSafeResults: SafeRunResult[]
   achievements: EarnedAchievement[]
   collectionCycle: number  // bumps each time Alle Goud triggers a reset
+
+  // --- Breuken -----------------------------------------------------
+  fractionProgress: FractionProgress
+  pastries: PastryEntry[]              // the bakkerij, breuken's own collection
+  recentFractionResults: FractionRoundResult[]
+  settings: ProfileSettings
 }
 
 /** Raw shape read from localStorage — may be missing new fields from older profile versions. */
@@ -110,7 +144,26 @@ export function hydrateProfile(raw: RawProfile): UserProfile {
     recentSafeResults: raw.recentSafeResults ?? [],
     achievements: raw.achievements ?? [],
     collectionCycle: raw.collectionCycle ?? 1,
+    fractionProgress: hydrateFractionProgress(raw.fractionProgress),
+    pastries: raw.pastries ?? [],
+    recentFractionResults: raw.recentFractionResults ?? [],
+    settings: { ...DEFAULT_SETTINGS, ...(raw.settings ?? {}) },
   }
+}
+
+/**
+ * Fill in any rung missing from a stored profile. Written per-rung rather
+ * than spread-over-default so a profile saved when the ladder had fewer
+ * rungs still comes back with all four.
+ */
+function hydrateFractionProgress(raw: Partial<FractionProgress> | undefined): FractionProgress {
+  const base = emptyFractionProgress()
+  if (!raw) return base
+  for (const rung of [1, 2, 3, 4] as const) {
+    const stored = raw[rung]
+    if (stored) base[rung] = { ...base[rung], ...stored }
+  }
+  return base
 }
 
 const STORAGE_KEY = 'tafel-trainer-profiles'
@@ -183,6 +236,10 @@ export function createProfile(name: string): UserProfile {
     recentSafeResults: [],
     achievements: [],
     collectionCycle: 1,
+    fractionProgress: emptyFractionProgress(),
+    pastries: [],
+    recentFractionResults: [],
+    settings: { ...DEFAULT_SETTINGS },
   }
 
   const profiles = getAllProfiles()

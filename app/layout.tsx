@@ -1,21 +1,29 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Geist, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
+  weight: ["400", "600", "800"],
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
+// Numerals that read like a dial: fractions, scores, safe combinations.
+const plexMono = IBM_Plex_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Vermenigvuldiging Trainer",
-  description: "Oefen je vermenigvuldigingstafels van 1 tot 10",
+  title: "Tafel Trainer",
+  description: "Oefen tafels, delen en breuken — en kraak de kluis",
 };
 
 export default function RootLayout({
@@ -24,9 +32,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="nl">
+    // The vault is a night world: dark is the app's only theme, so the
+    // class is set here rather than toggled.
+    <html lang="nl" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${bricolage.variable} ${geistSans.variable} ${plexMono.variable} antialiased`}
       >
         {children}
         <Toaster richColors position="top-center" />

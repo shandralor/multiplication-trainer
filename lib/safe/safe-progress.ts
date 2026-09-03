@@ -6,7 +6,7 @@ import {
   evaluateAchievements,
 } from '@/lib/safe/achievements'
 
-const TIER_RANK: Record<AnimalTier, number> = {
+export const TIER_RANK: Record<AnimalTier, number> = {
   bronze: 1,
   silver: 2,
   gold: 3,
