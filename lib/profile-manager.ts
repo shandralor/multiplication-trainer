@@ -186,6 +186,34 @@ export function getAllProfiles(): UserProfile[] {
 function saveAllProfiles(profiles: UserProfile[]) {
   if (typeof window === 'undefined') return
   localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles))
+  notifyProfileChanged()
+}
+
+// --- change notification ---------------------------------------------
+// Every write goes through saveAllProfiles or setCurrentProfileId, so a
+// single listener set here is enough for useProfile() to stay in sync
+// across screens without any component polling localStorage.
+
+type ProfileListener = () => void
+const listeners = new Set<ProfileListener>()
+
+/** Bumped on every write; useProfile snapshots against it. */
+let profileVersion = 0
+
+export function getProfileVersion(): number {
+  return profileVersion
+}
+
+export function subscribeToProfile(listener: ProfileListener): () => void {
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
+function notifyProfileChanged() {
+  profileVersion++
+  for (const listener of listeners) listener()
 }
 
 // Get current profile ID
@@ -198,6 +226,7 @@ export function getCurrentProfileId(): string | null {
 export function setCurrentProfileId(id: string) {
   if (typeof window === 'undefined') return
   localStorage.setItem(CURRENT_PROFILE_KEY, id)
+  notifyProfileChanged()
 }
 
 // Get current profile

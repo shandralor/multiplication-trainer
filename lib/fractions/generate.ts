@@ -8,6 +8,7 @@ import {
   scaleTo,
   simplify,
   subtract,
+  toText,
   toVulgar,
   type Fraction,
 } from './fraction'
@@ -135,9 +136,14 @@ function generateRung3(rng: Rng): FractionItem {
   let right: Fraction
 
   if (shape < 0.34) {
-    // Same denominator — read it straight off the numerators.
-    const d = pick(FRIENDLY_DENOMINATORS, rng)
-    const [a, b] = shuffle([pickInt(1, d - 1, rng), pickInt(1, d - 1, rng)], rng)
+    // Same denominator — read it straight off the numerators. Halves are
+    // excluded here: with d = 2 the only numerator is 1, so both sides
+    // would come out identical.
+    const d = pick(FRIENDLY_DENOMINATORS.filter((x) => x > 2), rng)
+    let a = pickInt(1, d - 1, rng)
+    let b = pickInt(1, d - 2, rng)
+    if (b >= a) b += 1
+    ;[a, b] = shuffle([a, b], rng)
     left = frac(a, d)
     right = frac(b, d)
   } else if (shape < 0.67) {
@@ -150,6 +156,14 @@ function generateRung3(rng: Rng): FractionItem {
     const ds = shuffle(FRIENDLY_DENOMINATORS, rng)
     left = frac(pickInt(1, ds[0] - 1, rng), ds[0])
     right = frac(pickInt(1, ds[1] - 1, rng), ds[1])
+  }
+
+  // An "=" question is worth asking when the two look different (1/2 vs
+  // 2/4), but 1/2 against a literal 1/2 teaches nothing. Nudge the right
+  // side onto a different noemer so the pair always reads as a question.
+  if (left.n === right.n && left.d === right.d) {
+    const scaled = scaleTo(right, right.d * 2)
+    if (scaled) right = scaled
   }
 
   const cmp = compare(left, right)
@@ -183,7 +197,7 @@ function generateRung4(rng: Rng): FractionItem {
       right,
       answer: add(left, right),
       unlike: false,
-      prompt: `${toVulgar(left)} + ${toVulgar(right)}`,
+      prompt: `${toText(left)} + ${toText(right)}`,
     }
   }
 
@@ -191,30 +205,39 @@ function generateRung4(rng: Rng): FractionItem {
     // Unlike denominators, but one is a multiple of the other so the
     // common denominator is findable without the full LCM machinery.
     const smallD = pick([2, 3, 4, 5] as const, rng)
-    const bigD = smallD * pickInt(2, 3, rng)
+    const factor = pickInt(2, 3, rng)
+    const bigD = smallD * factor
     const left = frac(1, smallD)
-    const right = frac(pickInt(1, bigD - 1, rng), bigD)
-    const sum = add(left, right)
-    if (compare(sum, frac(1, 1)) > 0) {
-      // Overshot 1 — fall back to the subtraction form of the same pair.
+
+    // In bigD parts, `left` is exactly `factor` of them. Drawing the
+    // other numerator anywhere but `factor` keeps the two fractions
+    // different, which is what stops a subtraction landing on zero.
+    let n = pickInt(1, bigD - 2, rng)
+    if (n >= factor) n += 1
+    const right = frac(n, bigD)
+
+    if (n + factor < bigD) {
       return {
         rung: 4,
-        kind: 'subtract',
-        left: right,
-        right: left,
-        answer: subtract(right, left),
+        kind: 'add',
+        left,
+        right,
+        answer: add(left, right),
         unlike: true,
-        prompt: `${toVulgar(right)} − ${toVulgar(left)}`,
+        prompt: `${toText(left)} + ${toText(right)}`,
       }
     }
+
+    // Adding would reach or pass 1, and "1/1" is not something to teach.
+    // n > factor is guaranteed here, so the difference stays positive.
     return {
       rung: 4,
-      kind: 'add',
-      left,
-      right,
-      answer: sum,
+      kind: 'subtract',
+      left: right,
+      right: left,
+      answer: subtract(right, left),
       unlike: true,
-      prompt: `${toVulgar(left)} + ${toVulgar(right)}`,
+      prompt: `${toText(right)} - ${toText(left)}`,
     }
   }
 

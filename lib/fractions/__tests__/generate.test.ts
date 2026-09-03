@@ -114,6 +114,16 @@ describe('rung 3 — vergelijken', () => {
     }
   })
 
+  it('never puts a fraction against a literal copy of itself', () => {
+    // 1/2 ___ 1/2 is answerable without reading it. An "=" question is
+    // only worth asking when the two sides look different.
+    for (const item of sample(3, 800)) {
+      if (item.kind === 'compare') {
+        expect(`${item.left.n}/${item.left.d}`).not.toBe(`${item.right.n}/${item.right.d}`)
+      }
+    }
+  })
+
   it('produces the same-numerator case, where more parts means less', () => {
     const items = sample(3, 600).filter(
       (i) => i.kind === 'compare' && i.left.n === i.right.n && i.left.d !== i.right.d,
@@ -123,11 +133,25 @@ describe('rung 3 — vergelijken', () => {
 })
 
 describe('rung 4 — rekenen', () => {
-  it('never produces a sum above 1, so no mixed numbers are needed', () => {
+  it('keeps every answer strictly between 0 and 1', () => {
+    // Reaching 1 would want "1/1" or a mixed number as the answer, which
+    // is not what this rung teaches.
     for (const item of sample(4, 600)) {
       if (item.kind === 'add' || item.kind === 'subtract') {
-        expect(compare(item.answer, frac(1, 1))).toBeLessThanOrEqual(0)
+        expect(compare(item.answer, frac(1, 1))).toBe(-1)
         expect(item.answer.n).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it('never subtracts a fraction from an equal one', () => {
+    // 1/2 + 2/4 sums to exactly 1, so it falls back to subtraction — and
+    // that pair used to land on 0. A subtraction must always have a
+    // strictly larger left side. (Equal operands are fine for addition:
+    // 2/5 + 2/5 is a real question.)
+    for (const item of sample(4, 800)) {
+      if (item.kind === 'subtract') {
+        expect(compare(item.left, item.right)).toBe(1)
       }
     }
   })

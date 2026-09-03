@@ -1,64 +1,65 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { ProfileSelector } from '@/components/profile-selector'
-import { initializeProfiles, getCurrentProfile } from '@/lib/profile-manager'
+import { useEnsureProfile, useProfile } from '@/lib/use-profile'
 
 type AppHeaderProps = {
+  /** Called after the profile picker switches or edits a profile. */
   onProfileChange?: () => void
 }
 
+/**
+ * The bar that sits on every screen: who is playing, how long their
+ * streak is, and how many medals they hold. Deliberately quiet — the
+ * world tiles below it are what should pull the eye.
+ */
 export function AppHeader({ onProfileChange }: AppHeaderProps) {
-  const [streak, setStreak] = useState(0)
-  const [medalCount, setMedalCount] = useState(0)
+  useEnsureProfile()
+  const profile = useProfile()
 
-  const reload = useCallback(() => {
-    const profile = getCurrentProfile()
-    if (profile) {
-      setStreak(profile.currentStreak)
-      setMedalCount(new Set(profile.achievements.map((a) => a.id)).size)
-    }
-    onProfileChange?.()
-  }, [onProfileChange])
-
-  useEffect(() => {
-    initializeProfiles()
-    reload()
-  }, [reload])
+  const streak = profile?.currentStreak ?? 0
+  const medals = profile ? new Set(profile.achievements.map((a) => a.id)).size : 0
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-md">
-      <div className="max-w-4xl mx-auto px-4 py-3">
-        <div className="flex justify-between items-center mb-3">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-            Tafel Trainer
-          </h1>
-          <div className="flex items-center gap-3">
-            <Link href="/progress">
-              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                📊 Mijn voortgang
-              </Button>
-            </Link>
-            <ProfileSelector onProfileChange={reload} />
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-orange-100 dark:bg-orange-900 px-3 py-1 rounded-full">
-            <span className="text-xl">🔥</span>
-            <span className="font-bold text-orange-600 dark:text-orange-300 text-sm">
-              {streak} dagen
-            </span>
-          </div>
-          <div className="flex items-center gap-2 bg-green-100 dark:bg-green-900 px-3 py-1 rounded-full">
-            <span className="text-xl">🏅</span>
-            <span className="font-bold text-green-600 dark:text-green-300 text-sm">
-              {medalCount}
-            </span>
-          </div>
+    <header className="border-b border-vault-line/70">
+      <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+        <ProfileSelector onProfileChange={onProfileChange} />
+
+        <div className="ml-auto flex items-center gap-2">
+          <Chip label={`${streak} dagen`} icon="🔥" />
+          <Link
+            href="/kluiskamer"
+            className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass"
+            aria-label="Naar de kluiskamer"
+          >
+            <Chip label={String(medals)} icon="🏅" interactive />
+          </Link>
         </div>
       </div>
-    </div>
+    </header>
+  )
+}
+
+function Chip({
+  icon,
+  label,
+  interactive = false,
+}: {
+  icon: string
+  label: string
+  interactive?: boolean
+}) {
+  return (
+    <span
+      className={`flex items-center gap-1.5 rounded-full border border-vault-line px-3 py-1 font-mono text-xs text-vault-dim tabular ${
+        interactive ? 'transition-colors hover:border-brass hover:text-brass' : ''
+      }`}
+    >
+      <span aria-hidden className="text-sm">
+        {icon}
+      </span>
+      {label}
+    </span>
   )
 }

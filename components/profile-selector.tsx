@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,40 +17,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { 
-  getAllProfiles, 
-  getCurrentProfile, 
-  setCurrentProfileId, 
+import {
+  getAllProfiles,
+  getProfileVersion,
+  setCurrentProfileId,
   createProfile,
   deleteProfile,
-  type UserProfile 
 } from '@/lib/profile-manager'
+import { useProfile } from '@/lib/use-profile'
 
 type ProfileSelectorProps = {
   onProfileChange?: () => void
 }
 
 export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
-  const [currentProfile, setCurrentProfile] = useState<UserProfile | null>(null)
-  const [allProfiles, setAllProfiles] = useState<UserProfile[]>([])
   const [showNewProfileDialog, setShowNewProfileDialog] = useState(false)
   const [newProfileName, setNewProfileName] = useState('')
 
-  const loadProfiles = useCallback(() => {
-    const profiles = getAllProfiles()
-    const current = getCurrentProfile()
-    setAllProfiles(profiles)
-    setCurrentProfile(current)
-  }, [])
-
-  useEffect(() => {
-    loadProfiles()
-  }, [loadProfiles])
+  // Reading through useProfile rather than a local snapshot: the picker
+  // used to load once on mount, which meant it rendered nothing at all
+  // when the default profile was still being created alongside it.
+  const currentProfile = useProfile()
+  const allProfiles = useMemo(
+    () => (currentProfile ? getAllProfiles() : []),
+    // getProfileVersion changes on every write, which is what makes the
+    // list pick up a newly created or deleted profile.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentProfile, getProfileVersion()],
+  )
 
   const handleSwitchProfile = (profileId: string) => {
     setCurrentProfileId(profileId)
-    loadProfiles()
-    if (onProfileChange) onProfileChange()
+    onProfileChange?.()
   }
 
   const handleCreateProfile = () => {
@@ -58,8 +56,7 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
       createProfile(newProfileName.trim())
       setNewProfileName('')
       setShowNewProfileDialog(false)
-      loadProfiles()
-      if (onProfileChange) onProfileChange()
+      onProfileChange?.()
     }
   }
 
@@ -68,11 +65,10 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
       alert('Je moet minimaal één profiel hebben!')
       return
     }
-    
+
     if (confirm('Weet je zeker dat je dit profiel wilt verwijderen?')) {
       deleteProfile(profileId)
-      loadProfiles()
-      if (onProfileChange) onProfileChange()
+      onProfileChange?.()
     }
   }
 
@@ -82,16 +78,18 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-            <span className="text-xl">👤</span>
-            <span className="font-semibold text-gray-800 dark:text-white hidden sm:inline">
+          <button className="flex items-center gap-2 rounded-full border border-vault-line px-2.5 py-1 transition-colors hover:border-brass">
+            <span aria-hidden className="grid h-6 w-6 place-items-center rounded-full bg-vault-card text-sm">
+              🦝
+            </span>
+            <span className="font-display text-[13px] font-bold tracking-tight">
               {currentProfile.name}
             </span>
-            <span className="text-gray-400">▼</span>
+            <span aria-hidden className="text-[9px] text-vault-dim">▼</span>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400">
+          <div className="px-2 py-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
             PROFIELEN
           </div>
           {allProfiles.map(profile => (

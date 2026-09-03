@@ -1,91 +1,209 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AppHeader } from '@/components/app-header'
-import { Mascot } from '@/components/mascot'
-import { getCurrentProfile, type AnimalEntry } from '@/lib/profile-manager'
-
-const ANIMAL_EMOJI: Record<number, string> = {
-  1: '🐥', 2: '🦆', 3: '🐰', 4: '🐶', 5: '🐷',
-  6: '🐼', 7: '🐵', 8: '🐻', 9: '🦒', 10: '🐘',
-}
+import { WorldShell } from '@/components/world-shell'
+import { ANIMAL_EMOJI } from '@/lib/safe/animals'
+import { PASTRIES } from '@/lib/fractions/pastries'
+import { completedRungCount, RUNGS } from '@/lib/fractions/ladder'
+import { emptyFractionProgress } from '@/lib/fractions/types'
+import { useEnsureProfile, useProfile } from '@/lib/use-profile'
+import { readResume, type ResumePoint } from '@/lib/resume'
 
 export default function Home() {
-  const [animals, setAnimals] = useState<AnimalEntry[]>([])
+  useEnsureProfile()
+  const profile = useProfile()
 
-  const loadProfileData = useCallback(() => {
-    const profile = getCurrentProfile()
-    setAnimals(profile?.animals ?? [])
-  }, [])
+  const animals = profile?.animals ?? []
+  const pastries = profile?.pastries ?? []
+  const fractionProgress = profile?.fractionProgress ?? emptyFractionProgress()
+  const rungsDone = completedRungCount(fractionProgress)
+  // Both of these read client-only state (localStorage, the clock). The
+  // profile is null until after hydration, which makes it the signal for
+  // "safe to render client-only values" — no separate mounted flag needed.
+  const hydrated = profile !== null
+  const resume = hydrated ? readResume() : null
 
-  useEffect(() => {
-    loadProfileData()
-  }, [loadProfileData])
-
-  const collectedCount = animals.length
-  const kluisSub =
-    collectedCount === 0
-      ? 'Verzamel alle 10 dieren'
-      : `${animals
-          .slice(0, 5)
-          .map((a) => ANIMAL_EMOJI[a.tableIndex] ?? '•')
-          .join(' ')} · ${collectedCount}/10 dieren`
+  const divideAccuracy = accuracyFor(profile?.tableStats, 'divide')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <AppHeader onProfileChange={loadProfileData} />
+    <WorldShell world="kluis">
+      <AppHeader />
 
-      <div className="max-w-md mx-auto px-4 py-8 space-y-5">
-        {/* Mascot + welcome */}
-        <div className="flex items-center gap-4 pt-2">
-          <Mascot emotion="neutral" size="medium" />
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              Welkom terug!
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Kies een wereld om te spelen
-            </p>
-          </div>
+      <div className="pt-6 space-y-5">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
+            {hydrated ? todayLine() : '\u00a0'}
+          </p>
+          <h1 className="mt-1.5 font-display text-[2rem] font-extrabold leading-[1.02] tracking-tight text-balance">
+            Wat ga je doen?
+          </h1>
         </div>
 
-        {/* Kluis portal */}
-        <Link
-          href="/safe"
-          className="block w-full py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all bg-gradient-to-br from-amber-500 via-rose-500 to-indigo-700 text-white text-center"
-        >
-          <div className="flex items-center justify-center gap-2 text-xl">
-            <span className="text-2xl">🔐</span>
-            <span>Kraak de kluis</span>
-          </div>
-          <div className="text-xs font-normal opacity-95 mt-1">{kluisSub}</div>
-        </Link>
+        {resume && <ResumeCard resume={resume} />}
 
-        {/* Vermenigvuldigen portal */}
-        <Link
-          href="/vermenigvuldigen"
-          className="block w-full py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all bg-gradient-to-br from-emerald-500 to-emerald-700 text-white text-center"
-        >
-          <div className="flex items-center justify-center gap-2 text-xl">
-            <span className="text-2xl">×</span>
-            <span>Vermenigvuldigen</span>
-          </div>
-          <div className="text-xs font-normal opacity-95 mt-1">Quiz · oefen · tijdrace</div>
-        </Link>
-
-        {/* Delen portal */}
-        <Link
-          href="/delen"
-          className="block w-full py-5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white text-center"
-        >
-          <div className="flex items-center justify-center gap-2 text-xl">
-            <span className="text-2xl">÷</span>
-            <span>Delen</span>
-          </div>
-          <div className="text-xs font-normal opacity-95 mt-1">Quiz · oefen · tijdrace</div>
-        </Link>
+        <nav className="space-y-3" aria-label="Werelden">
+          <Door
+            href="/tafels"
+            world="tafels"
+            sign="×"
+            name="Tafels"
+            detail={`kluis · quiz · ${animals.length}/10 dieren`}
+          />
+          <Door
+            href="/delen"
+            world="delen"
+            sign="÷"
+            name="Delen"
+            detail={
+              divideAccuracy === null
+                ? 'quiz · oefen · tijdrace'
+                : `quiz · tijdrace · ${divideAccuracy}% goed`
+            }
+          />
+          <Door
+            href="/breuken"
+            world="breuken"
+            sign="½"
+            name="Breuken"
+            detail={
+              rungsDone === 0
+                ? `${RUNGS.length} tredes · nog niet begonnen`
+                : `${rungsDone}/${RUNGS.length} tredes af · ${pastries.length}/${PASTRIES.length} gebakjes`
+            }
+            badge={rungsDone === 0 ? 'NIEUW' : undefined}
+          />
+        </nav>
       </div>
-    </div>
+
+      <Link
+        href="/kluiskamer"
+        className="mt-6 flex items-center gap-3 rounded-2xl vault-card px-4 py-3 transition-colors hover:border-vault-green/60"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
+          Kluiskamer
+        </span>
+        <span className="ml-auto flex gap-1" aria-hidden>
+          {Array.from({ length: 10 }, (_, i) => {
+            const entry = animals[i]
+            return (
+              <span
+                key={i}
+                className={`grid h-6 w-6 place-items-center rounded-md text-[11px] ${
+                  entry
+                    ? 'border border-brass/35 bg-brass/15'
+                    : 'border border-dashed border-vault-line opacity-60'
+                }`}
+              >
+                {entry ? ANIMAL_EMOJI[entry.tableIndex] : ''}
+              </span>
+            )
+          })}
+        </span>
+      </Link>
+    </WorldShell>
   )
+}
+
+function ResumeCard({ resume }: { resume: ResumePoint }) {
+  return (
+    <Link
+      href={resume.href}
+      className="flex items-center gap-3 rounded-2xl vault-card px-3.5 py-3 transition-colors hover:border-brass/50"
+    >
+      <span
+        aria-hidden
+        className="grid h-9 w-9 place-items-center rounded-xl border border-vault-line bg-vault-night text-lg"
+      >
+        {resume.icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+          Verder waar je was
+        </span>
+        <span className="block truncate font-display text-[13px] font-bold tracking-tight">
+          {resume.label}
+        </span>
+      </span>
+      <span aria-hidden className="text-brass">
+        ▶
+      </span>
+    </Link>
+  )
+}
+
+function Door({
+  href,
+  world,
+  sign,
+  name,
+  detail,
+  badge,
+}: {
+  href: string
+  world: 'tafels' | 'delen' | 'breuken'
+  sign: string
+  name: string
+  detail: string
+  badge?: string
+}) {
+  return (
+    <Link
+      href={href}
+      className={`world-${world} group relative flex items-center gap-3.5 overflow-hidden rounded-2xl vault-card py-4 pl-[1.0625rem] pr-3.5 transition-all hover:border-world/50 hover:-translate-y-px`}
+    >
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-1 bg-world"
+      />
+      <span
+        aria-hidden
+        className="grid h-[42px] w-[42px] flex-none place-items-center rounded-xl bg-world-dim font-mono text-xl font-semibold text-world"
+      >
+        {sign}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2 font-display text-base font-extrabold tracking-tight">
+          {name}
+          {badge && (
+            <span className="rounded bg-world px-1.5 py-0.5 font-mono text-[8px] font-semibold tracking-[0.12em] text-vault-night">
+              {badge}
+            </span>
+          )}
+        </span>
+        <span className="mt-0.5 block font-mono text-[10px] text-vault-dim">{detail}</span>
+      </span>
+      <span
+        aria-hidden
+        className="text-sm text-vault-dim transition-colors group-hover:text-world"
+      >
+        ›
+      </span>
+    </Link>
+  )
+}
+
+function todayLine(): string {
+  const days = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag']
+  const months = [
+    'januari', 'februari', 'maart', 'april', 'mei', 'juni',
+    'juli', 'augustus', 'september', 'oktober', 'november', 'december',
+  ]
+  const now = new Date()
+  return `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`
+}
+
+function accuracyFor(
+  stats: Record<number, { divide: { attempts: number; correct: number } }> | undefined,
+  operation: 'divide',
+): number | null {
+  if (!stats) return null
+  let attempts = 0
+  let correct = 0
+  for (const table of Object.values(stats)) {
+    attempts += table[operation].attempts
+    correct += table[operation].correct
+  }
+  if (attempts === 0) return null
+  return Math.round((correct / attempts) * 100)
 }
