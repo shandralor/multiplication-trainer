@@ -31,11 +31,11 @@ export function MedalRow({ earned }: MedalRowProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-2 px-2">
-        <span className="text-xs font-bold tracking-wider text-amber-300">
+        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
           Medailles · {earnedIds.size} / {ALL_IDS.length}
         </span>
       </div>
-      <div className="flex gap-2 p-3 rounded-2xl border-2 border-white/20 bg-white/5 justify-center flex-nowrap overflow-x-auto">
+      <div className="flex flex-nowrap justify-center gap-2 overflow-x-auto rounded-2xl vault-card p-3">
         {ALL_IDS.map((id) => {
           const def = ACHIEVEMENTS[id]
           const isEarned = earnedIds.has(id)
@@ -44,8 +44,10 @@ export function MedalRow({ earned }: MedalRowProps) {
               key={id}
               type="button"
               onClick={() => setOpen((cur) => (cur === id ? null : id))}
-              className={`shrink-0 relative inline-flex items-center justify-center w-14 h-14 rounded-xl transition-all ${
-                isEarned ? 'bg-white/10 hover:bg-white/20' : 'bg-black/20 hover:bg-black/30'
+              className={`relative inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border transition-colors ${
+                isEarned
+                  ? 'border-brass/35 bg-brass/10 hover:border-brass'
+                  : 'border-vault-line bg-vault-night hover:border-vault-dim'
               }`}
               title={def.label}
               aria-label={def.label}
@@ -55,7 +57,7 @@ export function MedalRow({ earned }: MedalRowProps) {
                 alt={def.label}
                 width={36}
                 height={60}
-                className={`object-contain ${isEarned ? '' : 'grayscale opacity-30'}`}
+                className={`h-11 w-11 object-contain ${isEarned ? '' : 'opacity-30 grayscale'}`}
               />
             </button>
           )
@@ -65,7 +67,7 @@ export function MedalRow({ earned }: MedalRowProps) {
       {open && (
         <div
           onClick={() => setOpen(null)}
-          className="mt-2 p-3 rounded-xl bg-white/10 border border-white/20 text-sm text-white cursor-pointer"
+          className="mt-2 cursor-pointer rounded-xl vault-card p-3 text-sm text-vault-ink"
         >
           <div className="flex items-center gap-3">
             <Image
@@ -73,13 +75,17 @@ export function MedalRow({ earned }: MedalRowProps) {
               alt=""
               width={32}
               height={54}
-              className={`object-contain ${earnedIds.has(open) ? '' : 'grayscale opacity-40'}`}
+              className={`h-10 w-10 object-contain ${earnedIds.has(open) ? '' : 'opacity-40 grayscale'}`}
             />
             <div>
-              <div className="font-bold">{ACHIEVEMENTS[open].label}</div>
-              <div className="text-xs opacity-80">{ACHIEVEMENTS[open].description}</div>
+              <div className="font-display font-bold tracking-tight">
+                {ACHIEVEMENTS[open].label}
+              </div>
+              <div className="mt-0.5 text-xs text-vault-dim">
+                {ACHIEVEMENTS[open].description}
+              </div>
               {!earnedIds.has(open) && (
-                <div className="text-xs text-amber-300 mt-1">Nog niet verdiend</div>
+                <div className="mt-1 font-mono text-[10px] text-brass">Nog niet verdiend</div>
               )}
             </div>
           </div>
