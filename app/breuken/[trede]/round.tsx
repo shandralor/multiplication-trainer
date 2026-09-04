@@ -18,6 +18,7 @@ const ROUND_LENGTH = 12
 
 type Phase = 'asking' | 'checked' | 'done'
 type Verdict = 'goed' | 'fout'
+type MascotEmotion = 'happy' | 'sad' | 'neutral' | 'excited' | 'thinking'
 
 export function Round({ slug }: { slug: string }) {
   const def = rungDef(rungBySlug(slug)!.rung)
@@ -32,8 +33,7 @@ export function Round({ slug }: { slug: string }) {
   const [phase, setPhase] = useState<Phase>('asking')
   const [verdict, setVerdict] = useState<Verdict | null>(null)
   const [correct, setCorrect] = useState(0)
-  // Only the running streak's peak is kept; the current value is never read.
-  const [, setStreak] = useState(0)
+  const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
   const [outcome, setOutcome] = useState<RoundOutcome | null>(null)
 
@@ -85,6 +85,10 @@ export function Round({ slug }: { slug: string }) {
 
   const answer = answerFor()
   const canCheck = answer !== null && answer !== undefined && answer !== ''
+  // Any mark on the item counts as started — a typed digit, a shaded
+  // slice, a placed token, a chosen sign.
+  const hasStartedAnswering =
+    canCheck || numerator !== '' || denominator !== '' || shaded > 0 || placed !== null
 
   const check = () => {
     if (!canCheck || phase !== 'asking') return
@@ -174,7 +178,12 @@ export function Round({ slug }: { slug: string }) {
           />
         </div>
 
-        {verdict && <Feedback item={item} verdict={verdict} />}
+        <MascotStrip
+          item={item}
+          verdict={verdict}
+          streak={streak}
+          started={hasStartedAnswering}
+        />
 
         <div className="mt-5">
           {needsNumpad(item) && phase === 'asking' ? (
@@ -395,22 +404,83 @@ function ItemBody(props: BodyProps) {
 
 // -------------------------------------------------------------- feedback
 
-function Feedback({ item, verdict }: { item: FractionItem; verdict: Verdict }) {
+/**
+ * The mascot is on screen for the whole item, not only after a check.
+ *
+ * Two reasons. It reacts while the kid works — idle until they start,
+ * thinking once they do — which is the point of having a mascot at all.
+ * And because the row is always rendered, answering no longer shoves the
+ * numpad down the screen the moment feedback appears.
+ */
+function MascotStrip({
+  item,
+  verdict,
+  streak,
+  started,
+}: {
+  item: FractionItem
+  verdict: Verdict | null
+  streak: number
+  started: boolean
+}) {
+  const emotion: MascotEmotion = verdict
+    ? verdict === 'goed'
+      // Three in a row earns the bigger reaction, so it means something.
+      ? streak >= 3
+        ? 'excited'
+        : 'happy'
+      : 'sad'
+    : started
+      ? 'thinking'
+      : 'neutral'
+
   return (
-    <div className="mt-5 flex items-center gap-3">
+    <div className="mt-5 flex min-h-[3.25rem] items-center gap-3">
       <span className="flex-none">
-        <Mascot emotion={verdict === 'goed' ? 'happy' : 'thinking'} size="small" animate />
+        <Mascot emotion={emotion} size="small" animate={verdict !== null} />
       </span>
       <p className="text-[12px] leading-snug text-vault-dim">
-        {verdict === 'goed' ? (
-          <span className="font-semibold text-goed">Goed zo! </span>
+        {verdict === null ? (
+          <span className="font-mono text-[11px]">{idleLine(item, started)}</span>
         ) : (
-          <span className="font-semibold text-fout">Bijna. </span>
+          <>
+            {verdict === 'goed' ? (
+              <span className="font-semibold text-goed">
+                {streak >= 3 ? `${streak} op rij! ` : 'Goed zo! '}
+              </span>
+            ) : (
+              <span className="font-semibold text-fout">Bijna. </span>
+            )}
+            {explain(item, verdict)}
+          </>
         )}
-        {explain(item, verdict)}
       </p>
     </div>
   )
+}
+
+/** What the mascot says while the kid is still working on the item. */
+function idleLine(item: FractionItem, started: boolean): string {
+  if (started) return 'Denk rustig na…'
+  switch (item.kind) {
+    case 'read-shape':
+      return 'Tel eerst hoeveel stukken er zijn.'
+    case 'colour-shape':
+      return 'Tik de stukken aan die je wilt kleuren.'
+    case 'missing-numerator':
+      return 'Hoeveel keer zo groot is de noemer geworden?'
+    case 'simplify':
+      return 'Zoek een getal waar teller én noemer door kunnen.'
+    case 'number-line':
+      return 'Tel de stapjes vanaf 0.'
+    case 'compare':
+      return 'Zijn de noemers gelijk? Kijk dan naar de tellers.'
+    case 'add':
+    case 'subtract':
+      return item.unlike ? 'Maak eerst de noemers gelijk.' : 'Zelfde noemer — tel de tellers op.'
+    case 'of-number':
+      return 'Deel eerst door de noemer.'
+  }
 }
 
 /** The one line of teaching that turns a wrong answer into a lesson. */
@@ -459,11 +529,15 @@ function Scorecard({
 }) {
   const def = rungDef(rungBySlug(slug)!.rung)
   const pct = Math.round((correct / total) * 100)
+  const mood: MascotEmotion = pct >= 80 ? 'excited' : pct >= 50 ? 'happy' : 'sad'
 
   return (
     <WorldShell world="breuken" backHref="/breuken" backLabel="Ladder">
-      <div className="pt-10 text-center">
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
+      <div className="pt-8 text-center">
+        <div className="flex justify-center">
+          <Mascot emotion={mood} size="large" animate />
+        </div>
+        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
           Trede {def.rung} · {def.title}
         </p>
         <p className="mt-3 font-display text-[3.25rem] font-extrabold leading-none tabular tracking-tight text-plum">
@@ -471,6 +545,13 @@ function Scorecard({
           <span className="text-vault-dim">/{total}</span>
         </p>
         <p className="mt-2 font-mono text-xs text-vault-dim">{pct}% goed</p>
+        <p className="mt-3 text-sm text-vault-dim">
+          {pct >= 80
+            ? 'Knap gedaan — die breuken liggen je.'
+            : pct >= 50
+              ? 'Goed bezig. Nog een rondje en je hebt hem.'
+              : 'Nog even oefenen. Dat komt goed.'}
+        </p>
 
         {outcome?.pastry && (
           <div className="mt-7 rounded-2xl vault-card-lit p-5">

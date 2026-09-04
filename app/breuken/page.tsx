@@ -3,7 +3,14 @@
 import Link from 'next/link'
 import { AppHeader } from '@/components/app-header'
 import { WorldShell } from '@/components/world-shell'
-import { RUNGS, isRungComplete, isRungUnlocked, rungDef } from '@/lib/fractions/ladder'
+import { Mascot } from '@/components/mascot'
+import {
+  RUNGS,
+  completedRungCount,
+  isRungComplete,
+  isRungUnlocked,
+  rungDef,
+} from '@/lib/fractions/ladder'
 import { PASTRIES, getPastry } from '@/lib/fractions/pastries'
 import { emptyFractionProgress, type Rung } from '@/lib/fractions/types'
 import { useEnsureProfile, useProfile } from '@/lib/use-profile'
@@ -16,17 +23,35 @@ export default function BreukenPage() {
   const pastries = profile?.pastries ?? []
   const unlockAll = profile?.settings.unlockAllRungs ?? false
 
+  const done = completedRungCount(progress)
+  const mood = done === RUNGS.length ? 'excited' : done > 0 ? 'happy' : 'neutral'
+  const ladderLine =
+    done === RUNGS.length
+      ? 'Alle vier de tredes gehaald. Je bent een breukenbaas.'
+      : done > 0
+        ? `Trede ${done + 1} staat voor je klaar.`
+        : unlockAll
+          ? 'Alle tredes staan open — kies er maar een.'
+          : 'Elke trede opent de volgende.'
+
   return (
     <WorldShell world="breuken" backHref="/">
       <AppHeader />
 
-      <div className="pt-5">
-        <h1 className="font-display text-[1.4rem] font-extrabold tracking-tight">
-          Klim de ladder op
-        </h1>
-        <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.13em] text-vault-dim">
-          {unlockAll ? 'alle tredes staan open' : 'elke trede opent de volgende'}
-        </p>
+      <div className="flex items-center gap-4 pt-5">
+        {/* The mascot reads the ladder: pleased once a trede is done,
+            delighted when the whole thing is. */}
+        <Mascot emotion={mood} size="medium" />
+        <div className="min-w-0">
+          <h1 className="font-display text-[1.4rem] font-extrabold tracking-tight text-balance">
+            {done === 0
+              ? 'Klim de ladder op'
+              : done === RUNGS.length
+                ? 'De hele ladder is af!'
+                : `${done} van de ${RUNGS.length} tredes af`}
+          </h1>
+          <p className="mt-1.5 text-[12px] leading-snug text-vault-dim">{ladderLine}</p>
+        </div>
       </div>
 
       <ol className="mt-4 space-y-2">
