@@ -5,8 +5,6 @@ import {
   buildSafe,
   shuffleTables,
   endlessSafeTimer,
-  type Difficulty,
-  type SafeSlot,
 } from '@/lib/safe/safe-logic'
 
 describe('gapsForSafe', () => {
@@ -35,18 +33,27 @@ describe('gapsForSafe', () => {
 })
 
 describe('scoreTier', () => {
-  it('0 mistakes → gold', () => {
-    expect(scoreTier(0)).toBe('gold')
+  it('Makkelijk: 0 mistakes → silver, any mistakes → bronze', () => {
+    expect(scoreTier(0, 'easy')).toBe('silver')
+    expect(scoreTier(1, 'easy')).toBe('bronze')
+    expect(scoreTier(2, 'easy')).toBe('bronze')
+    expect(scoreTier(5, 'easy')).toBe('bronze')
   })
 
-  it('1 or 2 mistakes → silver', () => {
-    expect(scoreTier(1)).toBe('silver')
-    expect(scoreTier(2)).toBe('silver')
+  it('Normaal: 0 → gold, 1-2 → silver, 3+ → bronze', () => {
+    expect(scoreTier(0, 'medium')).toBe('gold')
+    expect(scoreTier(1, 'medium')).toBe('silver')
+    expect(scoreTier(2, 'medium')).toBe('silver')
+    expect(scoreTier(3, 'medium')).toBe('bronze')
+    expect(scoreTier(10, 'medium')).toBe('bronze')
   })
 
-  it('3+ mistakes → bronze', () => {
-    expect(scoreTier(3)).toBe('bronze')
-    expect(scoreTier(10)).toBe('bronze')
+  it('Moeilijk: 0 → platinum, 1-2 → gold, 3+ → silver (no bronze)', () => {
+    expect(scoreTier(0, 'hard')).toBe('platinum')
+    expect(scoreTier(1, 'hard')).toBe('gold')
+    expect(scoreTier(2, 'hard')).toBe('gold')
+    expect(scoreTier(3, 'hard')).toBe('silver')
+    expect(scoreTier(10, 'hard')).toBe('silver')
   })
 })
 
@@ -142,3 +149,31 @@ function mulberry32(seed: number): () => number {
     return ((r ^ (r >>> 14)) >>> 0) / 4294967296
   }
 }
+
+describe('buildSafe — operation', () => {
+  it('poses multiplication by default, unchanged from before', () => {
+    const slots = buildSafe({ table: 3, gapCount: 2 })
+    for (const slot of slots) {
+      expect(slot.answer).toBe(slot.factor * 3)
+      expect(slot.label).toBe(`${slot.factor}\u00d73`)
+    }
+  })
+
+  it('poses division when asked, as the same fact read backwards', () => {
+    const slots = buildSafe({ table: 3, gapCount: 2, operation: 'divide' })
+    for (const slot of slots) {
+      // 21 ÷ 3 = 7 — the answer is the factor, not the product.
+      expect(slot.answer).toBe(slot.factor)
+      expect(slot.label).toBe(`${slot.factor * 3}\u00f73`)
+    }
+  })
+
+  it('keeps the same gap count and wheel size either way', () => {
+    for (const operation of ['multiply', 'divide'] as const) {
+      const slots = buildSafe({ table: 7, gapCount: 4, operation })
+      expect(slots).toHaveLength(10)
+      expect(slots.filter((s) => s.isGap)).toHaveLength(4)
+      expect(new Set(slots.map((s) => s.factor)).size).toBe(10)
+    }
+  })
+})

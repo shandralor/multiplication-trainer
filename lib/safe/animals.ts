@@ -25,3 +25,12 @@ export function getAnimalForTable(tableIndex: number): Animal {
   }
   return animal
 }
+
+/**
+ * Emoji stand-ins for the animal PNGs, for places too small to justify
+ * loading the art: the home strip, the kluiskamer row, a toast.
+ */
+export const ANIMAL_EMOJI: Record<number, string> = {
+  1: '🐥', 2: '🦆', 3: '🐰', 4: '🐶', 5: '🐷',
+  6: '🐼', 7: '🐵', 8: '🐻', 9: '🦒', 10: '🐘',
+}

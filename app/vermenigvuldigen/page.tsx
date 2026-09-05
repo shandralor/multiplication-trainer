@@ -1,13 +1,6 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import { AppHeader } from '@/components/app-header'
-import { OperationSetup } from '@/components/operation-setup'
-
-export default function VermenigvuldigenPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <AppHeader />
-      <OperationSetup operation="multiply" />
-    </div>
-  )
+/** Renamed to /tafels in the world rework; kept so old links still land. */
+export default function VermenigvuldigenRedirect() {
+  redirect('/tafels')
 }

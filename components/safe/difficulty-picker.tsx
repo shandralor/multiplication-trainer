@@ -7,10 +7,15 @@ type DifficultyPickerProps = {
   onChange: (next: Difficulty) => void
 }
 
+/**
+ * Difficulty keeps its own three hues rather than taking the world
+ * colour: here the colour encodes risk, which is information, not
+ * decoration — easy reads calm, hard reads hot.
+ */
 const ACTIVE_CLASSES: Record<Difficulty, string> = {
-  easy:   'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white border-emerald-700 shadow-lg scale-105',
-  medium: 'bg-gradient-to-br from-orange-500 to-orange-700 text-white border-orange-700 shadow-lg scale-105',
-  hard:   'bg-gradient-to-br from-red-500 to-red-700 text-white border-red-700 shadow-lg scale-105',
+  easy:   'border-goed bg-goed/15 text-goed',
+  medium: 'border-brass bg-brass/15 text-brass',
+  hard:   'border-fout bg-fout/15 text-fout',
 }
 
 export function DifficultyPicker({ value, onChange }: DifficultyPickerProps) {
@@ -28,14 +33,17 @@ export function DifficultyPicker({ value, onChange }: DifficultyPickerProps) {
           <button
             key={opt.id}
             onClick={() => onChange(opt.id)}
-            className={`p-3 rounded-xl font-bold text-center transition-all border-2 ${
+            aria-pressed={active}
+            className={`rounded-xl border p-3 text-center transition-all ${
               active
                 ? ACTIVE_CLASSES[opt.id]
-                : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
+                : 'border-line bg-surface text-ink hover:border-dim'
             }`}
           >
-            <div>{opt.label}</div>
-            <div className={`text-[10px] ${active ? 'opacity-90' : 'text-gray-500'}`}>{opt.hint}</div>
+            <div className="font-display text-sm font-bold tracking-tight">{opt.label}</div>
+            <div className="mt-0.5 text-[12px] leading-snug text-dim">
+              {opt.hint}
+            </div>
           </button>
         )
       })}

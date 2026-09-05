@@ -1,0 +1,741 @@
+'use client'
+
+import { useCallback, useState } from 'react'
+import Link from 'next/link'
+import { WorldShell } from '@/components/world-shell'
+import { Mascot } from '@/components/mascot'
+import { FractionShape } from '@/components/fractions/fraction-shape'
+import { FractionInput } from '@/components/fractions/fraction-input'
+import { NumberLine } from '@/components/fractions/number-line'
+import { checkAnswer, generateSet } from '@/lib/fractions/generate'
+import { frac, toVulgar } from '@/lib/fractions/fraction'
+import { rungBySlug, rungDef } from '@/lib/fractions/ladder'
+import { completeRound, type RoundOutcome } from '@/lib/fractions/fraction-progress'
+import { saveResume } from '@/lib/resume'
+import { PastryIcon } from '@/components/fractions/pastry-icon'
+import type { FractionItem } from '@/lib/fractions/types'
+
+const ROUND_LENGTH = 12
+
+type Phase = 'asking' | 'checked' | 'done'
+type Verdict = 'goed' | 'fout'
+type MascotEmotion = 'happy' | 'sad' | 'neutral' | 'excited' | 'thinking'
+
+export function Round({ slug }: { slug: string }) {
+  const def = rungDef(rungBySlug(slug)!.rung)
+
+  // One set per mount. Generated lazily so the server render and the
+  // first client render agree on nothing random — the whole round is
+  // client-side, and re-generating on every render would reshuffle the
+  // question under the kid's finger.
+  const [items] = useState<FractionItem[]>(() => generateSet(def.rung, ROUND_LENGTH))
+
+  const [index, setIndex] = useState(0)
+  const [phase, setPhase] = useState<Phase>('asking')
+  const [verdict, setVerdict] = useState<Verdict | null>(null)
+  const [correct, setCorrect] = useState(0)
+  const [streak, setStreak] = useState(0)
+  const [bestStreak, setBestStreak] = useState(0)
+  const [outcome, setOutcome] = useState<RoundOutcome | null>(null)
+
+  // Per-item answer state. Reset on every advance.
+  const [numerator, setNumerator] = useState('')
+  const [denominator, setDenominator] = useState('')
+  const [field, setField] = useState<'n' | 'd'>('n')
+  // Which parts the kid has coloured. A set, not a count: filling
+  // "up to part i" meant one tap on the last piece filled the whole
+  // shape, which is not what tapping a piece should do.
+  const [filled, setFilled] = useState<Set<number>>(() => new Set())
+  const [placed, setPlaced] = useState<number | null>(null)
+  const [choice, setChoice] = useState<string | null>(null)
+
+  const item = items[index]
+
+  const resetItem = useCallback(() => {
+    setNumerator('')
+    setDenominator('')
+    setField('n')
+    setFilled(new Set())
+    setPlaced(null)
+    setChoice(null)
+    setVerdict(null)
+    setPhase('asking')
+  }, [])
+
+  const toggleFilled = useCallback((index: number) => {
+    setFilled((current) => {
+      const next = new Set(current)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
+      return next
+    })
+  }, [])
+
+  const answerFor = useCallback((): unknown => {
+    switch (item.kind) {
+      case 'read-shape':
+        // The noemer is read off the drawing, not typed — so the answer
+        // assembles from the teller alone.
+        return numerator ? frac(Number(numerator), item.parts) : null
+      case 'colour-shape':
+        // Zero coloured parts is a mis-tap, not an answer.
+        return filled.size > 0 ? filled.size : null
+      case 'missing-numerator':
+        return numerator ? Number(numerator) : null
+      case 'simplify':
+        return numerator && denominator ? frac(Number(numerator), Number(denominator)) : null
+      case 'number-line':
+        return placed
+      case 'compare':
+        return choice
+      case 'add':
+      case 'subtract':
+        return numerator && denominator ? frac(Number(numerator), Number(denominator)) : null
+      case 'of-number':
+        return numerator ? Number(numerator) : null
+    }
+  }, [item, numerator, denominator, filled, placed, choice])
+
+  const answer = answerFor()
+  const canCheck = answer !== null && answer !== undefined && answer !== ''
+  // Any mark on the item counts as started — a typed digit, a shaded
+  // slice, a placed token, a chosen sign.
+  const hasStartedAnswering =
+    canCheck || numerator !== '' || denominator !== '' || filled.size > 0 || placed !== null
+
+  const check = () => {
+    if (!canCheck || phase !== 'asking') return
+    const right = checkAnswer(item, answer)
+    setVerdict(right ? 'goed' : 'fout')
+    setPhase('checked')
+    if (right) {
+      setCorrect((c) => c + 1)
+      setStreak((s) => {
+        const next = s + 1
+        setBestStreak((b) => Math.max(b, next))
+        return next
+      })
+    } else {
+      setStreak(0)
+    }
+  }
+
+  const advance = () => {
+    if (index + 1 >= items.length) {
+      const finalCorrect = correct
+      const result = completeRound({
+        rung: def.rung,
+        correct: finalCorrect,
+        total: items.length,
+        bestStreak,
+      })
+      setOutcome(result)
+      setPhase('done')
+      saveResume({
+        href: `/breuken/${def.slug}`,
+        label: `Breuken · ${def.title}`,
+        icon: '½',
+      })
+      return
+    }
+    setIndex((i) => i + 1)
+    resetItem()
+  }
+
+  if (phase === 'done') {
+    return <Scorecard slug={slug} correct={correct} total={items.length} outcome={outcome} />
+  }
+
+  return (
+    <WorldShell world="breuken" backHref="/breuken" backLabel="Ladder">
+      <div className="mx-auto max-w-sm pt-3">
+        <div className="flex items-center justify-between gap-3">
+          <span className="rounded-full bg-world-wash px-3 py-1 text-sm font-extrabold text-world">
+            Level {def.rung} · {def.title}
+          </span>
+          <span className="font-display text-base font-extrabold tabular text-dim">
+            {index + 1} / {items.length}
+          </span>
+        </div>
+
+        <div className="mt-2.5 flex gap-1" aria-hidden>
+          {items.map((_, i) => (
+            <span
+              key={i}
+              className={`h-2.5 flex-1 rounded-full ${
+                i < index ? 'bg-world' : i === index ? 'bg-world-wash' : 'bg-line'
+              }`}
+            />
+          ))}
+        </div>
+
+        <h1 className="mt-6 text-balance text-center font-display text-2xl font-extrabold">
+          {headline(item)}
+        </h1>
+
+        <div className="mt-5">
+          <ItemBody
+            item={item}
+            state={verdict ?? 'idle'}
+            locked={phase !== 'asking'}
+            numerator={numerator}
+            denominator={denominator}
+            field={field}
+            filled={filled}
+            placed={placed}
+            choice={choice}
+            setField={setField}
+            toggleFilled={toggleFilled}
+            setPlaced={setPlaced}
+            setChoice={setChoice}
+          />
+        </div>
+
+        <MascotStrip
+          item={item}
+          verdict={verdict}
+          streak={streak}
+          started={hasStartedAnswering}
+        />
+
+        <div className="mt-5">
+          {needsNumpad(item) && phase === 'asking' ? (
+            <Numpad
+              onDigit={(digit) => {
+                const setter = field === 'n' ? setNumerator : setDenominator
+                setter((v) => (v.length >= 3 ? v : v + digit))
+              }}
+              onBackspace={() => {
+                const setter = field === 'n' ? setNumerator : setDenominator
+                setter((v) => v.slice(0, -1))
+              }}
+              onConfirm={check}
+              canConfirm={canCheck}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={phase === 'asking' ? check : advance}
+              disabled={phase === 'asking' && !canCheck}
+              className="btn-3d w-full py-3.5 font-display text-lg font-extrabold"
+            >
+              <span className="block">{phase === 'asking' ? 'Nakijken' : 'Volgende'}</span>
+              {/* A disabled primary button with no reason is a dead end.
+                  Say what is still missing, the way Start! does. */}
+              {phase === 'asking' && !canCheck && (
+                <span className="mt-0.5 block text-[12px] font-normal">
+                  {missingHint(item)}
+                </span>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    </WorldShell>
+  )
+}
+
+// ------------------------------------------------------------------ body
+
+type BodyProps = {
+  item: FractionItem
+  state: 'idle' | 'goed' | 'fout'
+  locked: boolean
+  numerator: string
+  denominator: string
+  field: 'n' | 'd'
+  filled: Set<number>
+  placed: number | null
+  choice: string | null
+  setField: (f: 'n' | 'd') => void
+  toggleFilled: (index: number) => void
+  setPlaced: (n: number) => void
+  setChoice: (c: string) => void
+}
+
+function ItemBody(props: BodyProps) {
+  const { item, state, locked } = props
+
+  switch (item.kind) {
+    case 'read-shape':
+      return (
+        <div className="flex flex-col items-center gap-5">
+          <FractionShape shape={item.shape} parts={item.parts} shaded={item.shaded} />
+          <FractionInput
+            numerator={props.numerator}
+            // Rung 1 teaches reading, not typing: the noemer comes off
+            // the drawing so the kid only supplies the teller.
+            denominator={props.denominator || String(item.parts)}
+            active={props.field}
+            onFocusField={props.setField}
+            lockDenominator
+            state={state}
+          />
+        </div>
+      )
+
+    case 'colour-shape':
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <FractionShape
+            shape={item.shape}
+            parts={item.parts}
+            shaded={props.filled.size}
+            isFilled={(i) => props.filled.has(i)}
+            onToggle={locked ? undefined : props.toggleFilled}
+            label={`${props.filled.size} van de ${item.parts} delen gekleurd`}
+          />
+          <p className="text-[14px] font-semibold text-dim">
+            {props.filled.size} van de {item.parts} gekleurd
+          </p>
+        </div>
+      )
+
+    case 'missing-numerator':
+      return (
+        <div className="flex items-center justify-center gap-4">
+          <StaticFraction n={item.given.n} d={item.given.d} />
+          <span className="text-xl text-dim">=</span>
+          <FractionInput
+            numerator={props.numerator}
+            denominator={String(item.targetD)}
+            active="n"
+            onFocusField={props.setField}
+            lockDenominator
+            state={state}
+          />
+        </div>
+      )
+
+    case 'simplify':
+      return (
+        <div className="flex items-center justify-center gap-4">
+          <StaticFraction n={item.given.n} d={item.given.d} />
+          <span className="text-xl text-dim">=</span>
+          <FractionInput
+            numerator={props.numerator}
+            denominator={props.denominator}
+            active={props.field}
+            onFocusField={props.setField}
+            state={state}
+          />
+        </div>
+      )
+
+    case 'number-line':
+      return (
+        <NumberLine
+          steps={item.steps}
+          placed={props.placed}
+          onPlace={props.setPlaced}
+          target={item.target}
+          disabled={locked}
+          state={state}
+        />
+      )
+
+    case 'compare':
+      return (
+        <div className="flex flex-col items-center gap-5">
+          <div className="flex items-center gap-5">
+            <StaticFraction n={item.left.n} d={item.left.d} />
+            <span className="grid h-11 w-11 place-items-center rounded-xl border border-dashed border-line text-xl text-dim">
+              {props.choice ?? '?'}
+            </span>
+            <StaticFraction n={item.right.n} d={item.right.d} />
+          </div>
+          <div className="grid w-full grid-cols-3 gap-2">
+            {(['<', '=', '>'] as const).map((sign) => (
+              <button
+                key={sign}
+                type="button"
+                disabled={locked}
+                onClick={() => props.setChoice(sign)}
+                aria-pressed={props.choice === sign}
+                className="btn-3d-quiet py-3 font-display text-3xl font-extrabold disabled:opacity-60"
+              >
+                {sign}
+              </button>
+            ))}
+          </div>
+        </div>
+      )
+
+    case 'add':
+    case 'subtract':
+      return (
+        <div className="flex items-center justify-center gap-3">
+          <StaticFraction n={item.left.n} d={item.left.d} />
+          <span className="text-xl text-dim">
+            {item.kind === 'add' ? '+' : '−'}
+          </span>
+          <StaticFraction n={item.right.n} d={item.right.d} />
+          <span className="text-xl text-dim">=</span>
+          <FractionInput
+            numerator={props.numerator}
+            denominator={props.denominator}
+            active={props.field}
+            onFocusField={props.setField}
+            state={state}
+          />
+        </div>
+      )
+
+    case 'of-number':
+      return (
+        <div className="flex items-center justify-center gap-4">
+          <span className="font-display text-2xl font-extrabold tracking-tight">
+            {toVulgar(item.frac)} van {item.whole}
+          </span>
+          <span className="text-xl text-dim">=</span>
+          <span
+            className={`grid h-11 min-w-[52px] place-items-center rounded-xl border bg-surface px-3 text-[22px] font-semibold tabular ${
+              state === 'goed'
+                ? 'border-goed text-goed'
+                : state === 'fout'
+                  ? 'border-fout text-fout'
+                  : 'border-plum text-plum'
+            }`}
+          >
+            {props.numerator || ' '}
+          </span>
+        </div>
+      )
+  }
+}
+
+// -------------------------------------------------------------- feedback
+
+/**
+ * The mascot is on screen for the whole item, not only after a check.
+ *
+ * Two reasons. It reacts while the kid works — idle until they start,
+ * thinking once they do — which is the point of having a mascot at all.
+ * And because the row is always rendered, answering no longer shoves the
+ * numpad down the screen the moment feedback appears.
+ */
+function MascotStrip({
+  item,
+  verdict,
+  streak,
+  started,
+}: {
+  item: FractionItem
+  verdict: Verdict | null
+  streak: number
+  started: boolean
+}) {
+  const emotion: MascotEmotion = verdict
+    ? verdict === 'goed'
+      // Three in a row earns the bigger reaction, so it means something.
+      ? streak >= 3
+        ? 'excited'
+        : 'happy'
+      : 'sad'
+    : started
+      ? 'thinking'
+      : 'neutral'
+
+  return (
+    <div className="mt-5 flex min-h-[4.5rem] items-center gap-3">
+      <span className="flex-none">
+        <Mascot emotion={emotion} size="medium" animate={verdict !== null} />
+      </span>
+      <p className="text-[14px] font-semibold leading-snug text-dim">
+        {verdict === null ? (
+          <span className="text-[12px]">{idleLine(item, started)}</span>
+        ) : (
+          <>
+            {verdict === 'goed' ? (
+              <span className="font-semibold text-goed">
+                {streak >= 3 ? `${streak} op rij! ` : 'Goed zo! '}
+              </span>
+            ) : (
+              <span className="font-semibold text-fout">Bijna. </span>
+            )}
+            {explain(item, verdict)}
+          </>
+        )}
+      </p>
+    </div>
+  )
+}
+
+/** What the mascot says while the kid is still working on the item. */
+function idleLine(item: FractionItem, started: boolean): string {
+  if (started) return 'Denk rustig na…'
+  switch (item.kind) {
+    case 'read-shape':
+      return 'Tel eerst hoeveel stukken er zijn.'
+    case 'colour-shape':
+      return 'Tik de stukken aan die je wilt kleuren.'
+    case 'missing-numerator':
+      return 'Hoeveel keer zo groot is de noemer geworden?'
+    case 'simplify':
+      return 'Zoek een getal waar teller én noemer door kunnen.'
+    case 'number-line':
+      return 'Tel de stapjes vanaf 0.'
+    case 'compare':
+      return 'Zijn de noemers gelijk? Kijk dan naar de tellers.'
+    case 'add':
+    case 'subtract':
+      return item.unlike ? 'Maak eerst de noemers gelijk.' : 'Zelfde noemer — tel de tellers op.'
+    case 'of-number':
+      return 'Deel eerst door de noemer.'
+  }
+}
+
+/** The one line of teaching that turns a wrong answer into a lesson. */
+function explain(item: FractionItem, verdict: Verdict): string {
+  switch (item.kind) {
+    case 'read-shape':
+      return `Onder de streep hoeveel stukken er zijn (${item.parts}), erboven hoeveel er gekleurd zijn (${item.shaded}).`
+    case 'colour-shape':
+      return `${toVulgar(item.target)} betekent ${item.answer} van de ${item.parts} stukken.`
+    case 'missing-numerator':
+      return `${item.given.d} × ${item.targetD / item.given.d} = ${item.targetD}, dus de teller gaat ook ${item.targetD / item.given.d}× zo groot: ${item.answer}.`
+    case 'simplify':
+      return `Teller en noemer kunnen allebei door ${item.sharedFactor}: ${item.given.n} ÷ ${item.sharedFactor} = ${item.answer.n} en ${item.given.d} ÷ ${item.sharedFactor} = ${item.answer.d}.`
+    case 'number-line':
+      return `${toVulgar(item.target)} is ${item.target.n} stapjes van de ${item.steps}.`
+    case 'compare':
+      return item.left.d === item.right.d
+        ? `Zelfde noemer, dus kijk alleen naar de tellers: ${item.left.n} ${item.answer} ${item.right.n}.`
+        : item.left.n === item.right.n
+          ? 'Zelfde teller: hoe meer stukken, hoe kleiner elk stuk.'
+          : `Maak de noemers gelijk, dan zie je het: ${toVulgar(item.left)} ${item.answer} ${toVulgar(item.right)}.`
+    case 'add':
+    case 'subtract':
+      return item.unlike
+        ? `Eerst dezelfde noemer maken, dan de tellers ${item.kind === 'add' ? 'optellen' : 'aftrekken'}. Antwoord: ${item.answer.n}/${item.answer.d}.`
+        : `Zelfde noemer, dus alleen de tellers ${item.kind === 'add' ? 'optellen' : 'aftrekken'}. Antwoord: ${item.answer.n}/${item.answer.d}.`
+    case 'of-number':
+      return verdict === 'goed'
+        ? `Precies: ${item.whole} ÷ ${item.frac.d} × ${item.frac.n} = ${item.answer}.`
+        : `Deel eerst door de noemer, keer dan de teller: ${item.whole} ÷ ${item.frac.d} = ${item.whole / item.frac.d}, × ${item.frac.n} = ${item.answer}.`
+  }
+}
+
+// ------------------------------------------------------------- scorecard
+
+function Scorecard({
+  slug,
+  correct,
+  total,
+  outcome,
+}: {
+  slug: string
+  correct: number
+  total: number
+  outcome: RoundOutcome | null
+}) {
+  const def = rungDef(rungBySlug(slug)!.rung)
+  const pct = Math.round((correct / total) * 100)
+  const mood: MascotEmotion = pct >= 80 ? 'excited' : pct >= 50 ? 'happy' : 'sad'
+
+  return (
+    <WorldShell world="breuken" backHref="/breuken" backLabel="Ladder">
+      <div className="pt-8 text-center">
+        <div className="flex justify-center">
+          <Mascot emotion={mood} size="large" animate />
+        </div>
+        <p className="mt-4 text-[12px] text-dim">
+          Level {def.rung} · {def.title}
+        </p>
+        <p className="mt-3 font-display text-[3.25rem] font-extrabold leading-none tabular tracking-tight text-plum">
+          {correct}
+          <span className="text-dim">/{total}</span>
+        </p>
+        <p className="mt-2 text-xs text-dim">{pct}% goed</p>
+        <p className="mt-3 text-sm text-dim">
+          {pct >= 80
+            ? 'Knap gedaan — die breuken liggen je.'
+            : pct >= 50
+              ? 'Goed bezig. Nog een rondje en je hebt hem.'
+              : 'Nog even oefenen. Dat komt goed.'}
+        </p>
+
+        {outcome?.pastry && (
+          <div className="mt-7 rounded-2xl card-lit p-5">
+            <div className="flex justify-center">
+              <PastryIcon
+                slug={outcome.pastry.slug}
+                size={72}
+                title={outcome.pastry.nameNl}
+              />
+            </div>
+            <p className="mt-2 font-display text-lg font-extrabold tracking-tight">
+              {outcome.upgraded ? 'Opgewaardeerd!' : outcome.pastry.nameNl}
+            </p>
+            <p className="mt-1 text-[12px] text-dim">
+              {tierLabel(outcome.tier)} · buitgemaakt
+            </p>
+          </div>
+        )}
+
+        {outcome?.rungCompleted && (
+          <p className="mt-5 font-display text-sm font-bold text-plum">
+            Level {def.rung} is af!
+            {outcome.unlockedNextRung && ' Het volgende level staat nu open.'}
+          </p>
+        )}
+
+        <div className="mt-8 space-y-2">
+          <Link
+            href={`/breuken/${slug}`}
+            className="btn-3d block w-full py-3.5 text-center font-display text-xl font-extrabold"
+          >
+            Nog een ronde
+          </Link>
+          <Link
+            href="/breuken"
+            className="btn-3d-quiet block w-full py-3 text-center font-display text-base font-extrabold text-dim"
+          >
+            Terug naar de ladder
+          </Link>
+        </div>
+      </div>
+    </WorldShell>
+  )
+}
+
+function tierLabel(tier: RoundOutcome['tier']): string {
+  switch (tier) {
+    case 'platinum':
+      return 'Platina'
+    case 'gold':
+      return 'Goud'
+    case 'silver':
+      return 'Zilver'
+    case 'bronze':
+      return 'Brons'
+    default:
+      return ''
+  }
+}
+
+// ---------------------------------------------------------------- pieces
+
+function StaticFraction({ n, d }: { n: number; d: number }) {
+  return (
+    <span className="flex flex-col items-center gap-1.5" aria-label={`${n} ${d}de`}>
+      <span className="text-[22px] font-semibold tabular">{n}</span>
+      <span aria-hidden className="h-0.5 w-8 rounded-sm bg-ink" />
+      <span className="text-[22px] font-semibold tabular">{d}</span>
+    </span>
+  )
+}
+
+/**
+ * The instruction above the item.
+ *
+ * `item.prompt` carries the sum itself so every generated item is unique
+ * (generateSet dedupes on it), but for the kinds whose body already
+ * *shows* that sum, repeating it as a heading is just noise. Those get
+ * an instruction instead.
+ */
+function headline(item: FractionItem): string {
+  switch (item.kind) {
+    case 'missing-numerator':
+      return 'Welk getal hoort hier?'
+    case 'simplify':
+      return 'Vereenvoudig zo ver als het kan'
+    case 'compare':
+      return 'Wat hoort ertussen?'
+    case 'add':
+      return 'Tel op'
+    case 'subtract':
+      return 'Trek af'
+    case 'of-number':
+      return 'Reken uit'
+    default:
+      // read-shape, colour-shape and number-line prompts are already
+      // instructions, not restatements.
+      return item.prompt
+  }
+}
+
+/** What the kid still has to do before the answer can be checked. */
+function missingHint(item: FractionItem): string {
+  switch (item.kind) {
+    case 'colour-shape':
+      return `Tik op de ${item.shape === 'pie' ? 'taart' : 'reep'} om te kleuren`
+    case 'number-line':
+      return 'Kies een plek op de lijn'
+    case 'compare':
+      return 'Kies <, = of >'
+    default:
+      return 'Vul je antwoord in'
+  }
+}
+
+function needsNumpad(item: FractionItem): boolean {
+  return (
+    item.kind === 'read-shape' ||
+    item.kind === 'missing-numerator' ||
+    item.kind === 'simplify' ||
+    item.kind === 'add' ||
+    item.kind === 'subtract' ||
+    item.kind === 'of-number'
+  )
+}
+
+function Numpad({
+  onDigit,
+  onBackspace,
+  onConfirm,
+  canConfirm,
+}: {
+  onDigit: (d: string) => void
+  onBackspace: () => void
+  onConfirm: () => void
+  canConfirm: boolean
+}) {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
+        <Key key={d} onClick={() => onDigit(d)}>
+          {d}
+        </Key>
+      ))}
+      <Key onClick={onBackspace} muted>
+        ⌫
+      </Key>
+      <Key onClick={() => onDigit('0')}>0</Key>
+      <button
+        type="button"
+        onClick={onConfirm}
+        disabled={!canConfirm}
+        className={`rounded-xl py-2.5 font-display text-[13px] font-bold transition-colors ${
+          canConfirm
+            ? 'bg-world text-white'
+            : 'cursor-not-allowed border border-line bg-surface text-dim'
+        }`}
+      >
+        OK
+      </button>
+    </div>
+  )
+}
+
+function Key({
+  onClick,
+  muted = false,
+  children,
+}: {
+  onClick: () => void
+  muted?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`btn-3d-quiet py-3 font-display text-2xl font-extrabold ${
+        muted ? 'text-dim' : ''
+      }`}
+    >
+      {children}
+    </button>
+  )
+}

@@ -2,241 +2,301 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Card, CardContent } from '@/components/ui/card'
-import { Mascot } from '@/components/mascot'
+import { useRouter } from 'next/navigation'
+import { saveResume } from '@/lib/resume'
+import { useProfile } from '@/lib/use-profile'
+import type { TableStats } from '@/lib/profile-manager'
 
 type Operation = 'multiply' | 'divide'
 type QuizMode = 'quiz' | 'practice' | 'timed'
 
-type OperationSetupProps = {
-  operation: Operation
-}
+const ALL_TABLES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-const OP_CONFIG = {
-  multiply: {
-    title: '× Vermenigvuldigen',
-    accentText: 'text-emerald-700 dark:text-emerald-400',
-    tileActive: 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-lg scale-105',
-    pillActive: 'bg-emerald-700 text-white shadow-md',
-  },
-  divide: {
-    title: '÷ Delen',
-    accentText: 'text-blue-700 dark:text-blue-400',
-    tileActive: 'bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg scale-105',
-    pillActive: 'bg-blue-700 text-white shadow-md',
-  },
-} as const
-
-const MODE_TILES: { id: QuizMode; emoji: string; label: string }[] = [
-  { id: 'quiz',     emoji: '📝', label: 'Quiz' },
+const MODES: { id: QuizMode; emoji: string; label: string }[] = [
+  { id: 'quiz', emoji: '📝', label: 'Quiz' },
   { id: 'practice', emoji: '♾️', label: 'Oefen' },
-  { id: 'timed',    emoji: '⏱️', label: 'Tijd' },
+  { id: 'timed', emoji: '⏱️', label: 'Tijd' },
 ]
 
-const MODE_GRADIENT: Record<QuizMode, string> = {
-  quiz:     'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white',
-  practice: 'bg-gradient-to-br from-blue-500 to-blue-700 text-white',
-  timed:    'bg-gradient-to-br from-amber-500 to-amber-700 text-gray-900',
+type OperationSetupProps = {
+  operation: Operation
+  /** Tafels shows the kluis above the practice shelf; delen has no safe yet. */
+  showKluis?: boolean
 }
 
-export function OperationSetup({ operation }: OperationSetupProps) {
-  const cfg = OP_CONFIG[operation]
+/**
+ * One screen, not three stacked cards. Everything starts on a sensible
+ * default — quiz, alle tafels, 10 vragen — so a kid who just wants to
+ * practise can press Start! immediately, and only the ones who care
+ * about the settings have to touch them.
+ */
+export function OperationSetup({ operation, showKluis = false }: OperationSetupProps) {
+  const router = useRouter()
+  const profile = useProfile()
+
   const [mode, setMode] = useState<QuizMode>('quiz')
-  const [tables, setTables] = useState<number[]>([])
+  const [tables, setTables] = useState<number[]>(ALL_TABLES)
   const [count, setCount] = useState(10)
   const [time, setTime] = useState(5)
-  const [mascotEmotion, setMascotEmotion] = useState<
-    'happy' | 'sad' | 'neutral' | 'excited' | 'thinking'
-  >('neutral')
-  const [mascotAnimate, setMascotAnimate] = useState(false)
 
-  const toggleTable = (t: number) => {
-    setTables((prev) => {
-      const has = prev.includes(t)
-      if (!has) {
-        setMascotEmotion('happy')
-        setMascotAnimate(true)
-        setTimeout(() => {
-          setMascotEmotion('neutral')
-          setMascotAnimate(false)
-        }, 600)
-      }
-      return has ? prev.filter((x) => x !== t) : [...prev, t]
-    })
-  }
-
-  const selectAll = () => setTables([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-  const clearAll = () => setTables([])
-
+  const animals = profile?.animals ?? []
   const canStart = tables.length > 0
+
+  const toggleTable = (t: number) =>
+    setTables((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))
 
   const start = () => {
     if (!canStart) return
+    const sorted = [...tables].sort((a, b) => a - b)
     const params = new URLSearchParams({
-      tables: [...tables].sort((a, b) => a - b).join(','),
+      tables: sorted.join(','),
       mode,
       operation,
-      count: count.toString(),
-      ...(mode === 'timed' && { time: time.toString() }),
+      count: String(count),
+      ...(mode === 'timed' && { time: String(time) }),
     })
-    window.location.href = `/quiz?${params.toString()}`
+    saveResume({
+      href: `/quiz?${params.toString()}`,
+      label: `${operation === 'multiply' ? 'Tafels' : 'Delen'} · ${modeLabel(mode)} · ${tafelLabel(sorted)}`,
+      icon: operation === 'multiply' ? '×' : '÷',
+    })
+    router.push(`/quiz?${params.toString()}`)
   }
 
-  const startSub = (() => {
-    const modeLabel = mode === 'quiz' ? 'Quiz' : mode === 'practice' ? 'Oefen' : 'Tijd'
-    const tlabel = tables.length === 1 ? '1 tafel' : `${tables.length} tafels`
-    const tail = mode === 'timed' ? ` · ${time}s per vraag` : ''
-    return canStart
-      ? `${modeLabel} · ${tlabel} · ${count} vragen${tail}`
-      : 'Kies eerst je tafels'
-  })()
-
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 md:py-10 space-y-4 md:space-y-6">
-      {/* Back + title + mascot */}
-      <div className="flex items-center gap-3">
-        <Link
-          href="/"
-          className="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
-        >
-          ← Home
-        </Link>
-        <h2 className={`ml-auto text-2xl md:text-3xl font-bold ${cfg.accentText}`}>
-          {cfg.title}
-        </h2>
-        <div className="flex-shrink-0">
-          <Mascot emotion={mascotEmotion} size="small" animate={mascotAnimate} />
+    <div className="space-y-4 pt-4">
+      {showKluis && <KluisHero animals={animals} operation={operation} />}
+
+      <Shelf title="Oefenen">
+        <div className="grid grid-cols-3 gap-2">
+          {MODES.map((m) => {
+            const active = mode === m.id
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setMode(m.id)}
+                aria-pressed={active}
+                className="btn-3d-quiet py-2.5"
+              >
+                <span aria-hidden className="block text-2xl leading-none">
+                  {m.emoji}
+                </span>
+                <span className="mt-1 block font-display text-[14px] font-extrabold">
+                  {m.label}
+                </span>
+              </button>
+            )
+          })}
         </div>
-      </div>
+      </Shelf>
 
-      {/* Mode row */}
-      <Card className="border-2 shadow-xl">
-        <CardContent className="p-4 md:p-6">
-          <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3">
-            1. Kies je modus
-          </h3>
-          <div className="grid grid-cols-3 gap-2 md:gap-3">
-            {MODE_TILES.map((t) => {
-              const active = mode === t.id
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => setMode(t.id)}
-                  className={`py-3 rounded-xl font-bold text-sm transition-all border-2 ${
-                    active
-                      ? `${MODE_GRADIENT[t.id]} border-transparent scale-105 shadow-lg`
-                      : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  <div className="text-xl">{t.emoji}</div>
-                  <div>{t.label}</div>
-                </button>
-              )
-            })}
+      <Shelf
+        title="Welke tafels"
+        action={
+          <div className="flex gap-3">
+            <TinyButton onClick={() => setTables(ALL_TABLES)}>alles</TinyButton>
+            <TinyButton onClick={() => setTables([])}>wissen</TinyButton>
           </div>
-        </CardContent>
-      </Card>
+        }
+      >
+        <div className="grid grid-cols-5 gap-2">
+          {ALL_TABLES.map((t) => (
+            <TableCell
+              key={t}
+              table={t}
+              selected={tables.includes(t)}
+              mastery={masteryFor(profile?.tableStats, t, operation)}
+              onToggle={() => toggleTable(t)}
+            />
+          ))}
+        </div>
+      </Shelf>
 
-      {/* Tafels */}
-      <Card className="border-2 shadow-xl">
-        <CardContent className="p-4 md:p-6">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-              2. Kies je tafels
-            </h3>
-            <div className="flex gap-3 text-xs">
-              <button onClick={selectAll} className="text-emerald-600 hover:underline font-semibold">
-                alles
-              </button>
-              <button onClick={clearAll} className="text-gray-500 hover:underline font-semibold">
-                wissen
-              </button>
-            </div>
-          </div>
-          <div className="grid grid-cols-10 gap-1.5 md:gap-2">
-            {Array.from({ length: 10 }, (_, i) => i + 1).map((t) => {
-              const active = tables.includes(t)
-              return (
-                <button
-                  key={t}
-                  onClick={() => toggleTable(t)}
-                  className={`aspect-square rounded-lg font-bold text-sm md:text-base transition-all ${
-                    active
-                      ? cfg.tileActive
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  {t}
-                </button>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      <Shelf title="Hoeveel vragen">
+        <div className="grid grid-cols-4 gap-2">
+          {[10, 20, 30, 50].map((n) => (
+            <Pill key={n} active={count === n} onClick={() => setCount(n)}>
+              {n}
+            </Pill>
+          ))}
+        </div>
 
-      {/* Config */}
-      <Card className="border-2 shadow-xl">
-        <CardContent className="p-4 md:p-6 space-y-3">
-          <div>
-            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">
-              3. Aantal vragen
-            </h3>
-            <div className="grid grid-cols-4 gap-2">
-              {[10, 20, 30, 50].map((n) => (
-                <button
-                  key={n}
-                  onClick={() => setCount(n)}
-                  className={`py-2 rounded-lg font-bold text-sm transition-all ${
-                    count === n
-                      ? cfg.pillActive
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className={mode === 'timed' ? '' : 'opacity-50 pointer-events-none'}>
-            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">
-              Tijd per vraag{' '}
-              <span className="text-xs font-normal text-gray-400">
-                (alleen tijdmodus)
-              </span>
-            </h3>
+        {mode === 'timed' && (
+          <div className="mt-3">
+            <p className="mb-2 text-[12px] text-dim">
+              Seconden per vraag
+            </p>
             <div className="grid grid-cols-3 gap-2">
               {[3, 4, 5].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setTime(s)}
-                  className={`py-2 rounded-lg font-bold text-sm transition-all ${
-                    time === s
-                      ? 'bg-amber-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
-                  }`}
-                >
+                <Pill key={s} active={time === s} onClick={() => setTime(s)}>
                   {s}s
-                </button>
+                </Pill>
               ))}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </Shelf>
 
-      {/* Start */}
       <button
+        type="button"
         onClick={start}
         disabled={!canStart}
-        className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${
-          canStart
-            ? `${MODE_GRADIENT[mode]} hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0`
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-        }`}
+        className="btn-3d w-full py-3.5"
       >
-        <div>Start!</div>
-        <div className="text-xs font-normal opacity-90 mt-0.5">{startSub}</div>
+        <span className="block font-display text-xl font-extrabold">Start!</span>
+        <span className="mt-0.5 block text-[13px] font-semibold opacity-85">
+          {canStart
+            ? `${modeLabel(mode)} · ${tafelLabel(tables)} · ${count} vragen${
+                mode === 'timed' ? ` · ${time}s` : ''
+              }`
+            : 'Kies eerst je tafels'}
+        </span>
       </button>
     </div>
   )
+}
+
+function KluisHero({
+  animals,
+  operation,
+}: {
+  animals: { tableIndex: number }[]
+  operation: Operation
+}) {
+  const remaining = 10 - animals.length
+  const isDivide = operation === 'divide'
+  return (
+    <Link
+      href={isDivide ? '/delen/kluis' : '/tafels/kluis'}
+      className="world-kluis btn-3d flex items-center gap-3.5 p-4"
+    >
+      <span className="flex-1">
+        <span className="block font-display text-2xl font-extrabold text-white">
+          {isDivide ? 'Kraak de deelkluis' : 'Kraak de kluis'}
+        </span>
+        <span className="mt-1 block text-[13px] font-semibold text-white/85">
+          {remaining === 0
+            ? 'alle dieren bevrijd — ga voor platina'
+            : `nog ${remaining} ${remaining === 1 ? 'dier' : 'dieren'} opgesloten`}
+        </span>
+        <span className="mt-3 inline-block rounded-full bg-white px-4 py-2 font-display text-[15px] font-extrabold text-world">
+          {animals.length === 0 ? 'Begin de kraak' : 'Verder kraken'}
+        </span>
+      </span>
+      <span aria-hidden className="text-[44px] leading-none">
+        🔐
+      </span>
+    </Link>
+  )
+}
+
+function TableCell({
+  table,
+  selected,
+  mastery,
+  onToggle,
+}: {
+  table: number
+  selected: boolean
+  mastery: number | null
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={selected}
+      aria-label={`Tafel van ${table}${mastery === null ? '' : `, ${mastery}% goed`}`}
+      className="btn-3d-quiet flex aspect-square flex-col items-center justify-center gap-1.5 font-display text-lg font-extrabold"
+    >
+      {table}
+      {/* Mastery from tableStats: the picker tells you something instead
+          of only asking. An untouched tafel shows a flat rule. */}
+      <span
+        aria-hidden
+        className="block h-0.5 w-3.5 overflow-hidden rounded-sm bg-line"
+      >
+        {mastery !== null && (
+          <span className="block h-full bg-world" style={{ width: `${mastery}%` }} />
+        )}
+      </span>
+    </button>
+  )
+}
+
+function Shelf({
+  title,
+  action,
+  children,
+}: {
+  title: string
+  action?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <section>
+      <div className="mb-2 flex items-center gap-3">
+        <h2 className="text-[12px] text-dim">
+          {title}
+        </h2>
+        <span aria-hidden className="h-px flex-1 bg-line" />
+        {action}
+      </div>
+      {children}
+    </section>
+  )
+}
+
+function TinyButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-[12px] text-dim underline-offset-2 transition-colors hover:text-world hover:underline"
+    >
+      {children}
+    </button>
+  )
+}
+
+function Pill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className="btn-3d-quiet py-2 font-display text-base font-extrabold tabular"
+    >
+      {children}
+    </button>
+  )
+}
+
+function modeLabel(mode: QuizMode): string {
+  return mode === 'quiz' ? 'Quiz' : mode === 'practice' ? 'Oefen' : 'Tijd'
+}
+
+function tafelLabel(tables: number[]): string {
+  if (tables.length === 10) return 'alle tafels'
+  return tables.length === 1 ? '1 tafel' : `${tables.length} tafels`
+}
+
+/** Percentage correct for one tafel, or null when it has never been tried. */
+function masteryFor(
+  stats: TableStats | undefined,
+  table: number,
+  operation: Operation,
+): number | null {
+  const entry = stats?.[table]?.[operation]
+  if (!entry || entry.attempts === 0) return null
+  return Math.round((entry.correct / entry.attempts) * 100)
 }

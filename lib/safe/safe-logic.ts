@@ -1,10 +1,14 @@
 export type Difficulty = 'easy' | 'medium' | 'hard'
-export type AnimalTier = 'bronze' | 'silver' | 'gold'
+
+/** Which sum a safe's slots pose. The dial itself does not care. */
+export type SafeOperation = 'multiply' | 'divide'
+export type AnimalTier = 'bronze' | 'silver' | 'gold' | 'platinum'
 
 export type SafeSlot = {
   factor: number         // 1..10 (the multiplier)
   table: number          // the fixed table for this safe (1..10)
-  answer: number         // factor * table
+  answer: number         // what the player must enter
+  label: string          // the sum printed above the slot, e.g. "7×3" or "21÷3"
   isGap: boolean         // true = player must fill; false = pre-filled
 }
 
@@ -20,11 +24,25 @@ export function gapsForSafe(difficulty: Difficulty, safeIndex: number): number {
   return Math.min(10, base + (safeIndex - 1))
 }
 
-/** Map mistake count to earned tier. */
-export function scoreTier(mistakes: number): AnimalTier {
-  if (mistakes === 0) return 'gold'
-  if (mistakes <= 2) return 'silver'
-  return 'bronze'
+/**
+ * Map mistake count + difficulty to an earned tier using the α mapping.
+ * Makkelijk: 0 → silver,   any → bronze.
+ * Normaal:   0 → gold,     1-2 → silver,   3+ → bronze.
+ * Moeilijk:  0 → platinum, 1-2 → gold,     3+ → silver (no bronze).
+ */
+export function scoreTier(mistakes: number, difficulty: Difficulty): AnimalTier {
+  if (difficulty === 'easy') {
+    return mistakes === 0 ? 'silver' : 'bronze'
+  }
+  if (difficulty === 'medium') {
+    if (mistakes === 0) return 'gold'
+    if (mistakes <= 2) return 'silver'
+    return 'bronze'
+  }
+  // hard
+  if (mistakes === 0) return 'platinum'
+  if (mistakes <= 2) return 'gold'
+  return 'silver'
 }
 
 /**
@@ -43,6 +61,8 @@ export function endlessSafeTimer(safeIndex: number): number {
 export type BuildSafeArgs = {
   table: number
   gapCount: number
+  /** Defaults to multiply, which is how every existing safe was built. */
+  operation?: SafeOperation
   rng?: () => number
 }
 
@@ -54,17 +74,29 @@ const ALL_FACTORS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
  * dial, going clockwise) and the factor at each position is shuffled, so
  * consecutive runs won't show the same sequential 1,2,3,...,10 layout.
  */
-export function buildSafe({ table, gapCount, rng = Math.random }: BuildSafeArgs): SafeSlot[] {
+export function buildSafe({
+  table,
+  gapCount,
+  operation = 'multiply',
+  rng = Math.random,
+}: BuildSafeArgs): SafeSlot[] {
   const gaps = pickN(ALL_FACTORS, gapCount, rng)
   const gapSet = new Set(gaps)
   const wheelOrder = pickN(ALL_FACTORS, ALL_FACTORS.length, rng)
 
-  return wheelOrder.map((factor) => ({
-    factor,
-    table,
-    answer: factor * table,
-    isGap: gapSet.has(factor),
-  }))
+  return wheelOrder.map((factor) => {
+    const product = factor * table
+    // Division is the same fact read backwards: the dial, the numpad and
+    // the whole reveal animation are unchanged, only the slot differs.
+    const isDivide = operation === 'divide'
+    return {
+      factor,
+      table,
+      answer: isDivide ? factor : product,
+      label: isDivide ? `${product}\u00f7${table}` : `${factor}\u00d7${table}`,
+      isGap: gapSet.has(factor),
+    }
+  })
 }
 
 /** Shuffle a list of tables into a deck for even per-run distribution. */

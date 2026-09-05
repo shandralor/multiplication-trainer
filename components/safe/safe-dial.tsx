@@ -16,8 +16,10 @@ type SafeDialProps = {
   onSlotClick: (factor: number) => void
   spinning?: boolean
   flash?: boolean
-  label?: string                  // e.g., "×7"
+  label?: string                  // e.g., "×7" or "÷7"
   subLabel?: string               // e.g., "3 / 10 ingevuld"
+  /** Sits above the label; names the safe rather than assuming it is a × one. */
+  title?: string
 }
 
 export function SafeDial({
@@ -29,6 +31,7 @@ export function SafeDial({
   flash = false,
   label = '',
   subLabel = '',
+  title = 'Kraak de kluis',
 }: SafeDialProps) {
   const dialRef = useRef<HTMLDivElement | null>(null)
 
@@ -47,21 +50,49 @@ export function SafeDial({
         aspectRatio: '1 / 1',
       }}
     >
+      {/* The safe door: a thick coloured ring, a lighter inner face, and
+          six bolts around the rim. Flat shapes and hard edges — cartoon
+          depth, not a gradient trying to look like metal. */}
       <div
         ref={dialRef}
-        className={`relative w-full h-full rounded-full border-8 border-gray-400 bg-gradient-to-br from-gray-600 to-gray-900 shadow-2xl transition-transform duration-700 ${
+        className={`relative h-full w-full rounded-full transition-transform duration-700 ${
           spinning ? 'animate-[spin_0.9s_ease-in-out]' : ''
-        } ${flash ? 'ring-8 ring-yellow-300' : ''}`}
+        }`}
         style={{
-          boxShadow:
-            '0 10px 30px rgba(0,0,0,0.4), inset 0 4px 20px rgba(255,255,255,0.1)',
+          background: 'var(--world)',
+          border: '6px solid var(--world-edge)',
+          boxShadow: flash ? '0 0 0 10px var(--world-wash)' : '0 8px 0 var(--world-edge)',
         }}
       >
+        {/* Bolts around the rim */}
+        {Array.from({ length: 6 }, (_, i) => {
+          const angle = (i / 6) * Math.PI * 2 - Math.PI / 2
+          return (
+            <span
+              key={i}
+              aria-hidden
+              className="absolute h-3 w-3 rounded-full sm:h-4 sm:w-4"
+              style={{
+                background: 'var(--world-edge)',
+                left: `${50 + Math.cos(angle) * 41}%`,
+                top: `${50 + Math.sin(angle) * 41}%`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            />
+          )
+        })}
+
+        {/* Inner face */}
+        <div
+          className="absolute inset-[14%] rounded-full"
+          style={{ background: 'var(--surface)', border: '5px solid var(--world-edge)' }}
+        />
+
         {/* Center label */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-white pointer-events-none">
-          <span className="text-xs tracking-[0.2em] text-gray-300">Kraak de kluis</span>
-          <span className="text-5xl font-extrabold mt-1">{label}</span>
-          {subLabel && <span className="text-xs text-emerald-200 mt-2">{subLabel}</span>}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-ink">
+          <span className="text-sm font-bold text-dim">{title}</span>
+          <span className="mt-1 font-display text-6xl font-extrabold text-world">{label}</span>
+          {subLabel && <span className="mt-2 text-sm font-bold text-dim">{subLabel}</span>}
         </div>
       </div>
 
@@ -80,7 +111,7 @@ export function SafeDial({
           >
             <SafeSlot
               factor={slot.factor}
-              table={slot.table}
+              label={slot.label}
               displayValue={status.displayValue}
               state={
                 activeFactor === slot.factor && status.state === 'gap-empty'

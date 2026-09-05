@@ -21,14 +21,23 @@ export function ModePicker({ value, onChange }: ModePickerProps) {
           <button
             key={opt.id}
             onClick={() => onChange(opt.id)}
-            className={`p-4 rounded-xl font-bold text-left transition-all border-2 ${
+            aria-pressed={active}
+            className={`rounded-xl border p-4 text-left transition-all ${
               active
-                ? 'bg-gradient-to-br from-indigo-500 to-indigo-700 text-white border-indigo-700 shadow-lg scale-105'
-                : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
+                ? 'border-world bg-world-dim'
+                : 'border-line bg-surface hover:border-dim'
             }`}
           >
-            <div className="text-lg">{opt.label}</div>
-            <div className={`text-xs ${active ? 'opacity-90' : 'text-gray-500'}`}>{opt.desc}</div>
+            <div
+              className={`font-display text-lg font-extrabold tracking-tight ${
+                active ? 'text-world' : 'text-ink'
+              }`}
+            >
+              {opt.label}
+            </div>
+            <div className="mt-0.5 text-[12px] leading-snug text-dim">
+              {opt.desc}
+            </div>
           </button>
         )
       })}

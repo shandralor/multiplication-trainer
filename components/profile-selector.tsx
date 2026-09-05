@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,40 +17,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { 
-  getAllProfiles, 
-  getCurrentProfile, 
-  setCurrentProfileId, 
+import {
+  getAllProfiles,
+  getProfileVersion,
+  setCurrentProfileId,
   createProfile,
   deleteProfile,
-  type UserProfile 
 } from '@/lib/profile-manager'
+import { useProfile } from '@/lib/use-profile'
 
 type ProfileSelectorProps = {
   onProfileChange?: () => void
 }
 
 export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
-  const [currentProfile, setCurrentProfile] = useState<UserProfile | null>(null)
-  const [allProfiles, setAllProfiles] = useState<UserProfile[]>([])
   const [showNewProfileDialog, setShowNewProfileDialog] = useState(false)
   const [newProfileName, setNewProfileName] = useState('')
 
-  const loadProfiles = useCallback(() => {
-    const profiles = getAllProfiles()
-    const current = getCurrentProfile()
-    setAllProfiles(profiles)
-    setCurrentProfile(current)
-  }, [])
-
-  useEffect(() => {
-    loadProfiles()
-  }, [loadProfiles])
+  // Reading through useProfile rather than a local snapshot: the picker
+  // used to load once on mount, which meant it rendered nothing at all
+  // when the default profile was still being created alongside it.
+  const currentProfile = useProfile()
+  const allProfiles = useMemo(
+    () => (currentProfile ? getAllProfiles() : []),
+    // getProfileVersion changes on every write, which is what makes the
+    // list pick up a newly created or deleted profile.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentProfile, getProfileVersion()],
+  )
 
   const handleSwitchProfile = (profileId: string) => {
     setCurrentProfileId(profileId)
-    loadProfiles()
-    if (onProfileChange) onProfileChange()
+    onProfileChange?.()
   }
 
   const handleCreateProfile = () => {
@@ -58,8 +56,7 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
       createProfile(newProfileName.trim())
       setNewProfileName('')
       setShowNewProfileDialog(false)
-      loadProfiles()
-      if (onProfileChange) onProfileChange()
+      onProfileChange?.()
     }
   }
 
@@ -68,11 +65,10 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
       alert('Je moet minimaal één profiel hebben!')
       return
     }
-    
+
     if (confirm('Weet je zeker dat je dit profiel wilt verwijderen?')) {
       deleteProfile(profileId)
-      loadProfiles()
-      if (onProfileChange) onProfileChange()
+      onProfileChange?.()
     }
   }
 
@@ -82,16 +78,18 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-            <span className="text-xl">👤</span>
-            <span className="font-semibold text-gray-800 dark:text-white hidden sm:inline">
+          <button className="flex items-center gap-2 rounded-full border border-line px-2.5 py-1 transition-colors hover:border-brass">
+            <span aria-hidden className="grid h-6 w-6 place-items-center rounded-full bg-surface text-sm">
+              🦝
+            </span>
+            <span className="font-display text-[13px] font-bold tracking-tight">
               {currentProfile.name}
             </span>
-            <span className="text-gray-400">▼</span>
+            <span aria-hidden className="text-[12px] text-dim">▼</span>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400">
+          <div className="px-2 py-1.5 text-[12px] text-dim">
             PROFIELEN
           </div>
           {allProfiles.map(profile => (
@@ -99,14 +97,14 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
               key={profile.id}
               onClick={() => handleSwitchProfile(profile.id)}
               className={`flex items-center justify-between ${
-                profile.id === currentProfile.id ? 'bg-green-50 dark:bg-green-900/20' : ''
+                profile.id === currentProfile.id ? 'bg-goed/10' : ''
               }`}
             >
               <div className="flex items-center gap-2">
                 <span className="text-lg">👤</span>
                 <span className="font-medium">{profile.name}</span>
                 {profile.id === currentProfile.id && (
-                  <span className="text-green-600 dark:text-green-400">✓</span>
+                  <span className="font-extrabold text-goed">✓</span>
                 )}
               </div>
               {profile.id !== currentProfile.id && allProfiles.length > 1 && (
@@ -115,7 +113,7 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
                     e.stopPropagation()
                     handleDeleteProfile(profile.id)
                   }}
-                  className="text-red-500 hover:text-red-700 ml-2"
+                  className="ml-2 text-fout transition-opacity hover:opacity-70"
                   title="Verwijder profiel"
                 >
                   🗑️
@@ -126,7 +124,7 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setShowNewProfileDialog(true)}
-            className="text-green-600 dark:text-green-400 font-semibold"
+            className="font-extrabold text-goed"
           >
             <span className="mr-2">➕</span>
             Nieuw Profiel
