@@ -16,9 +16,9 @@ const Round = dynamic(() => import('./round').then((m) => m.Round), {
   loading: () => <RoundSkeleton />,
 })
 
-export default function TredePage({ params }: { params: Promise<{ trede: string }> }) {
-  const { trede } = use(params)
-  const def = rungBySlug(trede)
+export default function LevelPage({ params }: { params: Promise<{ level: string }> }) {
+  const { level } = use(params)
+  const def = rungBySlug(level)
   if (!def) notFound()
 
   return <Round slug={def.slug} />

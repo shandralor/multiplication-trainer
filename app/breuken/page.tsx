@@ -28,19 +28,19 @@ export default function BreukenPage() {
   const mood = done === RUNGS.length ? 'excited' : done > 0 ? 'happy' : 'neutral'
   const ladderLine =
     done === RUNGS.length
-      ? 'Alle vier de tredes gehaald. Je bent een breukenbaas.'
+      ? 'Alle vier de levels gehaald. Je bent een breukenbaas.'
       : done > 0
-        ? `Trede ${done + 1} staat voor je klaar.`
+        ? `Level ${done + 1} staat voor je klaar.`
         : unlockAll
-          ? 'Alle tredes staan open — kies er maar een.'
-          : 'Elke trede opent de volgende.'
+          ? 'Alle levels staan open — kies er maar een.'
+          : 'Elk level opent het volgende.'
 
   return (
     <WorldShell world="breuken" backHref="/">
       <AppHeader />
 
       <div className="flex items-center gap-4 pt-5">
-        {/* The mascot reads the ladder: pleased once a trede is done,
+        {/* The mascot reads the ladder: pleased once a level is done,
             delighted when the whole thing is. */}
         <Mascot emotion={mood} size="large" />
         <div className="min-w-0">
@@ -49,7 +49,7 @@ export default function BreukenPage() {
               ? 'Klim de ladder op'
               : done === RUNGS.length
                 ? 'De hele ladder is af!'
-                : `${done} van de ${RUNGS.length} tredes af`}
+                : `${done} van de ${RUNGS.length} levels af`}
           </h1>
           <p className="mt-1.5 text-[12px] leading-snug text-dim">{ladderLine}</p>
         </div>

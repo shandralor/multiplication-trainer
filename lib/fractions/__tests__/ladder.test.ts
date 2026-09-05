@@ -29,7 +29,7 @@ describe('rung definitions', () => {
   })
 
   it('throws on an unknown rung number', () => {
-    expect(() => rungDef(9 as Rung)).toThrow(/Onbekende trede/)
+    expect(() => rungDef(9 as Rung)).toThrow(/Onbekend level/)
   })
 })
 

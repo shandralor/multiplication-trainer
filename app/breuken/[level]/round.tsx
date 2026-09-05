@@ -42,7 +42,10 @@ export function Round({ slug }: { slug: string }) {
   const [numerator, setNumerator] = useState('')
   const [denominator, setDenominator] = useState('')
   const [field, setField] = useState<'n' | 'd'>('n')
-  const [shaded, setShaded] = useState(0)
+  // Which parts the kid has coloured. A set, not a count: filling
+  // "up to part i" meant one tap on the last piece filled the whole
+  // shape, which is not what tapping a piece should do.
+  const [filled, setFilled] = useState<Set<number>>(() => new Set())
   const [placed, setPlaced] = useState<number | null>(null)
   const [choice, setChoice] = useState<string | null>(null)
 
@@ -52,11 +55,20 @@ export function Round({ slug }: { slug: string }) {
     setNumerator('')
     setDenominator('')
     setField('n')
-    setShaded(0)
+    setFilled(new Set())
     setPlaced(null)
     setChoice(null)
     setVerdict(null)
     setPhase('asking')
+  }, [])
+
+  const toggleFilled = useCallback((index: number) => {
+    setFilled((current) => {
+      const next = new Set(current)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
+      return next
+    })
   }, [])
 
   const answerFor = useCallback((): unknown => {
@@ -66,8 +78,8 @@ export function Round({ slug }: { slug: string }) {
         // assembles from the teller alone.
         return numerator ? frac(Number(numerator), item.parts) : null
       case 'colour-shape':
-        // Zero shaded parts is a mis-tap, not an answer.
-        return shaded > 0 ? shaded : null
+        // Zero coloured parts is a mis-tap, not an answer.
+        return filled.size > 0 ? filled.size : null
       case 'missing-numerator':
         return numerator ? Number(numerator) : null
       case 'simplify':
@@ -82,14 +94,14 @@ export function Round({ slug }: { slug: string }) {
       case 'of-number':
         return numerator ? Number(numerator) : null
     }
-  }, [item, numerator, denominator, shaded, placed, choice])
+  }, [item, numerator, denominator, filled, placed, choice])
 
   const answer = answerFor()
   const canCheck = answer !== null && answer !== undefined && answer !== ''
   // Any mark on the item counts as started — a typed digit, a shaded
   // slice, a placed token, a chosen sign.
   const hasStartedAnswering =
-    canCheck || numerator !== '' || denominator !== '' || shaded > 0 || placed !== null
+    canCheck || numerator !== '' || denominator !== '' || filled.size > 0 || placed !== null
 
   const check = () => {
     if (!canCheck || phase !== 'asking') return
@@ -139,7 +151,7 @@ export function Round({ slug }: { slug: string }) {
       <div className="mx-auto max-w-sm pt-3">
         <div className="flex items-center justify-between gap-3">
           <span className="rounded-full bg-world-wash px-3 py-1 text-sm font-extrabold text-world">
-            Trede {def.rung} · {def.title}
+            Level {def.rung} · {def.title}
           </span>
           <span className="font-display text-base font-extrabold tabular text-dim">
             {index + 1} / {items.length}
@@ -169,11 +181,11 @@ export function Round({ slug }: { slug: string }) {
             numerator={numerator}
             denominator={denominator}
             field={field}
-            shaded={shaded}
+            filled={filled}
             placed={placed}
             choice={choice}
             setField={setField}
-            setShaded={setShaded}
+            toggleFilled={toggleFilled}
             setPlaced={setPlaced}
             setChoice={setChoice}
           />
@@ -232,11 +244,11 @@ type BodyProps = {
   numerator: string
   denominator: string
   field: 'n' | 'd'
-  shaded: number
+  filled: Set<number>
   placed: number | null
   choice: string | null
   setField: (f: 'n' | 'd') => void
-  setShaded: (n: number) => void
+  toggleFilled: (index: number) => void
   setPlaced: (n: number) => void
   setChoice: (c: string) => void
 }
@@ -268,16 +280,13 @@ function ItemBody(props: BodyProps) {
           <FractionShape
             shape={item.shape}
             parts={item.parts}
-            shaded={props.shaded}
-            onToggle={
-              locked
-                ? undefined
-                : (i) => props.setShaded(i + 1 === props.shaded ? i : i + 1)
-            }
-            label={`${props.shaded} van de ${item.parts} delen gekleurd`}
+            shaded={props.filled.size}
+            isFilled={(i) => props.filled.has(i)}
+            onToggle={locked ? undefined : props.toggleFilled}
+            label={`${props.filled.size} van de ${item.parts} delen gekleurd`}
           />
-          <p className="text-[12px] text-dim">
-            {props.shaded} van de {item.parts} gekleurd
+          <p className="text-[14px] font-semibold text-dim">
+            {props.filled.size} van de {item.parts} gekleurd
           </p>
         </div>
       )
@@ -531,7 +540,7 @@ function Scorecard({
           <Mascot emotion={mood} size="large" animate />
         </div>
         <p className="mt-4 text-[12px] text-dim">
-          Trede {def.rung} · {def.title}
+          Level {def.rung} · {def.title}
         </p>
         <p className="mt-3 font-display text-[3.25rem] font-extrabold leading-none tabular tracking-tight text-plum">
           {correct}
@@ -566,8 +575,8 @@ function Scorecard({
 
         {outcome?.rungCompleted && (
           <p className="mt-5 font-display text-sm font-bold text-plum">
-            Trede {def.rung} is af!
-            {outcome.unlockedNextRung && ' De volgende trede staat nu open.'}
+            Level {def.rung} is af!
+            {outcome.unlockedNextRung && ' Het volgende level staat nu open.'}
           </p>
         )}
 

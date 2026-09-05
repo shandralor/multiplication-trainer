@@ -102,7 +102,7 @@ export default function KluiskamerPage() {
                   className={entry ? '' : 'opacity-25 grayscale'}
                 />
                 <span className="text-[12px] uppercase tracking-wide text-dim">
-                  {entry ? TIER_LABEL[entry.tier] : `trede ${pastry.rung}`}
+                  {entry ? TIER_LABEL[entry.tier] : `level ${pastry.rung}`}
                 </span>
               </div>
             )

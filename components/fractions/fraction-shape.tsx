@@ -5,7 +5,14 @@ import type { Shape } from '@/lib/fractions/types'
 type FractionShapeProps = {
   shape: Shape
   parts: number
+  /** How many parts are filled — used for the caption and the count. */
   shaded: number
+  /**
+   * Which parts are filled. Defaults to the first `shaded` of them, which
+   * is what a generated drawing wants; interactive items pass their own
+   * so a kid can colour any piece they like.
+   */
+  isFilled?: (index: number) => boolean
   /** Tapping a part toggles it — used by the "kleur ⅔" items. */
   onToggle?: (index: number) => void
   size?: number
@@ -22,17 +29,19 @@ export function FractionShape({
   shape,
   parts,
   shaded,
+  isFilled,
   onToggle,
   size = 176,
   label,
 }: FractionShapeProps) {
   const interactive = Boolean(onToggle)
+  const filled = isFilled ?? ((i: number) => i < shaded)
   const description = label ?? `${shaded} van de ${parts} delen gekleurd`
 
   return shape === 'pie' ? (
     <Pie
       parts={parts}
-      shaded={shaded}
+      filled={filled}
       size={size}
       onToggle={onToggle}
       interactive={interactive}
@@ -41,7 +50,7 @@ export function FractionShape({
   ) : (
     <Bar
       parts={parts}
-      shaded={shaded}
+      filled={filled}
       size={size}
       onToggle={onToggle}
       interactive={interactive}
@@ -52,14 +61,14 @@ export function FractionShape({
 
 type InnerProps = {
   parts: number
-  shaded: number
+  filled: (index: number) => boolean
   size: number
   onToggle?: (index: number) => void
   interactive: boolean
   description: string
 }
 
-function Pie({ parts, shaded, size, onToggle, interactive, description }: InnerProps) {
+function Pie({ parts, filled, size, onToggle, interactive, description }: InnerProps) {
   const R = 70
   const C = 80
 
@@ -83,7 +92,7 @@ function Pie({ parts, shaded, size, onToggle, interactive, description }: InnerP
         const [x1, y1] = point(i)
         const [x2, y2] = point(i + 1)
         const largeArc = 360 / parts > 180 ? 1 : 0
-        const isShaded = i < shaded
+        const isShaded = filled(i)
         return (
           <path
             key={i}
@@ -96,12 +105,20 @@ function Pie({ parts, shaded, size, onToggle, interactive, description }: InnerP
           />
         )
       })}
-      <circle cx={C} cy={C} r={R} fill="none" stroke="var(--dim)" strokeWidth="2" />
+      <circle
+        cx={C}
+        cy={C}
+        r={R}
+        fill="none"
+        stroke="var(--dim)"
+        strokeWidth="2"
+        pointerEvents="none"
+      />
     </svg>
   )
 }
 
-function Bar({ parts, shaded, size, onToggle, interactive, description }: InnerProps) {
+function Bar({ parts, filled, size, onToggle, interactive, description }: InnerProps) {
   const W = 260
   const H = 64
   const partW = W / parts
@@ -122,7 +139,7 @@ function Bar({ parts, shaded, size, onToggle, interactive, description }: InnerP
           y={0}
           width={partW}
           height={H}
-          fill={i < shaded ? 'var(--world)' : 'var(--card)'}
+          fill={filled(i) ? 'var(--world)' : 'var(--card)'}
           stroke="var(--line)"
           strokeWidth="1.5"
           onClick={onToggle ? () => onToggle(i) : undefined}
@@ -138,6 +155,7 @@ function Bar({ parts, shaded, size, onToggle, interactive, description }: InnerP
         stroke="var(--dim)"
         strokeWidth="2"
         rx="4"
+        pointerEvents="none"
       />
     </svg>
   )

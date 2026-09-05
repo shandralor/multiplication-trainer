@@ -53,7 +53,7 @@ export function rungBySlug(slug: string): RungDef | undefined {
 
 export function rungDef(rung: Rung): RungDef {
   const def = RUNGS.find((r) => r.rung === rung)
-  if (!def) throw new Error(`Onbekende trede ${rung}`)
+  if (!def) throw new Error(`Onbekend level ${rung}`)
   return def
 }
 

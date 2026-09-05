@@ -72,8 +72,8 @@ export default function Home() {
             name="Breuken"
             detail={
               rungsDone === 0
-                ? `${RUNGS.length} tredes · nog niet begonnen`
-                : `${rungsDone}/${RUNGS.length} tredes af · ${pastries.length}/${PASTRIES.length} gebakjes`
+                ? `${RUNGS.length} levels · nog niet begonnen`
+                : `${rungsDone}/${RUNGS.length} levels af · ${pastries.length}/${PASTRIES.length} gebakjes`
             }
             badge={rungsDone === 0 ? 'NIEUW' : undefined}
           />
