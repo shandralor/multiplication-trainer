@@ -2,12 +2,19 @@ import type { AnimalTier } from '@/lib/safe/safe-logic'
 import type { Rung } from './types'
 
 /**
- * The Breuken world's collection. Ten gebakjes, earned the way the ten
- * animals are: one per completed rung pass, upgraded on a better run.
+ * The Breuken world's collection — the Taartenkluis. Ten gebakjes,
+ * earned the way the ten animals are: one per completed rung pass,
+ * upgraded on a better run.
  *
- * Emoji rather than PNGs for now — the animal set came from a paid pack
- * and there is no matching pastry art yet. `emoji` is the seam: swap it
- * for a `pngPath` when the art lands and nothing else changes.
+ * Named for the heist rather than for a bakery: the animals are locked
+ * in safes and you free them, so the gebakjes are locked in one too and
+ * you steal them. A raccoon robbing a cake vault is on-theme in a way
+ * that "collecting pastries" never was.
+ *
+ * Emoji rather than PNGs for now: the animals come from Kenney's
+ * Animal Pack Remastered (CC0) and there is no matching food set in that
+ * style yet. `emoji` is the seam — swap it for a `pngPath` when the art
+ * lands and nothing else in the module changes.
  */
 export type Pastry = {
   index: number // 1..10

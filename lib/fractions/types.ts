@@ -97,7 +97,7 @@ export type RungProgress = {
   attempts: number
   /** Set the first time the rung is finished; never cleared. */
   completedAt?: string
-  /** Best run of consecutive correct answers, for the bakkerij tier. */
+  /** Best run of consecutive correct answers, for the taartenkluis tier. */
   bestStreak: number
 }
 

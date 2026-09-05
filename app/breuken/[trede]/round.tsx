@@ -554,7 +554,7 @@ function Scorecard({
               {outcome.upgraded ? 'Opgewaardeerd!' : outcome.pastry.nameNl}
             </p>
             <p className="mt-1 text-[12px] text-dim">
-              {tierLabel(outcome.tier)} · in de bakkerij
+              {tierLabel(outcome.tier)} · buitgemaakt
             </p>
           </div>
         )}

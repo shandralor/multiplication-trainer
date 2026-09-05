@@ -115,7 +115,7 @@ export type UserProfile = {
 
   // --- Breuken -----------------------------------------------------
   fractionProgress: FractionProgress
-  pastries: PastryEntry[]              // the bakkerij, breuken's own collection
+  pastries: PastryEntry[]              // the taartenkluis, breuken's own collection
   recentFractionResults: FractionRoundResult[]
   settings: ProfileSettings
 }

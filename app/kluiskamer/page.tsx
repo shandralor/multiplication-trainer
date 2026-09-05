@@ -82,7 +82,7 @@ export default function KluiskamerPage() {
         </div>
       </Section>
 
-      <Section title="Bakkerij" count={`${pastries.length} / ${PASTRIES.length}`}>
+      <Section title="Taartenkluis" count={`${pastries.length} / ${PASTRIES.length}`}>
         <div className="grid grid-cols-5 gap-2">
           {PASTRIES.map((pastry) => {
             const entry = pastries.find((p) => p.pastryIndex === pastry.index)
@@ -92,7 +92,7 @@ export default function KluiskamerPage() {
                 className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border bg-surface p-1.5 ${
                   entry ? TIER_RING[entry.tier] : 'border-dashed border-line'
                 }`}
-                title={entry ? `${pastry.nameNl} · ${TIER_LABEL[entry.tier]}` : 'Nog niet gebakken'}
+                title={entry ? `${pastry.nameNl} · ${TIER_LABEL[entry.tier]}` : 'Nog in de kluis'}
               >
                 <span aria-hidden className={`text-xl ${entry ? '' : 'opacity-25 grayscale'}`}>
                   {pastry.emoji}

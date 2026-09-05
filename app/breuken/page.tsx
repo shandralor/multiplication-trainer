@@ -73,7 +73,7 @@ export default function BreukenPage() {
       </ol>
 
       <section className="mt-5 flex items-center gap-3 rounded-2xl card px-4 py-3.5">
-        <h2 className="font-display text-base font-extrabold text-ink">Bakkerij</h2>
+        <h2 className="font-display text-base font-extrabold text-ink">Taartenkluis</h2>
         <span className="ml-auto flex gap-1" aria-hidden>
           {PASTRIES.map((pastry) => {
             const owned = pastries.find((e) => e.pastryIndex === pastry.index)
@@ -92,7 +92,7 @@ export default function BreukenPage() {
         </span>
       </section>
       <p className="mt-2 text-center text-[12px] text-dim">
-        {pastries.length} van de {PASTRIES.length} gebakjes gebakken
+        {pastries.length} van de {PASTRIES.length} gebakjes buitgemaakt
       </p>
     </WorldShell>
   )
