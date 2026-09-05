@@ -25,17 +25,17 @@ export function ModePicker({ value, onChange }: ModePickerProps) {
             className={`rounded-xl border p-4 text-left transition-all ${
               active
                 ? 'border-world bg-world-dim'
-                : 'border-vault-line bg-vault-card hover:border-vault-dim'
+                : 'border-line bg-surface hover:border-dim'
             }`}
           >
             <div
               className={`font-display text-lg font-extrabold tracking-tight ${
-                active ? 'text-world' : 'text-vault-ink'
+                active ? 'text-world' : 'text-ink'
               }`}
             >
               {opt.label}
             </div>
-            <div className="mt-0.5 font-mono text-[10px] leading-snug text-vault-dim">
+            <div className="mt-0.5 text-[12px] leading-snug text-dim">
               {opt.desc}
             </div>
           </button>

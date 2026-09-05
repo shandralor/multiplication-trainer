@@ -51,7 +51,7 @@ export function NumberLine({
           y1={AXIS_Y}
           x2={RIGHT}
           y2={AXIS_Y}
-          stroke="var(--vault-dim)"
+          stroke="var(--dim)"
           strokeWidth="2"
         />
 
@@ -64,7 +64,7 @@ export function NumberLine({
               y1={AXIS_Y - (end ? 10 : 6)}
               x2={x(i)}
               y2={AXIS_Y + (end ? 10 : 6)}
-              stroke="var(--vault-dim)"
+              stroke="var(--dim)"
               strokeWidth="2"
             />
           )
@@ -74,7 +74,7 @@ export function NumberLine({
           x={LEFT}
           y={AXIS_Y + 28}
           textAnchor="middle"
-          fill="var(--vault-dim)"
+          fill="var(--dim)"
           fontSize="12"
           fontFamily="var(--font-geist-mono), monospace"
         >
@@ -84,7 +84,7 @@ export function NumberLine({
           x={RIGHT}
           y={AXIS_Y + 28}
           textAnchor="middle"
-          fill="var(--vault-dim)"
+          fill="var(--dim)"
           fontSize="12"
           fontFamily="var(--font-geist-mono), monospace"
         >
@@ -115,7 +115,7 @@ export function NumberLine({
               x={x(placed)}
               y={34}
               textAnchor="middle"
-              fill="var(--vault-night)"
+              fill="var(--paper)"
               fontSize="15"
               fontWeight="600"
               fontFamily="var(--font-geist-mono), monospace"
@@ -140,10 +140,10 @@ export function NumberLine({
             onClick={() => onPlace(i)}
             aria-label={`Zet ${toVulgar(target)} op ${i} van de ${steps}`}
             aria-pressed={placed === i}
-            className={`rounded-md border py-2 font-mono text-[11px] tabular transition-colors disabled:opacity-60 ${
+            className={`rounded-md border py-2 text-[12px] tabular transition-colors disabled:opacity-60 ${
               placed === i
                 ? 'border-world bg-world-dim text-world'
-                : 'border-vault-line bg-vault-card text-vault-dim hover:border-vault-dim'
+                : 'border-line bg-surface text-dim hover:border-dim'
             }`}
           >
             {i}

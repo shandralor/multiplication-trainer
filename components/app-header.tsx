@@ -22,7 +22,7 @@ export function AppHeader({ onProfileChange }: AppHeaderProps) {
   const medals = profile ? new Set(profile.achievements.map((a) => a.id)).size : 0
 
   return (
-    <header className="border-b border-vault-line/70">
+    <header className="border-b border-line/70">
       <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
         <ProfileSelector onProfileChange={onProfileChange} />
 
@@ -52,11 +52,11 @@ function Chip({
 }) {
   return (
     <span
-      className={`flex items-center gap-1.5 rounded-full border border-vault-line px-3 py-1 font-mono text-xs text-vault-dim tabular ${
-        interactive ? 'transition-colors hover:border-brass hover:text-brass' : ''
+      className={`flex items-center gap-1.5 rounded-full border-2 border-line bg-surface px-3 py-1 text-sm font-extrabold text-ink tabular ${
+        interactive ? 'transition-colors hover:border-world' : ''
       }`}
     >
-      <span aria-hidden className="text-sm">
+      <span aria-hidden className="text-base">
         {icon}
       </span>
       {label}

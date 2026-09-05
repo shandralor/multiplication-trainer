@@ -37,11 +37,11 @@ export function DifficultyPicker({ value, onChange }: DifficultyPickerProps) {
             className={`rounded-xl border p-3 text-center transition-all ${
               active
                 ? ACTIVE_CLASSES[opt.id]
-                : 'border-vault-line bg-vault-card text-vault-ink hover:border-vault-dim'
+                : 'border-line bg-surface text-ink hover:border-dim'
             }`}
           >
             <div className="font-display text-sm font-bold tracking-tight">{opt.label}</div>
-            <div className="mt-0.5 font-mono text-[9px] leading-snug text-vault-dim">
+            <div className="mt-0.5 text-[12px] leading-snug text-dim">
               {opt.hint}
             </div>
           </button>

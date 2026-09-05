@@ -78,18 +78,18 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 rounded-full border border-vault-line px-2.5 py-1 transition-colors hover:border-brass">
-            <span aria-hidden className="grid h-6 w-6 place-items-center rounded-full bg-vault-card text-sm">
+          <button className="flex items-center gap-2 rounded-full border border-line px-2.5 py-1 transition-colors hover:border-brass">
+            <span aria-hidden className="grid h-6 w-6 place-items-center rounded-full bg-surface text-sm">
               🦝
             </span>
             <span className="font-display text-[13px] font-bold tracking-tight">
               {currentProfile.name}
             </span>
-            <span aria-hidden className="text-[9px] text-vault-dim">▼</span>
+            <span aria-hidden className="text-[12px] text-dim">▼</span>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <div className="px-2 py-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+          <div className="px-2 py-1.5 text-[12px] text-dim">
             PROFIELEN
           </div>
           {allProfiles.map(profile => (

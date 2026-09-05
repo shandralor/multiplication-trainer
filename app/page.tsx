@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { AppHeader } from '@/components/app-header'
+import { Mascot } from '@/components/mascot'
 import { WorldShell } from '@/components/world-shell'
 import { ANIMAL_EMOJI } from '@/lib/safe/animals'
 import { PASTRIES } from '@/lib/fractions/pastries'
@@ -31,18 +32,21 @@ export default function Home() {
       <AppHeader />
 
       <div className="pt-6 space-y-5">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
-            {hydrated ? todayLine() : '\u00a0'}
-          </p>
-          <h1 className="mt-1.5 font-display text-[2rem] font-extrabold leading-[1.02] tracking-tight text-balance">
-            Wat ga je doen?
-          </h1>
+        <div className="flex items-center gap-3">
+          <Mascot emotion={animals.length >= 10 ? 'excited' : 'happy'} size="medium" />
+          <div className="min-w-0">
+            <p className="text-[13px] font-bold text-dim">
+              {hydrated ? todayLine() : '\u00a0'}
+            </p>
+            <h1 className="mt-0.5 font-display text-[2.25rem] font-extrabold leading-[1.05] text-balance">
+              Wat ga je doen?
+            </h1>
+          </div>
         </div>
 
         {resume && <ResumeCard resume={resume} />}
 
-        <nav className="space-y-3" aria-label="Werelden">
+        <nav className="space-y-3.5" aria-label="Werelden">
           <Door
             href="/tafels"
             world="tafels"
@@ -78,21 +82,19 @@ export default function Home() {
 
       <Link
         href="/kluiskamer"
-        className="mt-6 flex items-center gap-3 rounded-2xl vault-card px-4 py-3 transition-colors hover:border-vault-green/60"
+        className="world-kluis btn-3d-quiet mt-6 flex items-center gap-3 px-4 py-3"
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
-          Kluiskamer
-        </span>
+        <span className="font-display text-base font-extrabold text-ink">Kluiskamer</span>
         <span className="ml-auto flex gap-1" aria-hidden>
           {Array.from({ length: 10 }, (_, i) => {
             const entry = animals[i]
             return (
               <span
                 key={i}
-                className={`grid h-6 w-6 place-items-center rounded-md text-[11px] ${
+                className={`grid h-6 w-6 place-items-center rounded-md text-[12px] ${
                   entry
-                    ? 'border border-brass/35 bg-brass/15'
-                    : 'border border-dashed border-vault-line opacity-60'
+                    ? 'bg-world-wash ring-2 ring-world'
+                    : 'bg-line'
                 }`}
               >
                 {entry ? ANIMAL_EMOJI[entry.tableIndex] : ''}
@@ -109,16 +111,16 @@ function ResumeCard({ resume }: { resume: ResumePoint }) {
   return (
     <Link
       href={resume.href}
-      className="flex items-center gap-3 rounded-2xl vault-card px-3.5 py-3 transition-colors hover:border-brass/50"
+      className="btn-3d-quiet flex items-center gap-3 px-4 py-3"
     >
       <span
         aria-hidden
-        className="grid h-9 w-9 place-items-center rounded-xl border border-vault-line bg-vault-night text-lg"
+        className="grid h-9 w-9 place-items-center rounded-xl border border-line bg-paper text-lg"
       >
         {resume.icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+        <span className="block text-[12px] text-dim">
           Verder waar je was
         </span>
         <span className="block truncate font-display text-[13px] font-bold tracking-tight">
@@ -150,33 +152,26 @@ function Door({
   return (
     <Link
       href={href}
-      className={`world-${world} group relative flex items-center gap-3.5 overflow-hidden rounded-2xl vault-card py-4 pl-[1.0625rem] pr-3.5 transition-all hover:border-world/50 hover:-translate-y-px`}
+      className={`world-${world} btn-3d flex w-full items-center gap-4 px-4 py-4 text-left`}
     >
       <span
         aria-hidden
-        className="absolute inset-y-0 left-0 w-1 bg-world"
-      />
-      <span
-        aria-hidden
-        className="grid h-[42px] w-[42px] flex-none place-items-center rounded-xl bg-world-dim font-mono text-xl font-semibold text-world"
+        className="grid h-12 w-12 flex-none place-items-center rounded-2xl bg-white/25 text-2xl font-extrabold text-white"
       >
         {sign}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2 font-display text-base font-extrabold tracking-tight">
+        <span className="flex items-center gap-2 font-display text-xl font-extrabold text-white">
           {name}
           {badge && (
-            <span className="rounded bg-world px-1.5 py-0.5 font-mono text-[8px] font-semibold tracking-[0.12em] text-vault-night">
+            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-world">
               {badge}
             </span>
           )}
         </span>
-        <span className="mt-0.5 block font-mono text-[10px] text-vault-dim">{detail}</span>
+        <span className="mt-0.5 block text-[13px] font-semibold text-white/85">{detail}</span>
       </span>
-      <span
-        aria-hidden
-        className="text-sm text-vault-dim transition-colors group-hover:text-world"
-      >
+      <span aria-hidden className="text-2xl font-bold text-white/70">
         ›
       </span>
     </Link>

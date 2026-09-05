@@ -320,17 +320,17 @@ function QuizContent() {
 
   if (tables.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-vault world-tafels p-4 text-vault-ink">
-        <Card className="vault-card w-full max-w-md rounded-2xl">
+      <div className="flex min-h-screen items-center justify-center bg-vault world-tafels p-4 text-ink">
+        <Card className="card w-full max-w-md rounded-2xl">
           <CardContent className="p-8 text-center">
             <Mascot emotion="sad" size="large" />
             <h2 className="mt-4 mb-2 font-display text-2xl font-extrabold tracking-tight">
               Geen tafels geselecteerd
             </h2>
-            <p className="mb-6 text-sm text-vault-dim">Kies eerst je tafels om te beginnen!</p>
+            <p className="mb-6 text-sm text-dim">Kies eerst je tafels om te beginnen!</p>
             <button
               onClick={goHome}
-              className="w-full rounded-xl bg-world px-6 py-3 font-display font-bold text-vault-night transition-transform hover:-translate-y-px"
+              className="btn-3d w-full px-6 py-3 font-display text-lg font-extrabold"
             >
               Terug naar de tafels
             </button>
@@ -342,10 +342,10 @@ function QuizContent() {
 
   if (questions.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-vault p-4 text-vault-ink">
-        <Card className="vault-card w-full max-w-md rounded-2xl">
+      <div className="flex min-h-screen items-center justify-center bg-vault p-4 text-ink">
+        <Card className="card w-full max-w-md rounded-2xl">
           <CardContent className="py-8">
-            <p className="text-center font-mono text-xs text-vault-dim">Laden…</p>
+            <p className="text-center text-xs text-dim">Laden…</p>
           </CardContent>
         </Card>
       </div>
@@ -356,7 +356,7 @@ function QuizContent() {
     const percentage = Math.round((score / questions.length) * 100)
     
     return (
-      <div className={`flex min-h-screen items-center justify-center bg-vault ${worldClass} p-4 text-vault-ink`}>
+      <div className={`flex min-h-screen items-center justify-center bg-vault ${worldClass} p-4 text-ink`}>
         {showConfetti && <Confetti />}
         <div className="w-full max-w-sm animate-slide-up text-center">
           <Mascot emotion={mascotEmotion} size="large" animate={true} />
@@ -366,22 +366,22 @@ function QuizContent() {
           </h2>
 
           {/* The score is the point of this screen, so it gets the size. */}
-          <p className="mt-5 font-display text-[3.25rem] font-extrabold leading-none tabular tracking-tight text-world">
+          <p className="mt-5 font-display text-[4rem] font-extrabold leading-none tabular text-world">
             {score}
-            <span className="text-vault-dim">/{questions.length}</span>
+            <span className="text-dim">/{questions.length}</span>
           </p>
-          <p className="mt-2 font-mono text-xs text-vault-dim">{percentage}% goed</p>
+          <p className="mt-2 text-xs text-dim">{percentage}% goed</p>
 
           <div className="mt-8 space-y-2">
             <button
               onClick={restart}
-              className="w-full rounded-2xl bg-world py-3.5 font-display text-base font-extrabold tracking-tight text-vault-night transition-transform hover:-translate-y-px"
+              className="btn-3d w-full py-3.5 font-display text-xl font-extrabold"
             >
               Nog een ronde
             </button>
             <button
               onClick={goHome}
-              className="w-full rounded-2xl border border-vault-line bg-vault-card py-3 font-display text-sm font-bold text-vault-dim transition-colors hover:border-world hover:text-vault-ink"
+              className="btn-3d-quiet w-full py-3 font-display text-base font-extrabold text-dim"
             >
               Terug naar {operation === 'multiply' ? 'de tafels' : 'delen'}
             </button>
@@ -396,30 +396,30 @@ function QuizContent() {
   const progressPercentage = mode === 'quiz' ? ((currentQuestion + 1) / questions.length) * 100 : 0
 
   return (
-    <div className={`min-h-screen bg-vault ${worldClass} text-vault-ink`}>
+    <div className={`min-h-screen bg-vault ${worldClass} text-ink`}>
       {/* Header with progress */}
-      <div className="sticky top-0 z-10 border-b border-vault-line bg-vault-night/90 backdrop-blur">
+      <div className="sticky top-0 z-10 border-b border-line bg-paper/90 backdrop-blur">
         <div className="mx-auto max-w-2xl px-4 py-3">
           <div className="mb-2 flex items-center justify-between gap-3">
             <button
               onClick={goHome}
-              className="font-mono text-[11px] uppercase tracking-[0.12em] text-vault-dim transition-colors hover:text-vault-ink"
+              className="text-[12px] text-dim transition-colors hover:text-ink"
             >
               ✕ Stop
             </button>
-            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-vault-dim">
+            <p className="text-[12px] text-dim">
               {mode === 'quiz' && `Vraag ${currentQuestion + 1} / ${questions.length}`}
               {mode === 'practice' && 'Oefenmodus'}
               {mode === 'timed' && 'Tijdmodus'}
             </p>
-            <p className="font-mono text-[11px] tabular text-world">
+            <p className="text-[12px] tabular text-world">
               {score}/{totalQuestions}
             </p>
           </div>
           {mode === 'quiz' && (
-            <div className="h-[3px] w-full overflow-hidden rounded-sm bg-vault-line">
+            <div className="h-3 w-full overflow-hidden rounded-full bg-line">
               <div
-                className="h-full rounded-sm bg-world transition-all duration-300"
+                className="h-full rounded-full bg-world transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -438,10 +438,8 @@ function QuizContent() {
             {mode === 'timed' && !showResult && (
               <div className="mb-5 text-center">
                 <div
-                  className={`inline-block rounded-full border px-5 py-2 font-mono text-xl font-semibold tabular ${
-                    timeLeft <= 2
-                      ? 'animate-pulse border-fout bg-fout/15 text-fout'
-                      : 'border-brass bg-brass/15 text-brass'
+                  className={`inline-block rounded-full px-6 py-2 font-display text-2xl font-extrabold tabular text-white ${
+                    timeLeft <= 2 ? 'animate-pulse bg-fout' : 'bg-world'
                   }`}
                 >
                   {timeLeft}s
@@ -451,10 +449,10 @@ function QuizContent() {
 
             {/* Question */}
             <div className="mb-6 text-center">
-              <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
+              <p className="mb-3 text-[12px] text-dim">
                 Wat is het antwoord?
               </p>
-              <p className="mb-7 font-display text-[3.5rem] font-extrabold leading-none tabular tracking-tight">
+              <p className="mb-7 font-display text-[4rem] font-extrabold leading-none tabular">
                 {currentQ.factor1}{' '}
                 <span className="text-world">
                   {currentQ.operation === 'multiply' ? '×' : '÷'}
@@ -475,41 +473,37 @@ function QuizContent() {
                     }}
                     placeholder="?"
                     disabled={showResult}
-                    className="h-16 rounded-2xl border border-vault-line bg-vault-card text-center font-mono text-3xl font-semibold tabular text-vault-ink focus-visible:border-world focus-visible:ring-0"
+                    className="h-16 rounded-2xl border-2 border-line bg-surface text-center font-display text-4xl font-extrabold tabular text-ink focus-visible:border-world focus-visible:ring-0"
                     autoFocus
                   />
 
                   <button
                     onClick={checkAnswer}
                     disabled={userAnswer.trim() === ''}
-                    className={`w-full rounded-2xl py-3.5 font-display text-base font-extrabold tracking-tight transition-all ${
-                      userAnswer.trim() === ''
-                        ? 'cursor-not-allowed border border-vault-line bg-vault-card text-vault-dim'
-                        : 'bg-world text-vault-night hover:-translate-y-px'
-                    }`}
+                    className="btn-3d w-full py-3.5 font-display text-xl font-extrabold"
                   >
                     Nakijken
                   </button>
                 </div>
               ) : (
                 <div
-                  className={`mx-auto max-w-md rounded-2xl border p-5 ${
+                  className={`mx-auto max-w-md rounded-2xl border-2 p-5 ${
                     isCorrect
                       ? 'animate-celebrate border-goed bg-goed/10'
                       : 'animate-shake border-fout bg-fout/10'
                   }`}
                 >
                   <p
-                    className={`font-display text-2xl font-extrabold tracking-tight ${
+                    className={`font-display text-3xl font-extrabold ${
                       isCorrect ? 'text-goed' : 'text-fout'
                     }`}
                   >
                     {isCorrect ? 'Goed zo!' : 'Bijna.'}
                   </p>
                   {!isCorrect && (
-                    <p className="mt-2 mb-4 text-sm text-vault-dim">
+                    <p className="mt-2 mb-4 text-sm text-dim">
                       Het juiste antwoord is{' '}
-                      <span className="font-mono text-xl font-semibold tabular text-vault-ink">
+                      <span className="text-xl font-semibold tabular text-ink">
                         {currentQ.answer}
                       </span>
                     </p>
@@ -517,7 +511,7 @@ function QuizContent() {
                   {mode !== 'timed' && (
                     <button
                       onClick={handleNextQuestion}
-                      className="mt-4 w-full rounded-xl bg-world py-3 font-display font-bold text-vault-night transition-transform hover:-translate-y-px"
+                      className="btn-3d mt-4 w-full py-3 font-display text-lg font-extrabold"
                     >
                       Volgende
                     </button>
@@ -534,10 +528,10 @@ function QuizContent() {
 export default function Quiz() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-vault p-4 text-vault-ink">
-        <Card className="vault-card w-full max-w-md rounded-2xl">
+      <div className="flex min-h-screen items-center justify-center bg-vault p-4 text-ink">
+        <Card className="card w-full max-w-md rounded-2xl">
           <CardContent className="py-8">
-            <p className="text-center font-mono text-xs text-vault-dim">Laden…</p>
+            <p className="text-center text-xs text-dim">Laden…</p>
           </CardContent>
         </Card>
       </div>

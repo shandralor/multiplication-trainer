@@ -34,7 +34,7 @@ export function FractionInput({
         state={state}
         onClick={() => onFocusField('n')}
       />
-      <span aria-hidden className="h-0.5 w-[52px] rounded-sm bg-vault-ink" />
+      <span aria-hidden className="h-0.5 w-[52px] rounded-sm bg-ink" />
       <Box
         value={denominator}
         label="noemer"
@@ -70,8 +70,8 @@ function Box({
         : focused
           ? 'border-world text-world'
           : locked
-            ? 'border-vault-line text-vault-dim'
-            : 'border-vault-line text-vault-ink'
+            ? 'border-line text-dim'
+            : 'border-line text-ink'
 
   return (
     <button
@@ -79,7 +79,7 @@ function Box({
       onClick={onClick}
       disabled={!onClick}
       aria-label={`${label}${value ? `: ${value}` : ', leeg'}`}
-      className={`grid h-11 w-[52px] place-items-center rounded-xl border bg-vault-card font-mono text-[22px] font-semibold tabular transition-colors disabled:cursor-default ${border}`}
+      className={`grid h-11 w-[52px] place-items-center rounded-xl border bg-surface text-[22px] font-semibold tabular transition-colors disabled:cursor-default ${border}`}
     >
       {value || ' '}
     </button>

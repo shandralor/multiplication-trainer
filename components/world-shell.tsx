@@ -46,18 +46,18 @@ export function WorldShell({
   children,
 }: WorldShellProps) {
   return (
-    <div className={`min-h-screen bg-vault text-vault-ink ${WORLD_CLASS[world]}`}>
+    <div className={`min-h-screen bg-vault text-ink ${WORLD_CLASS[world]}`}>
       <div className="max-w-2xl mx-auto px-4 pb-16">
         {backHref && (
           <div className="flex items-center justify-between gap-3 pt-4 pb-1">
             <Link
               href={backHref}
-              className="font-mono text-[11px] uppercase tracking-[0.12em] text-vault-dim transition-colors hover:text-vault-ink"
+              className="text-[12px] text-dim transition-colors hover:text-ink"
             >
               ← {backLabel}
             </Link>
             <span className="flex items-baseline gap-2 font-display text-lg font-extrabold tracking-tight text-world">
-              <span className="font-mono text-sm">{WORLD_SIGN[world]}</span>
+              <span className="text-sm">{WORLD_SIGN[world]}</span>
               {WORLD_NAME[world]}
             </span>
           </div>

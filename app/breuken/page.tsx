@@ -41,7 +41,7 @@ export default function BreukenPage() {
       <div className="flex items-center gap-4 pt-5">
         {/* The mascot reads the ladder: pleased once a trede is done,
             delighted when the whole thing is. */}
-        <Mascot emotion={mood} size="medium" />
+        <Mascot emotion={mood} size="large" />
         <div className="min-w-0">
           <h1 className="font-display text-[1.4rem] font-extrabold tracking-tight text-balance">
             {done === 0
@@ -50,7 +50,7 @@ export default function BreukenPage() {
                 ? 'De hele ladder is af!'
                 : `${done} van de ${RUNGS.length} tredes af`}
           </h1>
-          <p className="mt-1.5 text-[12px] leading-snug text-vault-dim">{ladderLine}</p>
+          <p className="mt-1.5 text-[12px] leading-snug text-dim">{ladderLine}</p>
         </div>
       </div>
 
@@ -72,10 +72,8 @@ export default function BreukenPage() {
         })}
       </ol>
 
-      <section className="mt-5 flex items-center gap-3 rounded-2xl vault-card px-4 py-3">
-        <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
-          Bakkerij
-        </h2>
+      <section className="mt-5 flex items-center gap-3 rounded-2xl card px-4 py-3.5">
+        <h2 className="font-display text-base font-extrabold text-ink">Bakkerij</h2>
         <span className="ml-auto flex gap-1" aria-hidden>
           {PASTRIES.map((pastry) => {
             const owned = pastries.find((e) => e.pastryIndex === pastry.index)
@@ -83,10 +81,8 @@ export default function BreukenPage() {
               <span
                 key={pastry.index}
                 title={pastry.nameNl}
-                className={`grid h-6 w-6 place-items-center rounded-md text-[11px] ${
-                  owned
-                    ? 'border border-plum/35 bg-plum/15'
-                    : 'border border-dashed border-vault-line opacity-60'
+                className={`grid h-6 w-6 place-items-center rounded-md text-[12px] ${
+                  owned ? 'bg-world-wash ring-2 ring-world' : 'bg-line'
                 }`}
               >
                 {owned ? getPastry(owned.pastryIndex).emoji : ''}
@@ -95,7 +91,7 @@ export default function BreukenPage() {
           })}
         </span>
       </section>
-      <p className="mt-2 text-center font-mono text-[10px] text-vault-dim">
+      <p className="mt-2 text-center text-[12px] text-dim">
         {pastries.length} van de {PASTRIES.length} gebakjes gebakken
       </p>
     </WorldShell>
@@ -120,42 +116,42 @@ function RungRow({
     <>
       <span
         aria-hidden
-        className={`grid h-[30px] w-[30px] flex-none place-items-center rounded-lg font-mono text-xs font-semibold ${
+        className={`grid h-9 w-9 flex-none place-items-center rounded-xl font-display text-base font-extrabold ${
           complete
-            ? 'bg-plum text-vault-night'
+            ? 'bg-world text-white'
             : unlocked
-              ? 'bg-plum/15 text-plum'
-              : 'border border-dashed border-vault-line text-vault-dim'
+              ? 'bg-world-wash text-world'
+              : 'bg-line text-dim'
         }`}
       >
         {unlocked ? rung : '🔒'}
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block font-display text-[13.5px] font-bold tracking-tight">
+        <span className="block font-display text-base font-extrabold">
           {def.title}
         </span>
-        <span className="mt-0.5 block truncate font-mono text-[10px] text-vault-dim">
+        <span className="mt-0.5 block truncate text-[13px] font-semibold text-dim">
           {unlocked ? def.example : `opent na ${rungDef((rung - 1) as Rung).title}`}
         </span>
         {unlocked && (
           <span
             aria-hidden
-            className="mt-1.5 block h-[3px] overflow-hidden rounded-sm bg-vault-line"
+            className="mt-2 block h-2.5 overflow-hidden rounded-full bg-line"
           >
-            <span className="block h-full rounded-sm bg-plum" style={{ width: `${pct}%` }} />
+            <span className="block h-full rounded-full bg-world" style={{ width: `${pct}%` }} />
           </span>
         )}
       </span>
 
-      <span className="flex-none font-mono text-[10px] tabular text-vault-dim">
+      <span className="flex-none font-display text-sm font-extrabold tabular text-dim">
         {unlocked ? `${Math.min(correct, def.itemsToComplete)}/${def.itemsToComplete}` : '—'}
       </span>
     </>
   )
 
-  const className = `flex w-full items-center gap-3 rounded-xl vault-card px-3 py-2.5 text-left ${
-    unlocked ? 'transition-colors hover:border-plum/50' : 'opacity-50'
+  const className = `btn-3d-quiet flex w-full items-center gap-3 px-3.5 py-3 text-left ${
+    unlocked ? '' : 'opacity-55'
   }`
 
   if (!unlocked) {

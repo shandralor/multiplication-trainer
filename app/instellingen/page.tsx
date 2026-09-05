@@ -23,23 +23,23 @@ export default function InstellingenPage() {
         <h1 className="font-display text-[1.4rem] font-extrabold tracking-tight">
           Instellingen
         </h1>
-        <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.13em] text-vault-dim">
+        <p className="mt-1.5 text-[12px] text-dim">
           Voor ouders · geldt voor {profile?.name ?? 'dit profiel'}
         </p>
       </div>
 
-      <section className="mt-5 rounded-2xl vault-card p-4">
+      <section className="mt-5 rounded-2xl card p-4">
         <div className="flex items-start gap-4">
           <div className="min-w-0 flex-1">
             <h2 className="font-display text-[15px] font-bold tracking-tight">
               Alle breuken-tredes openzetten
             </h2>
-            <p className="mt-1.5 text-[12px] leading-snug text-vault-dim">
+            <p className="mt-1.5 text-[12px] leading-snug text-dim">
               Normaal opent elke trede pas als de vorige af is. Zet dit aan
               als je kind op school al verder is dan trede 1 en niet eerst
               door {RUNGS.length - 1} tredes hoeft te werken.
             </p>
-            <p className="mt-2 font-mono text-[10px] text-vault-dim">
+            <p className="mt-2 text-[12px] text-dim">
               Voortgang telt gewoon door — dit opent alleen de deuren.
             </p>
           </div>

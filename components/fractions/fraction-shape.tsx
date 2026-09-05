@@ -78,7 +78,7 @@ function Pie({ parts, shaded, size, onToggle, interactive, description }: InnerP
       aria-label={description}
       className="max-w-full"
     >
-      <circle cx={C} cy={C} r={R} fill="var(--vault-card)" />
+      <circle cx={C} cy={C} r={R} fill="var(--card)" />
       {Array.from({ length: parts }, (_, i) => {
         const [x1, y1] = point(i)
         const [x2, y2] = point(i + 1)
@@ -88,15 +88,15 @@ function Pie({ parts, shaded, size, onToggle, interactive, description }: InnerP
           <path
             key={i}
             d={`M${C},${C} L${x1},${y1} A${R},${R} 0 ${largeArc},1 ${x2},${y2} Z`}
-            fill={isShaded ? 'var(--world)' : 'var(--vault-card)'}
-            stroke="var(--vault-line)"
+            fill={isShaded ? 'var(--world)' : 'var(--card)'}
+            stroke="var(--line)"
             strokeWidth="1.5"
             onClick={onToggle ? () => onToggle(i) : undefined}
             className={interactive ? 'cursor-pointer transition-[fill]' : undefined}
           />
         )
       })}
-      <circle cx={C} cy={C} r={R} fill="none" stroke="var(--vault-dim)" strokeWidth="2" />
+      <circle cx={C} cy={C} r={R} fill="none" stroke="var(--dim)" strokeWidth="2" />
     </svg>
   )
 }
@@ -122,8 +122,8 @@ function Bar({ parts, shaded, size, onToggle, interactive, description }: InnerP
           y={0}
           width={partW}
           height={H}
-          fill={i < shaded ? 'var(--world)' : 'var(--vault-card)'}
-          stroke="var(--vault-line)"
+          fill={i < shaded ? 'var(--world)' : 'var(--card)'}
+          stroke="var(--line)"
           strokeWidth="1.5"
           onClick={onToggle ? () => onToggle(i) : undefined}
           className={interactive ? 'cursor-pointer transition-[fill]' : undefined}
@@ -135,7 +135,7 @@ function Bar({ parts, shaded, size, onToggle, interactive, description }: InnerP
         width={W - 2}
         height={H - 2}
         fill="none"
-        stroke="var(--vault-dim)"
+        stroke="var(--dim)"
         strokeWidth="2"
         rx="4"
       />

@@ -1,24 +1,31 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Geist, IBM_Plex_Mono } from "next/font/google";
+import { Baloo_2, Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
+// Baloo 2 for anything big and loud: headings, scores, button labels.
+// Rounded terminals and a heavy weight are what make a number feel like
+// a game rather than a worksheet.
+const baloo = Baloo_2({
+  variable: "--font-display-face",
   subsets: ["latin"],
-  weight: ["400", "600", "800"],
+  weight: ["600", "700", "800"],
 });
 
-const geistSans = Geist({
+// Nunito everywhere else — same rounded family feel, but it stays
+// readable at 11px, which Baloo does not.
+const nunito = Nunito({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
 });
 
-// Numerals that read like a dial: fractions, scores, safe combinations.
-const plexMono = IBM_Plex_Mono({
+// The app has no monospaced content; the old mono was doing typographic
+// work that the rounded family now does. Numerals get `.tabular` instead.
+const nunitoNumerals = Nunito({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -32,11 +39,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // The vault is a night world: dark is the app's only theme, so the
-    // class is set here rather than toggled.
-    <html lang="nl" className="dark">
+    <html lang="nl">
       <body
-        className={`${bricolage.variable} ${geistSans.variable} ${plexMono.variable} antialiased`}
+        className={`${baloo.variable} ${nunito.variable} ${nunitoNumerals.variable} font-sans antialiased`}
       >
         {children}
         <Toaster richColors position="top-center" />

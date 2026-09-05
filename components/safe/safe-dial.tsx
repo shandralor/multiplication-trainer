@@ -52,22 +52,17 @@ export function SafeDial({
     >
       <div
         ref={dialRef}
-        className={`relative h-full w-full rounded-full border-4 border-vault-line bg-gradient-to-br from-vault-card to-vault-night transition-transform duration-700 ${
+        className={`relative h-full w-full rounded-full border-[6px] border-line bg-surface transition-transform duration-700 ${
           spinning ? 'animate-[spin_0.9s_ease-in-out]' : ''
         } ${flash ? 'ring-4 ring-world' : ''}`}
-        style={{
-          boxShadow:
-            '0 10px 30px rgba(0,0,0,0.4), inset 0 4px 20px rgba(255,255,255,0.1)',
-        }}
+        style={{ boxShadow: '0 6px 0 var(--line)' }}
       >
         {/* Center label */}
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-vault-ink">
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-vault-dim">
-            {title}
-          </span>
-          <span className="mt-1 font-display text-5xl font-extrabold tracking-tight">{label}</span>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-ink">
+          <span className="text-sm font-bold text-dim">{title}</span>
+          <span className="mt-1 font-display text-6xl font-extrabold text-world">{label}</span>
           {subLabel && (
-            <span className="mt-2 font-mono text-[10px] text-world">{subLabel}</span>
+            <span className="mt-2 text-sm font-bold text-dim">{subLabel}</span>
           )}
         </div>
       </div>

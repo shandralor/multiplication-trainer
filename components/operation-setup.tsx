@@ -77,20 +77,12 @@ export function OperationSetup({ operation, showKluis = false }: OperationSetupP
                 type="button"
                 onClick={() => setMode(m.id)}
                 aria-pressed={active}
-                className={`rounded-xl border py-2.5 transition-all ${
-                  active
-                    ? 'border-world bg-world-dim'
-                    : 'border-vault-line bg-vault-card hover:border-vault-dim'
-                }`}
+                className="btn-3d-quiet py-2.5"
               >
-                <span aria-hidden className="block text-[15px] leading-none">
+                <span aria-hidden className="block text-2xl leading-none">
                   {m.emoji}
                 </span>
-                <span
-                  className={`mt-1 block font-display text-[11px] font-bold tracking-tight ${
-                    active ? 'text-world' : ''
-                  }`}
-                >
+                <span className="mt-1 block font-display text-[14px] font-extrabold">
                   {m.label}
                 </span>
               </button>
@@ -132,7 +124,7 @@ export function OperationSetup({ operation, showKluis = false }: OperationSetupP
 
         {mode === 'timed' && (
           <div className="mt-3">
-            <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+            <p className="mb-2 text-[12px] text-dim">
               Seconden per vraag
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -150,14 +142,10 @@ export function OperationSetup({ operation, showKluis = false }: OperationSetupP
         type="button"
         onClick={start}
         disabled={!canStart}
-        className={`w-full rounded-2xl py-3.5 transition-all ${
-          canStart
-            ? 'bg-world text-vault-night hover:-translate-y-px'
-            : 'cursor-not-allowed border border-vault-line bg-vault-card text-vault-dim'
-        }`}
+        className="btn-3d w-full py-3.5"
       >
-        <span className="block font-display text-base font-extrabold tracking-tight">Start!</span>
-        <span className="mt-0.5 block font-mono text-[10px] opacity-75">
+        <span className="block font-display text-xl font-extrabold">Start!</span>
+        <span className="mt-0.5 block text-[13px] font-semibold opacity-85">
           {canStart
             ? `${modeLabel(mode)} · ${tafelLabel(tables)} · ${count} vragen${
                 mode === 'timed' ? ` · ${time}s` : ''
@@ -181,18 +169,18 @@ function KluisHero({
   return (
     <Link
       href={isDivide ? '/delen/kluis' : '/tafels/kluis'}
-      className="flex items-center gap-3.5 rounded-2xl vault-card-lit p-4 transition-transform hover:-translate-y-px"
+      className="world-kluis btn-3d flex items-center gap-3.5 p-4"
     >
       <span className="flex-1">
-        <span className="block font-display text-lg font-extrabold tracking-tight">
+        <span className="block font-display text-2xl font-extrabold text-white">
           {isDivide ? 'Kraak de deelkluis' : 'Kraak de kluis'}
         </span>
-        <span className="mt-1 block font-mono text-[10px] text-vault-dim">
+        <span className="mt-1 block text-[13px] font-semibold text-white/85">
           {remaining === 0
             ? 'alle dieren bevrijd — ga voor platina'
             : `nog ${remaining} ${remaining === 1 ? 'dier' : 'dieren'} opgesloten`}
         </span>
-        <span className="mt-2.5 inline-block rounded-md bg-brass px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-vault-night">
+        <span className="mt-3 inline-block rounded-full bg-white px-4 py-2 font-display text-[15px] font-extrabold text-world">
           {animals.length === 0 ? 'Begin de kraak' : 'Verder kraken'}
         </span>
       </span>
@@ -220,18 +208,14 @@ function TableCell({
       onClick={onToggle}
       aria-pressed={selected}
       aria-label={`Tafel van ${table}${mastery === null ? '' : `, ${mastery}% goed`}`}
-      className={`flex aspect-square flex-col items-center justify-center gap-1.5 rounded-xl border font-mono text-[13px] font-semibold transition-all ${
-        selected
-          ? 'border-world bg-world-dim text-world'
-          : 'border-vault-line bg-vault-card text-vault-ink hover:border-vault-dim'
-      }`}
+      className="btn-3d-quiet flex aspect-square flex-col items-center justify-center gap-1.5 font-display text-lg font-extrabold"
     >
       {table}
       {/* Mastery from tableStats: the picker tells you something instead
           of only asking. An untouched tafel shows a flat rule. */}
       <span
         aria-hidden
-        className="block h-0.5 w-3.5 overflow-hidden rounded-sm bg-vault-line"
+        className="block h-0.5 w-3.5 overflow-hidden rounded-sm bg-line"
       >
         {mastery !== null && (
           <span className="block h-full bg-world" style={{ width: `${mastery}%` }} />
@@ -253,10 +237,10 @@ function Shelf({
   return (
     <section>
       <div className="mb-2 flex items-center gap-3">
-        <h2 className="font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+        <h2 className="text-[12px] text-dim">
           {title}
         </h2>
-        <span aria-hidden className="h-px flex-1 bg-vault-line" />
+        <span aria-hidden className="h-px flex-1 bg-line" />
         {action}
       </div>
       {children}
@@ -269,7 +253,7 @@ function TinyButton({ onClick, children }: { onClick: () => void; children: Reac
     <button
       type="button"
       onClick={onClick}
-      className="font-mono text-[10px] text-vault-dim underline-offset-2 transition-colors hover:text-world hover:underline"
+      className="text-[12px] text-dim underline-offset-2 transition-colors hover:text-world hover:underline"
     >
       {children}
     </button>
@@ -290,11 +274,7 @@ function Pill({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`rounded-lg border py-2 font-mono text-[13px] font-medium tabular transition-all ${
-        active
-          ? 'border-world bg-world-dim text-world'
-          : 'border-vault-line bg-vault-card text-vault-ink hover:border-vault-dim'
-      }`}
+      className="btn-3d-quiet py-2 font-display text-base font-extrabold tabular"
     >
       {children}
     </button>

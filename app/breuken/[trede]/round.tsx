@@ -137,10 +137,10 @@ export function Round({ slug }: { slug: string }) {
     <WorldShell world="breuken" backHref="/breuken" backLabel="Ladder">
       <div className="mx-auto max-w-sm pt-3">
         <div className="flex items-center justify-between gap-3">
-          <span className="rounded-full border border-plum px-3 py-1 font-mono text-[10px] text-plum">
+          <span className="rounded-full bg-world-wash px-3 py-1 text-sm font-extrabold text-world">
             Trede {def.rung} · {def.title}
           </span>
-          <span className="font-mono text-[10px] tabular text-vault-dim">
+          <span className="font-display text-base font-extrabold tabular text-dim">
             {index + 1} / {items.length}
           </span>
         </div>
@@ -149,14 +149,14 @@ export function Round({ slug }: { slug: string }) {
           {items.map((_, i) => (
             <span
               key={i}
-              className={`h-[3px] flex-1 rounded-sm ${
-                i < index ? 'bg-plum' : i === index ? 'bg-plum/55' : 'bg-vault-line'
+              className={`h-2.5 flex-1 rounded-full ${
+                i < index ? 'bg-world' : i === index ? 'bg-world-wash' : 'bg-line'
               }`}
             />
           ))}
         </div>
 
-        <h1 className="mt-6 text-balance text-center font-display text-[19px] font-extrabold tracking-tight">
+        <h1 className="mt-6 text-balance text-center font-display text-2xl font-extrabold">
           {headline(item)}
         </h1>
 
@@ -204,17 +204,13 @@ export function Round({ slug }: { slug: string }) {
               type="button"
               onClick={phase === 'asking' ? check : advance}
               disabled={phase === 'asking' && !canCheck}
-              className={`w-full rounded-2xl py-3 font-display text-base font-extrabold tracking-tight transition-all ${
-                phase === 'asking' && !canCheck
-                  ? 'cursor-not-allowed border border-vault-line bg-vault-card text-vault-dim'
-                  : 'bg-plum text-vault-night hover:-translate-y-px'
-              }`}
+              className="btn-3d w-full py-3.5 font-display text-lg font-extrabold"
             >
               <span className="block">{phase === 'asking' ? 'Nakijken' : 'Volgende'}</span>
               {/* A disabled primary button with no reason is a dead end.
                   Say what is still missing, the way Start! does. */}
               {phase === 'asking' && !canCheck && (
-                <span className="mt-0.5 block font-mono text-[10px] font-normal">
+                <span className="mt-0.5 block text-[12px] font-normal">
                   {missingHint(item)}
                 </span>
               )}
@@ -279,7 +275,7 @@ function ItemBody(props: BodyProps) {
             }
             label={`${props.shaded} van de ${item.parts} delen gekleurd`}
           />
-          <p className="font-mono text-[11px] text-vault-dim">
+          <p className="text-[12px] text-dim">
             {props.shaded} van de {item.parts} gekleurd
           </p>
         </div>
@@ -289,7 +285,7 @@ function ItemBody(props: BodyProps) {
       return (
         <div className="flex items-center justify-center gap-4">
           <StaticFraction n={item.given.n} d={item.given.d} />
-          <span className="font-mono text-xl text-vault-dim">=</span>
+          <span className="text-xl text-dim">=</span>
           <FractionInput
             numerator={props.numerator}
             denominator={String(item.targetD)}
@@ -305,7 +301,7 @@ function ItemBody(props: BodyProps) {
       return (
         <div className="flex items-center justify-center gap-4">
           <StaticFraction n={item.given.n} d={item.given.d} />
-          <span className="font-mono text-xl text-vault-dim">=</span>
+          <span className="text-xl text-dim">=</span>
           <FractionInput
             numerator={props.numerator}
             denominator={props.denominator}
@@ -333,7 +329,7 @@ function ItemBody(props: BodyProps) {
         <div className="flex flex-col items-center gap-5">
           <div className="flex items-center gap-5">
             <StaticFraction n={item.left.n} d={item.left.d} />
-            <span className="grid h-11 w-11 place-items-center rounded-xl border border-dashed border-vault-line font-mono text-xl text-vault-dim">
+            <span className="grid h-11 w-11 place-items-center rounded-xl border border-dashed border-line text-xl text-dim">
               {props.choice ?? '?'}
             </span>
             <StaticFraction n={item.right.n} d={item.right.d} />
@@ -346,11 +342,7 @@ function ItemBody(props: BodyProps) {
                 disabled={locked}
                 onClick={() => props.setChoice(sign)}
                 aria-pressed={props.choice === sign}
-                className={`rounded-xl border py-3 font-mono text-xl transition-colors disabled:opacity-60 ${
-                  props.choice === sign
-                    ? 'border-plum bg-plum/15 text-plum'
-                    : 'border-vault-line bg-vault-card hover:border-vault-dim'
-                }`}
+                className="btn-3d-quiet py-3 font-display text-3xl font-extrabold disabled:opacity-60"
               >
                 {sign}
               </button>
@@ -364,11 +356,11 @@ function ItemBody(props: BodyProps) {
       return (
         <div className="flex items-center justify-center gap-3">
           <StaticFraction n={item.left.n} d={item.left.d} />
-          <span className="font-mono text-xl text-vault-dim">
+          <span className="text-xl text-dim">
             {item.kind === 'add' ? '+' : '−'}
           </span>
           <StaticFraction n={item.right.n} d={item.right.d} />
-          <span className="font-mono text-xl text-vault-dim">=</span>
+          <span className="text-xl text-dim">=</span>
           <FractionInput
             numerator={props.numerator}
             denominator={props.denominator}
@@ -385,9 +377,9 @@ function ItemBody(props: BodyProps) {
           <span className="font-display text-2xl font-extrabold tracking-tight">
             {toVulgar(item.frac)} van {item.whole}
           </span>
-          <span className="font-mono text-xl text-vault-dim">=</span>
+          <span className="text-xl text-dim">=</span>
           <span
-            className={`grid h-11 min-w-[52px] place-items-center rounded-xl border bg-vault-card px-3 font-mono text-[22px] font-semibold tabular ${
+            className={`grid h-11 min-w-[52px] place-items-center rounded-xl border bg-surface px-3 text-[22px] font-semibold tabular ${
               state === 'goed'
                 ? 'border-goed text-goed'
                 : state === 'fout'
@@ -435,13 +427,13 @@ function MascotStrip({
       : 'neutral'
 
   return (
-    <div className="mt-5 flex min-h-[3.25rem] items-center gap-3">
+    <div className="mt-5 flex min-h-[4.5rem] items-center gap-3">
       <span className="flex-none">
-        <Mascot emotion={emotion} size="small" animate={verdict !== null} />
+        <Mascot emotion={emotion} size="medium" animate={verdict !== null} />
       </span>
-      <p className="text-[12px] leading-snug text-vault-dim">
+      <p className="text-[14px] font-semibold leading-snug text-dim">
         {verdict === null ? (
-          <span className="font-mono text-[11px]">{idleLine(item, started)}</span>
+          <span className="text-[12px]">{idleLine(item, started)}</span>
         ) : (
           <>
             {verdict === 'goed' ? (
@@ -537,15 +529,15 @@ function Scorecard({
         <div className="flex justify-center">
           <Mascot emotion={mood} size="large" animate />
         </div>
-        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-vault-dim">
+        <p className="mt-4 text-[12px] text-dim">
           Trede {def.rung} · {def.title}
         </p>
         <p className="mt-3 font-display text-[3.25rem] font-extrabold leading-none tabular tracking-tight text-plum">
           {correct}
-          <span className="text-vault-dim">/{total}</span>
+          <span className="text-dim">/{total}</span>
         </p>
-        <p className="mt-2 font-mono text-xs text-vault-dim">{pct}% goed</p>
-        <p className="mt-3 text-sm text-vault-dim">
+        <p className="mt-2 text-xs text-dim">{pct}% goed</p>
+        <p className="mt-3 text-sm text-dim">
           {pct >= 80
             ? 'Knap gedaan — die breuken liggen je.'
             : pct >= 50
@@ -554,14 +546,14 @@ function Scorecard({
         </p>
 
         {outcome?.pastry && (
-          <div className="mt-7 rounded-2xl vault-card-lit p-5">
+          <div className="mt-7 rounded-2xl card-lit p-5">
             <p className="text-[46px] leading-none" aria-hidden>
               {outcome.pastry.emoji}
             </p>
             <p className="mt-2 font-display text-lg font-extrabold tracking-tight">
               {outcome.upgraded ? 'Opgewaardeerd!' : outcome.pastry.nameNl}
             </p>
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-vault-dim">
+            <p className="mt-1 text-[12px] text-dim">
               {tierLabel(outcome.tier)} · in de bakkerij
             </p>
           </div>
@@ -577,13 +569,13 @@ function Scorecard({
         <div className="mt-8 space-y-2">
           <Link
             href={`/breuken/${slug}`}
-            className="block w-full rounded-2xl bg-plum py-3.5 text-center font-display text-base font-extrabold tracking-tight text-vault-night"
+            className="btn-3d block w-full py-3.5 text-center font-display text-xl font-extrabold"
           >
             Nog een ronde
           </Link>
           <Link
             href="/breuken"
-            className="block w-full rounded-2xl border border-vault-line bg-vault-card py-3 text-center font-display text-sm font-bold text-vault-dim"
+            className="btn-3d-quiet block w-full py-3 text-center font-display text-base font-extrabold text-dim"
           >
             Terug naar de ladder
           </Link>
@@ -613,9 +605,9 @@ function tierLabel(tier: RoundOutcome['tier']): string {
 function StaticFraction({ n, d }: { n: number; d: number }) {
   return (
     <span className="flex flex-col items-center gap-1.5" aria-label={`${n} ${d}de`}>
-      <span className="font-mono text-[22px] font-semibold tabular">{n}</span>
-      <span aria-hidden className="h-0.5 w-8 rounded-sm bg-vault-ink" />
-      <span className="font-mono text-[22px] font-semibold tabular">{d}</span>
+      <span className="text-[22px] font-semibold tabular">{n}</span>
+      <span aria-hidden className="h-0.5 w-8 rounded-sm bg-ink" />
+      <span className="text-[22px] font-semibold tabular">{d}</span>
     </span>
   )
 }
@@ -702,8 +694,8 @@ function Numpad({
         disabled={!canConfirm}
         className={`rounded-xl py-2.5 font-display text-[13px] font-bold transition-colors ${
           canConfirm
-            ? 'bg-plum text-vault-night'
-            : 'cursor-not-allowed border border-vault-line bg-vault-card text-vault-dim'
+            ? 'bg-world text-white'
+            : 'cursor-not-allowed border border-line bg-surface text-dim'
         }`}
       >
         OK
@@ -725,8 +717,8 @@ function Key({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border border-vault-line bg-vault-card py-2.5 font-mono text-base transition-colors hover:border-vault-dim ${
-        muted ? 'text-vault-dim' : ''
+      className={`btn-3d-quiet py-3 font-display text-2xl font-extrabold ${
+        muted ? 'text-dim' : ''
       }`}
     >
       {children}

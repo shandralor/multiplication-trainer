@@ -382,24 +382,24 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
       displayValue: r.display,
     }))
     return (
-      <div className={`min-h-screen bg-vault ${worldClass} text-vault-ink`}>
+      <div className={`min-h-screen bg-vault ${worldClass} text-ink`}>
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-3 gap-2">
             <button
               onClick={abortRun}
-              className="rounded-lg border border-vault-line bg-vault-card px-3 py-1.5 font-display text-sm font-bold text-vault-ink transition-colors hover:border-brass"
+              className="rounded-lg border border-line bg-surface px-3 py-1.5 font-display text-sm font-bold text-ink transition-colors hover:border-brass"
             >
               ← Terug
             </button>
             <button
               onClick={restartRun}
-              className="rounded-lg border border-vault-line bg-vault-card px-3 py-1.5 font-display text-sm font-bold text-vault-dim transition-colors hover:border-world hover:text-vault-ink"
+              className="rounded-lg border border-line bg-surface px-3 py-1.5 font-display text-sm font-bold text-dim transition-colors hover:border-world hover:text-ink"
             >
               ↻ Herstart
             </button>
             <Link
               href={backHref}
-              className="rounded-lg border border-vault-line bg-vault-card px-3 py-1.5 font-display text-sm font-bold text-vault-ink transition-colors hover:border-world"
+              className="rounded-lg border border-line bg-surface px-3 py-1.5 font-display text-sm font-bold text-ink transition-colors hover:border-world"
             >
               {backLabel}
             </Link>
@@ -407,7 +407,7 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
 
           {profile && <CollectionStrip animals={profile.animals} compact />}
 
-          <div className="my-3 flex flex-wrap items-center justify-center gap-3 text-center font-mono text-xs text-vault-dim">
+          <div className="my-3 flex flex-wrap items-center justify-center gap-3 text-center text-xs text-dim">
             <span>
               {mode === 'safe-run' ? `Kluis ${safeIndex} / ${selectedTables.length}` : `Kluis ${Math.min(safeIndex, 99)}${safeIndex > 99 ? '+' : ''}`}
             </span>
@@ -470,7 +470,7 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
       bronze: perSafe.filter((s) => s.tier === 'bronze').length,
     }
     return (
-      <div className={`min-h-screen bg-vault ${worldClass} text-vault-ink`}>
+      <div className={`min-h-screen bg-vault ${worldClass} text-ink`}>
         <div className="max-w-2xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-extrabold text-center mb-6">Scorekaart</h1>
           {profile && (
@@ -478,15 +478,15 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
               <CollectionStrip animals={profile.animals} />
             </div>
           )}
-          <Card className="vault-card mb-6 rounded-2xl">
+          <Card className="card mb-6 rounded-2xl">
             <CardContent className="p-5 space-y-2">
               <div className="text-lg">Kluizen gekraakt: <span className="font-extrabold">{perSafe.length}</span></div>
               <div className="flex gap-4 text-lg">
                 <span className="text-yellow-300">🥇 {tiers.gold}</span>
-                <span className="text-vault-dim">🥈 {tiers.silver}</span>
+                <span className="text-dim">🥈 {tiers.silver}</span>
                 <span className="text-amber-600">🥉 {tiers.bronze}</span>
               </div>
-              <div className="font-mono text-xs text-vault-dim">
+              <div className="text-xs text-dim">
                 Totaal fout: {perSafe.reduce((a, s) => a + s.mistakes, 0)}
               </div>
             </CardContent>
@@ -554,7 +554,7 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
               Nog een keer
             </button>
             <Link href={backHref} className="block">
-              <button className="w-full rounded-xl border border-vault-line bg-vault-card py-3 font-display font-bold text-vault-ink transition-colors hover:border-brass">
+              <button className="w-full rounded-xl border border-line bg-surface py-3 font-display font-bold text-ink transition-colors hover:border-brass">
                 Home
               </button>
             </Link>
@@ -606,7 +606,7 @@ function StartScreen(props: {
     (profile?.animals ?? []).map((a) => [a.tableIndex, a.tier]),
   )
   return (
-    <div className={`min-h-screen bg-vault ${worldClass} text-vault-ink`}>
+    <div className={`min-h-screen bg-vault ${worldClass} text-ink`}>
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-10">
         <div className="mb-6 flex items-center justify-between md:mb-10">
           <h1 className="font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -614,7 +614,7 @@ function StartScreen(props: {
           </h1>
           <Link
             href={backHref}
-            className="font-mono text-[11px] uppercase tracking-[0.12em] text-vault-dim transition-colors hover:text-vault-ink"
+            className="text-[12px] text-dim transition-colors hover:text-ink"
           >
             ← {backLabel}
           </Link>
@@ -626,35 +626,35 @@ function StartScreen(props: {
           </div>
         )}
 
-        <Card className="vault-card mb-4 rounded-2xl md:mb-8">
+        <Card className="card mb-4 rounded-2xl md:mb-8">
           <CardContent className="p-5 md:p-8 space-y-4 md:space-y-8">
             <div>
-              <h2 className="mb-2 font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+              <h2 className="mb-2 text-[12px] text-dim">
                 Modus
               </h2>
               <ModePicker value={mode} onChange={setMode} />
             </div>
             <div>
-              <h2 className="mb-2 font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+              <h2 className="mb-2 text-[12px] text-dim">
                 Moeilijkheid
               </h2>
               <DifficultyPicker value={difficulty} onChange={setDifficulty} />
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h2 className="font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+                <h2 className="text-[12px] text-dim">
                   Tafels
                 </h2>
                 <div className="flex gap-2">
                   <button
                     onClick={selectAll}
-                    className="font-mono text-[10px] text-vault-dim underline-offset-2 transition-colors hover:text-brass hover:underline"
+                    className="text-[12px] text-dim underline-offset-2 transition-colors hover:text-brass hover:underline"
                   >
                     alles
                   </button>
                   <button
                     onClick={clearAll}
-                    className="font-mono text-[10px] text-vault-dim underline-offset-2 transition-colors hover:text-brass hover:underline"
+                    className="text-[12px] text-dim underline-offset-2 transition-colors hover:text-brass hover:underline"
                   >
                     wissen
                   </button>
@@ -668,10 +668,10 @@ function StartScreen(props: {
                       <button
                         onClick={() => toggleTable(t)}
                         aria-pressed={selectedTables.includes(t)}
-                        className={`flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-xl border p-1 font-mono font-semibold transition-all ${
+                        className={`flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-xl border p-1 font-semibold transition-all ${
                           selectedTables.includes(t)
-                            ? 'border-brass bg-brass/15 text-brass'
-                            : 'border-vault-line bg-vault-card text-vault-ink hover:border-vault-dim'
+                            ? 'border-world bg-world-dim text-world'
+                            : 'border-line bg-surface text-ink hover:border-dim'
                         }`}
                       >
                         <span className="text-xl leading-none">{t}</span>
@@ -688,7 +688,7 @@ function StartScreen(props: {
                             e.stopPropagation()
                             onResetTable(t)
                           }}
-                          className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-vault-night bg-fout text-xs font-bold text-vault-night transition-colors hover:bg-fout/80"
+                          className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-fout text-xs font-extrabold text-white transition-colors hover:bg-fout/80"
                           aria-label={`Reset tafel ${t}`}
                           title="Reset dit dier"
                         >
@@ -716,11 +716,7 @@ function StartScreen(props: {
         <button
           onClick={() => canStart && onStart()}
           disabled={!canStart}
-          className={`w-full rounded-2xl py-4 font-display text-lg font-extrabold tracking-tight transition-all ${
-            canStart
-              ? 'bg-brass text-vault-night hover:-translate-y-px'
-              : 'cursor-not-allowed border border-vault-line bg-vault-card text-vault-dim'
-          }`}
+          className="btn-3d w-full py-4 font-display text-2xl font-extrabold"
         >
           🔓 Start kraken
         </button>

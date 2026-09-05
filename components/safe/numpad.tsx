@@ -47,7 +47,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
           type="button"
           onClick={() => press(d)}
           disabled={disabled}
-          className="h-14 rounded-xl border border-vault-line bg-vault-card font-mono text-2xl font-semibold tabular text-vault-ink transition-colors hover:border-vault-dim active:translate-y-px disabled:opacity-50"
+          className="btn-3d-quiet h-14 font-display text-2xl font-extrabold tabular disabled:opacity-50"
         >
           {d}
         </button>
@@ -56,7 +56,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
         type="button"
         onClick={backspace}
         disabled={disabled}
-        className="h-14 rounded-xl border border-vault-line bg-vault-card font-display text-base font-bold text-vault-dim transition-colors hover:border-vault-dim disabled:opacity-50"
+        className="btn-3d-quiet h-14 font-display text-base font-extrabold text-dim disabled:opacity-50"
         aria-label="Backspace"
       >
         Wis
@@ -65,7 +65,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
         type="button"
         onClick={() => press('0')}
         disabled={disabled}
-        className="h-14 rounded-xl border border-vault-line bg-vault-card font-mono text-2xl font-semibold tabular text-vault-ink transition-colors hover:border-vault-dim active:translate-y-px disabled:opacity-50"
+        className="btn-3d-quiet h-14 font-display text-2xl font-extrabold tabular disabled:opacity-50"
       >
         0
       </button>
@@ -73,7 +73,7 @@ export function Numpad({ value, onChange, onSubmit, disabled = false }: NumpadPr
         type="button"
         onClick={onSubmit}
         disabled={disabled}
-        className="h-14 rounded-xl bg-world font-display text-lg font-extrabold text-vault-night transition-transform hover:-translate-y-px disabled:opacity-50"
+        className="btn-3d h-14 font-display text-xl font-extrabold disabled:opacity-50"
       >
         OK
       </button>

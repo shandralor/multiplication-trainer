@@ -28,8 +28,8 @@ function RoundSkeleton() {
   return (
     <div className="min-h-screen bg-vault world-breuken">
       <div className="mx-auto max-w-2xl px-4 pt-16">
-        <div className="h-3 w-24 rounded-sm bg-vault-line" />
-        <div className="mt-6 h-7 w-2/3 rounded-sm bg-vault-line" />
+        <div className="h-3 w-24 rounded-sm bg-line" />
+        <div className="mt-6 h-7 w-2/3 rounded-sm bg-line" />
       </div>
     </div>
   )

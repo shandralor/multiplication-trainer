@@ -71,7 +71,7 @@ export default function ProgressPage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-vault world-kluis text-vault-ink flex items-center justify-center">
+      <div className="min-h-screen bg-vault world-kluis text-ink flex items-center justify-center">
         <p>Laden...</p>
       </div>
     )
@@ -83,15 +83,15 @@ export default function ProgressPage() {
     : 0
 
   return (
-    <div className="min-h-screen bg-vault world-kluis text-vault-ink">
+    <div className="min-h-screen bg-vault world-kluis text-ink">
       {/* Header */}
-      <div className="border-b border-vault-line">
+      <div className="border-b border-line">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <div className="flex items-center gap-4">
               <Link
                 href="/kluiskamer"
-                className="font-mono text-[11px] uppercase tracking-[0.12em] text-vault-dim transition-colors hover:text-vault-ink"
+                className="text-[12px] text-dim transition-colors hover:text-ink"
               >
                 ← Kluiskamer
               </Link>
@@ -107,7 +107,7 @@ export default function ProgressPage() {
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Dieren Verzameling */}
         {profile && (
-          <Card className="vault-card mb-6 rounded-2xl">
+          <Card className="card mb-6 rounded-2xl">
             <CardContent className="p-5">
               <CollectionStrip animals={profile.animals ?? []} />
             </CardContent>
@@ -116,37 +116,37 @@ export default function ProgressPage() {
 
         {/* Profile Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card className="vault-card rounded-2xl">
+          <Card className="card rounded-2xl">
             <CardContent className="p-6 text-center">
               <div className="flex justify-center mb-3">
                 <Mascot emotion="excited" size="medium" />
               </div>
-              <p className="text-sm text-vault-dim mb-1">Huidige Streak</p>
+              <p className="text-sm text-dim mb-1">Huidige Streak</p>
               <p className="text-4xl font-bold text-brass">🔥 {profile.currentStreak}</p>
-              <p className="text-xs text-vault-dim mt-1">dagen achter elkaar</p>
+              <p className="text-xs text-dim mt-1">dagen achter elkaar</p>
             </CardContent>
           </Card>
 
-          <Card className="vault-card rounded-2xl">
+          <Card className="card rounded-2xl">
             <CardContent className="p-6 text-center">
-              <p className="text-sm text-vault-dim mb-1">Totaal Quizzen</p>
+              <p className="text-sm text-dim mb-1">Totaal Quizzen</p>
               <p className="text-4xl font-bold text-goed">{profile.totalQuizzes}</p>
-              <p className="text-xs text-vault-dim mt-1">{profile.totalQuestions} vragen beantwoord</p>
+              <p className="text-xs text-dim mt-1">{profile.totalQuestions} vragen beantwoord</p>
             </CardContent>
           </Card>
 
-          <Card className="vault-card rounded-2xl">
+          <Card className="card rounded-2xl">
             <CardContent className="p-6 text-center">
-              <p className="text-sm text-vault-dim mb-1">Nauwkeurigheid</p>
+              <p className="text-sm text-dim mb-1">Nauwkeurigheid</p>
               <p className="text-4xl font-bold text-steel">{totalAccuracy}%</p>
-              <p className="text-xs text-vault-dim mt-1">{profile.totalCorrect} goed van {profile.totalQuestions}</p>
+              <p className="text-xs text-dim mt-1">{profile.totalCorrect} goed van {profile.totalQuestions}</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Best Scores */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <Card className="vault-card rounded-2xl">
+          <Card className="card rounded-2xl">
             <CardHeader>
               <CardTitle className="text-lg">🏆 Beste Quiz Scores</CardTitle>
             </CardHeader>
@@ -154,7 +154,7 @@ export default function ProgressPage() {
               <div className="space-y-4">
                 {/* Multiplication */}
                 <div>
-                  <p className="text-sm font-semibold text-vault-dim mb-2 flex items-center gap-1">
+                  <p className="text-sm font-semibold text-dim mb-2 flex items-center gap-1">
                     <span className="text-lg">×</span> Vermenigvuldigen
                   </p>
                   {profile.bestScores.quiz.multiply ? (
@@ -162,20 +162,20 @@ export default function ProgressPage() {
                       <div className="text-2xl font-bold text-goed">
                         {profile.bestScores.quiz.multiply.percentage}%
                       </div>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         {profile.bestScores.quiz.multiply.score}/{profile.bestScores.quiz.multiply.total} vragen · Tafels: {profile.bestScores.quiz.multiply.tables.join(', ')}
                       </p>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         {new Date(profile.bestScores.quiz.multiply.date).toLocaleDateString('nl-NL')}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-vault-dim pl-6">Nog niet geoefend</p>
+                    <p className="text-xs text-dim pl-6">Nog niet geoefend</p>
                   )}
                 </div>
                 {/* Division */}
                 <div>
-                  <p className="text-sm font-semibold text-vault-dim mb-2 flex items-center gap-1">
+                  <p className="text-sm font-semibold text-dim mb-2 flex items-center gap-1">
                     <span className="text-lg">÷</span> Delen
                   </p>
                   {profile.bestScores.quiz.divide ? (
@@ -183,22 +183,22 @@ export default function ProgressPage() {
                       <div className="text-2xl font-bold text-goed">
                         {profile.bestScores.quiz.divide.percentage}%
                       </div>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         {profile.bestScores.quiz.divide.score}/{profile.bestScores.quiz.divide.total} vragen · Tafels: {profile.bestScores.quiz.divide.tables.join(', ')}
                       </p>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         {new Date(profile.bestScores.quiz.divide.date).toLocaleDateString('nl-NL')}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-vault-dim pl-6">Nog niet geoefend</p>
+                    <p className="text-xs text-dim pl-6">Nog niet geoefend</p>
                   )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="vault-card rounded-2xl">
+          <Card className="card rounded-2xl">
             <CardHeader>
               <CardTitle className="text-lg">⏱️ Beste Tijd Scores</CardTitle>
             </CardHeader>
@@ -206,7 +206,7 @@ export default function ProgressPage() {
               <div className="space-y-4">
                 {/* Multiplication */}
                 <div>
-                  <p className="text-sm font-semibold text-vault-dim mb-2 flex items-center gap-1">
+                  <p className="text-sm font-semibold text-dim mb-2 flex items-center gap-1">
                     <span className="text-lg">×</span> Vermenigvuldigen
                   </p>
                   {profile.bestScores.timed.multiply ? (
@@ -214,23 +214,23 @@ export default function ProgressPage() {
                       <div className="text-2xl font-bold text-brass">
                         {profile.bestScores.timed.multiply.percentage}%
                       </div>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         {profile.bestScores.timed.multiply.score}/{profile.bestScores.timed.multiply.total} vragen · {profile.bestScores.timed.multiply.timePerQuestion}s
                       </p>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         Tafels: {profile.bestScores.timed.multiply.tables.join(', ')}
                       </p>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         {new Date(profile.bestScores.timed.multiply.date).toLocaleDateString('nl-NL')}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-vault-dim pl-6">Nog niet geoefend</p>
+                    <p className="text-xs text-dim pl-6">Nog niet geoefend</p>
                   )}
                 </div>
                 {/* Division */}
                 <div>
-                  <p className="text-sm font-semibold text-vault-dim mb-2 flex items-center gap-1">
+                  <p className="text-sm font-semibold text-dim mb-2 flex items-center gap-1">
                     <span className="text-lg">÷</span> Delen
                   </p>
                   {profile.bestScores.timed.divide ? (
@@ -238,18 +238,18 @@ export default function ProgressPage() {
                       <div className="text-2xl font-bold text-brass">
                         {profile.bestScores.timed.divide.percentage}%
                       </div>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         {profile.bestScores.timed.divide.score}/{profile.bestScores.timed.divide.total} vragen · {profile.bestScores.timed.divide.timePerQuestion}s
                       </p>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         Tafels: {profile.bestScores.timed.divide.tables.join(', ')}
                       </p>
-                      <p className="text-xs text-vault-dim">
+                      <p className="text-xs text-dim">
                         {new Date(profile.bestScores.timed.divide.date).toLocaleDateString('nl-NL')}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-vault-dim pl-6">Nog niet geoefend</p>
+                    <p className="text-xs text-dim pl-6">Nog niet geoefend</p>
                   )}
                 </div>
               </div>
@@ -258,14 +258,14 @@ export default function ProgressPage() {
         </div>
 
         {/* Table Mastery */}
-        <Card className="vault-card rounded-2xl mb-6">
+        <Card className="card rounded-2xl mb-6">
           <CardHeader>
             <CardTitle className="text-lg">📚 Tafel Beheersing</CardTitle>
           </CardHeader>
           <CardContent>
             {/* Multiplication */}
             <div className="mb-6">
-              <h4 className="text-sm font-semibold text-vault-dim mb-3 flex items-center gap-1">
+              <h4 className="text-sm font-semibold text-dim mb-3 flex items-center gap-1">
                 <span className="text-lg">×</span> Vermenigvuldigen
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -286,19 +286,19 @@ export default function ProgressPage() {
                             : accuracy >= 60
                             ? 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900/20'
                             : 'bg-red-50 border-red-500 dark:bg-red-900/20'
-                          : 'bg-vault-card border-vault-line'
+                          : 'bg-surface border-line'
                       }`}
                     >
                       <div className="text-2xl font-bold mb-1">{table}</div>
                       {hasData ? (
                         <>
                           <div className="text-sm font-semibold">{accuracy}%</div>
-                          <div className="text-xs text-vault-dim">
+                          <div className="text-xs text-dim">
                             {stats.attempts} vragen
                           </div>
                         </>
                       ) : (
-                        <div className="text-xs text-vault-dim">Nog niet geoefend</div>
+                        <div className="text-xs text-dim">Nog niet geoefend</div>
                       )}
                     </div>
                   )
@@ -308,7 +308,7 @@ export default function ProgressPage() {
 
             {/* Division */}
             <div>
-              <h4 className="text-sm font-semibold text-vault-dim mb-3 flex items-center gap-1">
+              <h4 className="text-sm font-semibold text-dim mb-3 flex items-center gap-1">
                 <span className="text-lg">÷</span> Delen
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -329,19 +329,19 @@ export default function ProgressPage() {
                             : accuracy >= 60
                             ? 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900/20'
                             : 'bg-red-50 border-red-500 dark:bg-red-900/20'
-                          : 'bg-vault-card border-vault-line'
+                          : 'bg-surface border-line'
                       }`}
                     >
                       <div className="text-2xl font-bold mb-1">{table}</div>
                       {hasData ? (
                         <>
                           <div className="text-sm font-semibold">{accuracy}%</div>
-                          <div className="text-xs text-vault-dim">
+                          <div className="text-xs text-dim">
                             {stats.attempts} vragen
                           </div>
                         </>
                       ) : (
-                        <div className="text-xs text-vault-dim">Nog niet geoefend</div>
+                        <div className="text-xs text-dim">Nog niet geoefend</div>
                       )}
                     </div>
                   )
@@ -352,14 +352,14 @@ export default function ProgressPage() {
         </Card>
 
         {/* Leaderboard */}
-        <Card className="vault-card rounded-2xl mb-6">
+        <Card className="card rounded-2xl mb-6">
           <CardHeader>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg">🏅 Klassement (Dit Apparaat)</CardTitle>
               </div>
               <div className="flex gap-2 flex-wrap">
-                <div className="flex gap-1 bg-vault-card rounded-lg p-1">
+                <div className="flex gap-1 bg-surface rounded-lg p-1">
                   <Button
                     size="sm"
                     variant={leaderboardMode === 'quiz' ? 'default' : 'ghost'}
@@ -377,7 +377,7 @@ export default function ProgressPage() {
                     Tijd
                   </Button>
                 </div>
-                <div className="flex gap-1 bg-vault-card rounded-lg p-1">
+                <div className="flex gap-1 bg-surface rounded-lg p-1">
                   <Button
                     size="sm"
                     variant={leaderboardOperation === 'multiply' ? 'default' : 'ghost'}
@@ -407,7 +407,7 @@ export default function ProgressPage() {
                     className={`flex items-center justify-between p-3 rounded-lg ${
                       entry.profile.id === profile.id
                         ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-500'
-                        : 'bg-vault-card'
+                        : 'bg-surface'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -416,7 +416,7 @@ export default function ProgressPage() {
                       </div>
                       <div>
                         <div className="font-semibold">{entry.profile.name}</div>
-                        <div className="text-xs text-vault-dim">
+                        <div className="text-xs text-dim">
                           Tafels: {entry.result.tables.join(', ')}
                         </div>
                       </div>
@@ -425,7 +425,7 @@ export default function ProgressPage() {
                       <div className="text-xl font-bold text-goed">
                         {entry.result.percentage}%
                       </div>
-                      <div className="text-xs text-vault-dim">
+                      <div className="text-xs text-dim">
                         {entry.result.score}/{entry.result.total}
                       </div>
                     </div>
@@ -433,7 +433,7 @@ export default function ProgressPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-vault-dim text-center py-8">
+              <p className="text-dim text-center py-8">
                 Nog geen scores beschikbaar
               </p>
             )}
@@ -441,7 +441,7 @@ export default function ProgressPage() {
         </Card>
 
         {/* Recent Results */}
-        <Card className="vault-card rounded-2xl mb-6">
+        <Card className="card rounded-2xl mb-6">
           <CardHeader>
             <CardTitle className="text-lg">📅 Recente Resultaten</CardTitle>
           </CardHeader>
@@ -451,7 +451,7 @@ export default function ProgressPage() {
                 {profile.recentResults.slice(0, 10).map((result) => (
                   <div
                     key={result.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-vault-line bg-vault-card"
+                    className="flex items-center justify-between p-3 rounded-lg border border-line bg-surface"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xl">
@@ -460,11 +460,11 @@ export default function ProgressPage() {
                       <div>
                         <div className="text-sm font-medium flex items-center gap-2">
                           <span>{result.mode === 'quiz' ? 'Quiz' : result.mode === 'timed' ? 'Tijd' : 'Oefen'} Modus</span>
-                          <span className="text-xs bg-steel/15 text-steel px-2 py-0.5 rounded">
+                          <span className="rounded-full bg-steel/15 px-2 py-0.5 text-xs font-bold text-steel">
                             {result.operation === 'multiply' ? '×' : '÷'}
                           </span>
                         </div>
-                        <div className="text-xs text-vault-dim">
+                        <div className="text-xs text-dim">
                           Tafels: {result.tables.join(', ')}
                         </div>
                       </div>
@@ -475,7 +475,7 @@ export default function ProgressPage() {
                       }`}>
                         {result.percentage}%
                       </div>
-                      <div className="text-xs text-vault-dim">
+                      <div className="text-xs text-dim">
                         {new Date(result.date).toLocaleDateString('nl-NL')}
                       </div>
                     </div>
@@ -483,7 +483,7 @@ export default function ProgressPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-vault-dim text-center py-8">
+              <p className="text-dim text-center py-8">
                 Nog geen resultaten
               </p>
             )}
@@ -491,7 +491,7 @@ export default function ProgressPage() {
         </Card>
 
         {/* Export/Import */}
-        <Card className="vault-card rounded-2xl">
+        <Card className="card rounded-2xl">
           <CardHeader>
             <CardTitle className="text-lg">💾 Backup & Delen</CardTitle>
           </CardHeader>
@@ -504,7 +504,7 @@ export default function ProgressPage() {
                 📥 Importeer Profiel
               </Button>
             </div>
-            <p className="text-xs text-vault-dim mt-2 text-center">
+            <p className="text-xs text-dim mt-2 text-center">
               Gebruik deze functies om je voortgang naar een ander apparaat over te zetten
             </p>
           </CardContent>
@@ -521,7 +521,7 @@ export default function ProgressPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <div className="p-3 bg-vault-card rounded-lg break-all font-mono text-sm">
+            <div className="p-3 bg-surface rounded-lg break-all text-sm">
               {exportCode}
             </div>
             <Button onClick={copyToClipboard} className="w-full">
@@ -545,7 +545,7 @@ export default function ProgressPage() {
               value={importCode}
               onChange={(e) => setImportCode(e.target.value)}
               placeholder="Plak de code hier..."
-              className="font-mono"
+              className="tabular"
             />
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setShowImportDialog(false)} className="flex-1">

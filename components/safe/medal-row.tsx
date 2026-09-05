@@ -31,11 +31,11 @@ export function MedalRow({ earned }: MedalRowProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-2 px-2">
-        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+        <span className="text-[12px] text-dim">
           Medailles · {earnedIds.size} / {ALL_IDS.length}
         </span>
       </div>
-      <div className="flex flex-nowrap justify-center gap-2 overflow-x-auto rounded-2xl vault-card p-3">
+      <div className="flex flex-nowrap justify-center gap-2 overflow-x-auto rounded-2xl card p-3">
         {ALL_IDS.map((id) => {
           const def = ACHIEVEMENTS[id]
           const isEarned = earnedIds.has(id)
@@ -46,8 +46,8 @@ export function MedalRow({ earned }: MedalRowProps) {
               onClick={() => setOpen((cur) => (cur === id ? null : id))}
               className={`relative inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border transition-colors ${
                 isEarned
-                  ? 'border-brass/35 bg-brass/10 hover:border-brass'
-                  : 'border-vault-line bg-vault-night hover:border-vault-dim'
+                  ? 'border-world bg-world-dim'
+                  : 'border-line bg-surface'
               }`}
               title={def.label}
               aria-label={def.label}
@@ -67,7 +67,7 @@ export function MedalRow({ earned }: MedalRowProps) {
       {open && (
         <div
           onClick={() => setOpen(null)}
-          className="mt-2 cursor-pointer rounded-xl vault-card p-3 text-sm text-vault-ink"
+          className="mt-2 cursor-pointer rounded-xl card p-3 text-sm text-ink"
         >
           <div className="flex items-center gap-3">
             <Image
@@ -81,11 +81,11 @@ export function MedalRow({ earned }: MedalRowProps) {
               <div className="font-display font-bold tracking-tight">
                 {ACHIEVEMENTS[open].label}
               </div>
-              <div className="mt-0.5 text-xs text-vault-dim">
+              <div className="mt-0.5 text-xs text-dim">
                 {ACHIEVEMENTS[open].description}
               </div>
               {!earnedIds.has(open) && (
-                <div className="mt-1 font-mono text-[10px] text-brass">Nog niet verdiend</div>
+                <div className="mt-1 text-[12px] text-brass">Nog niet verdiend</div>
               )}
             </div>
           </div>

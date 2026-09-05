@@ -43,7 +43,7 @@ export default function KluiskamerPage() {
 
       <div className="pt-5">
         <h1 className="font-display text-[1.4rem] font-extrabold tracking-tight">Kluiskamer</h1>
-        <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.13em] text-vault-dim">
+        <p className="mt-1.5 text-[12px] text-dim">
           alles wat je hebt buitgemaakt
         </p>
       </div>
@@ -55,8 +55,8 @@ export default function KluiskamerPage() {
             return (
               <div
                 key={animal.slug}
-                className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border bg-vault-card p-1.5 ${
-                  entry ? TIER_RING[entry.tier] : 'border-dashed border-vault-line'
+                className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border bg-surface p-1.5 ${
+                  entry ? TIER_RING[entry.tier] : 'border-dashed border-line'
                 }`}
                 title={entry ? `${animal.nameNl} · ${TIER_LABEL[entry.tier]}` : 'Nog opgesloten'}
               >
@@ -73,7 +73,7 @@ export default function KluiskamerPage() {
                     🔒
                   </span>
                 )}
-                <span className="font-mono text-[8px] uppercase tracking-wide text-vault-dim">
+                <span className="text-[12px] uppercase tracking-wide text-dim">
                   {entry ? TIER_LABEL[entry.tier] : `tafel ${animal.tableIndex}`}
                 </span>
               </div>
@@ -89,15 +89,15 @@ export default function KluiskamerPage() {
             return (
               <div
                 key={pastry.slug}
-                className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border bg-vault-card p-1.5 ${
-                  entry ? TIER_RING[entry.tier] : 'border-dashed border-vault-line'
+                className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border bg-surface p-1.5 ${
+                  entry ? TIER_RING[entry.tier] : 'border-dashed border-line'
                 }`}
                 title={entry ? `${pastry.nameNl} · ${TIER_LABEL[entry.tier]}` : 'Nog niet gebakken'}
               >
                 <span aria-hidden className={`text-xl ${entry ? '' : 'opacity-25 grayscale'}`}>
                   {pastry.emoji}
                 </span>
-                <span className="font-mono text-[8px] uppercase tracking-wide text-vault-dim">
+                <span className="text-[12px] uppercase tracking-wide text-dim">
                   {entry ? TIER_LABEL[entry.tier] : `trede ${pastry.rung}`}
                 </span>
               </div>
@@ -113,13 +113,13 @@ export default function KluiskamerPage() {
       <div className="mt-8 flex gap-2">
         <Link
           href="/progress"
-          className="flex-1 rounded-xl border border-vault-line bg-vault-card py-2.5 text-center font-display text-[13px] font-bold text-vault-dim transition-colors hover:border-vault-green hover:text-vault-ink"
+          className="flex-1 rounded-xl border border-line bg-surface py-2.5 text-center font-display text-[13px] font-bold text-dim transition-colors hover:border-world hover:text-ink"
         >
           📊 Statistieken
         </Link>
         <Link
           href="/instellingen"
-          className="flex-1 rounded-xl border border-vault-line bg-vault-card py-2.5 text-center font-display text-[13px] font-bold text-vault-dim transition-colors hover:border-vault-green hover:text-vault-ink"
+          className="flex-1 rounded-xl border border-line bg-surface py-2.5 text-center font-display text-[13px] font-bold text-dim transition-colors hover:border-world hover:text-ink"
         >
           ⚙️ Instellingen
         </Link>
@@ -140,11 +140,11 @@ function Section({
   return (
     <section className="mt-6">
       <div className="mb-2.5 flex items-center gap-3">
-        <h2 className="font-mono text-[9px] uppercase tracking-[0.14em] text-vault-dim">
+        <h2 className="text-[12px] text-dim">
           {title}
         </h2>
-        <span aria-hidden className="h-px flex-1 bg-vault-line" />
-        <span className="font-mono text-[10px] tabular text-vault-dim">{count}</span>
+        <span aria-hidden className="h-px flex-1 bg-line" />
+        <span className="text-[12px] tabular text-dim">{count}</span>
       </div>
       {children}
     </section>
