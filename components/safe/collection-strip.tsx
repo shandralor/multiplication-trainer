@@ -20,14 +20,14 @@ export function CollectionStrip({ animals, highlightTable = null, compact = fals
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-2 px-2">
-        <span className="text-xs font-bold tracking-wider text-amber-700 dark:text-amber-300">
+        <span className="font-display text-base font-extrabold text-ink">
           Dieren verzameling · {earnedCount} / 10
         </span>
         {allGold && (
-          <span className="text-xs font-bold text-yellow-600">🏆 Kluis compleet!</span>
+          <span className="font-display text-base font-extrabold text-gold">🏆 Kluis compleet!</span>
         )}
       </div>
-      <div className={`flex gap-1.5 p-3 rounded-2xl border-2 border-amber-200 bg-amber-50 dark:bg-amber-950/30 justify-center flex-nowrap overflow-x-auto ${compact ? 'py-2' : ''}`}>
+      <div className={`flex flex-nowrap justify-center gap-1.5 overflow-x-auto rounded-2xl border-2 border-line bg-surface p-3 ${compact ? 'py-2' : ''}`}>
         {ANIMALS.map((animal) => (
           <div
             key={animal.tableIndex}

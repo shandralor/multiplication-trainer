@@ -387,19 +387,19 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
           <div className="flex items-center justify-between mb-3 gap-2">
             <button
               onClick={abortRun}
-              className="rounded-lg border border-line bg-surface px-3 py-1.5 font-display text-sm font-bold text-ink transition-colors hover:border-brass"
+              className="btn-3d-quiet px-3.5 py-1.5 font-display text-sm font-extrabold"
             >
               ← Terug
             </button>
             <button
               onClick={restartRun}
-              className="rounded-lg border border-line bg-surface px-3 py-1.5 font-display text-sm font-bold text-dim transition-colors hover:border-world hover:text-ink"
+              className="btn-3d-quiet px-3.5 py-1.5 font-display text-sm font-extrabold"
             >
               ↻ Herstart
             </button>
             <Link
               href={backHref}
-              className="rounded-lg border border-line bg-surface px-3 py-1.5 font-display text-sm font-bold text-ink transition-colors hover:border-world"
+              className="btn-3d-quiet px-3.5 py-1.5 font-display text-sm font-extrabold"
             >
               {backLabel}
             </Link>
@@ -418,7 +418,7 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
             {mode === 'safe-endless' && timeRemaining !== null && (
               <>
                 <span>·</span>
-                <span className={`font-bold ${timeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-emerald-300'}`}>
+                <span className={`font-display font-extrabold tabular ${timeRemaining <= 10 ? 'animate-pulse text-fout' : 'text-goed'}`}>
                   ⏱ {Math.max(0, timeRemaining)}s
                 </span>
               </>
@@ -482,9 +482,9 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
             <CardContent className="p-5 space-y-2">
               <div className="text-lg">Kluizen gekraakt: <span className="font-extrabold">{perSafe.length}</span></div>
               <div className="flex gap-4 text-lg">
-                <span className="text-yellow-300">🥇 {tiers.gold}</span>
+                <span className="font-extrabold text-gold">🥇 {tiers.gold}</span>
                 <span className="text-dim">🥈 {tiers.silver}</span>
-                <span className="text-amber-600">🥉 {tiers.bronze}</span>
+                <span className="font-extrabold text-[#A97142]">🥉 {tiers.bronze}</span>
               </div>
               <div className="text-xs text-dim">
                 Totaal fout: {perSafe.reduce((a, s) => a + s.mistakes, 0)}
@@ -493,9 +493,9 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
           </Card>
 
           {justEarnedAchievements.length > 0 && (
-            <Card className="bg-yellow-500/20 border-yellow-400/50 text-white mb-6">
+            <Card className="world-kluis mb-6 rounded-2xl border-2 border-world bg-world-dim">
               <CardContent className="p-5">
-                <div className="text-sm font-bold tracking-wider text-yellow-300 mb-3">
+                <div className="mb-3 font-display text-lg font-extrabold text-ink">
                   Nieuwe medailles!
                 </div>
                 <div className="space-y-2">
@@ -520,7 +520,7 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
           )}
 
           {justEarnedAchievements.includes('all-gold') && (
-            <Card className="bg-gradient-to-br from-yellow-500/30 to-amber-600/30 border-yellow-400 text-white mb-6">
+            <Card className="world-kluis mb-6 rounded-2xl border-2 border-world bg-world-dim">
               <CardContent className="p-5 space-y-3">
                 <div className="text-lg font-extrabold">🏆 Kluis compleet!</div>
                 <div className="text-sm opacity-90">
@@ -534,7 +534,7 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
                     setScreen('start')
                     setPerSafe([])
                   }}
-                  className="w-full py-3 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 text-white font-bold shadow-lg"
+                  className="btn-3d w-full py-3 font-display text-lg font-extrabold"
                 >
                   Verzameling resetten en opnieuw beginnen
                 </button>
@@ -549,12 +549,12 @@ export default function SafePage({ operation = 'multiply' }: SafePageProps) {
                 setPerSafe([])
                 setJustEarnedAchievements([])
               }}
-              className="py-3 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 text-white font-bold shadow-lg"
+              className="btn-3d py-3 font-display text-lg font-extrabold"
             >
               Nog een keer
             </button>
             <Link href={backHref} className="block">
-              <button className="w-full rounded-xl border border-line bg-surface py-3 font-display font-bold text-ink transition-colors hover:border-brass">
+              <button className="btn-3d-quiet w-full py-3 font-display text-lg font-extrabold">
                 Home
               </button>
             </Link>
@@ -703,7 +703,7 @@ function StartScreen(props: {
                 <div className="mt-3 text-right">
                   <button
                     onClick={onResetAll}
-                    className="text-xs font-semibold text-rose-300 hover:text-rose-200 underline-offset-2 hover:underline"
+                    className="text-[13px] font-bold text-fout underline-offset-2 hover:underline"
                   >
                     Verzameling resetten
                   </button>

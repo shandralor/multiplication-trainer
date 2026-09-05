@@ -97,14 +97,14 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
               key={profile.id}
               onClick={() => handleSwitchProfile(profile.id)}
               className={`flex items-center justify-between ${
-                profile.id === currentProfile.id ? 'bg-green-50 dark:bg-green-900/20' : ''
+                profile.id === currentProfile.id ? 'bg-goed/10' : ''
               }`}
             >
               <div className="flex items-center gap-2">
                 <span className="text-lg">👤</span>
                 <span className="font-medium">{profile.name}</span>
                 {profile.id === currentProfile.id && (
-                  <span className="text-green-600 dark:text-green-400">✓</span>
+                  <span className="font-extrabold text-goed">✓</span>
                 )}
               </div>
               {profile.id !== currentProfile.id && allProfiles.length > 1 && (
@@ -113,7 +113,7 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
                     e.stopPropagation()
                     handleDeleteProfile(profile.id)
                   }}
-                  className="text-red-500 hover:text-red-700 ml-2"
+                  className="ml-2 text-fout transition-opacity hover:opacity-70"
                   title="Verwijder profiel"
                 >
                   🗑️
@@ -124,7 +124,7 @@ export function ProfileSelector({ onProfileChange }: ProfileSelectorProps) {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setShowNewProfileDialog(true)}
-            className="text-green-600 dark:text-green-400 font-semibold"
+            className="font-extrabold text-goed"
           >
             <span className="mr-2">➕</span>
             Nieuw Profiel

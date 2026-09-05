@@ -50,20 +50,49 @@ export function SafeDial({
         aspectRatio: '1 / 1',
       }}
     >
+      {/* The safe door: a thick coloured ring, a lighter inner face, and
+          six bolts around the rim. Flat shapes and hard edges — cartoon
+          depth, not a gradient trying to look like metal. */}
       <div
         ref={dialRef}
-        className={`relative h-full w-full rounded-full border-[6px] border-line bg-surface transition-transform duration-700 ${
+        className={`relative h-full w-full rounded-full transition-transform duration-700 ${
           spinning ? 'animate-[spin_0.9s_ease-in-out]' : ''
-        } ${flash ? 'ring-4 ring-world' : ''}`}
-        style={{ boxShadow: '0 6px 0 var(--line)' }}
+        }`}
+        style={{
+          background: 'var(--world)',
+          border: '6px solid var(--world-edge)',
+          boxShadow: flash ? '0 0 0 10px var(--world-wash)' : '0 8px 0 var(--world-edge)',
+        }}
       >
+        {/* Bolts around the rim */}
+        {Array.from({ length: 6 }, (_, i) => {
+          const angle = (i / 6) * Math.PI * 2 - Math.PI / 2
+          return (
+            <span
+              key={i}
+              aria-hidden
+              className="absolute h-3 w-3 rounded-full sm:h-4 sm:w-4"
+              style={{
+                background: 'var(--world-edge)',
+                left: `${50 + Math.cos(angle) * 41}%`,
+                top: `${50 + Math.sin(angle) * 41}%`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            />
+          )
+        })}
+
+        {/* Inner face */}
+        <div
+          className="absolute inset-[14%] rounded-full"
+          style={{ background: 'var(--surface)', border: '5px solid var(--world-edge)' }}
+        />
+
         {/* Center label */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-ink">
           <span className="text-sm font-bold text-dim">{title}</span>
           <span className="mt-1 font-display text-6xl font-extrabold text-world">{label}</span>
-          {subLabel && (
-            <span className="mt-2 text-sm font-bold text-dim">{subLabel}</span>
-          )}
+          {subLabel && <span className="mt-2 text-sm font-bold text-dim">{subLabel}</span>}
         </div>
       </div>
 
