@@ -12,6 +12,7 @@ import {
   rungDef,
 } from '@/lib/fractions/ladder'
 import { PASTRIES, getPastry } from '@/lib/fractions/pastries'
+import { PastryIcon } from '@/components/fractions/pastry-icon'
 import { emptyFractionProgress, type Rung } from '@/lib/fractions/types'
 import { useEnsureProfile, useProfile } from '@/lib/use-profile'
 
@@ -85,7 +86,9 @@ export default function BreukenPage() {
                   owned ? 'bg-world-wash ring-2 ring-world' : 'bg-line'
                 }`}
               >
-                {owned ? getPastry(owned.pastryIndex).emoji : ''}
+                {owned ? (
+                  <PastryIcon slug={getPastry(owned.pastryIndex).slug} size={22} />
+                ) : null}
               </span>
             )
           })}

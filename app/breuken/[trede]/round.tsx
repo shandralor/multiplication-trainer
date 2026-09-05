@@ -12,6 +12,7 @@ import { frac, toVulgar } from '@/lib/fractions/fraction'
 import { rungBySlug, rungDef } from '@/lib/fractions/ladder'
 import { completeRound, type RoundOutcome } from '@/lib/fractions/fraction-progress'
 import { saveResume } from '@/lib/resume'
+import { PastryIcon } from '@/components/fractions/pastry-icon'
 import type { FractionItem } from '@/lib/fractions/types'
 
 const ROUND_LENGTH = 12
@@ -547,9 +548,13 @@ function Scorecard({
 
         {outcome?.pastry && (
           <div className="mt-7 rounded-2xl card-lit p-5">
-            <p className="text-[46px] leading-none" aria-hidden>
-              {outcome.pastry.emoji}
-            </p>
+            <div className="flex justify-center">
+              <PastryIcon
+                slug={outcome.pastry.slug}
+                size={72}
+                title={outcome.pastry.nameNl}
+              />
+            </div>
             <p className="mt-2 font-display text-lg font-extrabold tracking-tight">
               {outcome.upgraded ? 'Opgewaardeerd!' : outcome.pastry.nameNl}
             </p>

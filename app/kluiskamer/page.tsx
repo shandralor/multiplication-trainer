@@ -7,6 +7,7 @@ import { WorldShell } from '@/components/world-shell'
 import { MedalRow } from '@/components/safe/medal-row'
 import { ANIMALS } from '@/lib/safe/animals'
 import { PASTRIES } from '@/lib/fractions/pastries'
+import { PastryIcon } from '@/components/fractions/pastry-icon'
 import { useEnsureProfile, useProfile } from '@/lib/use-profile'
 import type { AnimalTier } from '@/lib/profile-manager'
 
@@ -94,9 +95,12 @@ export default function KluiskamerPage() {
                 }`}
                 title={entry ? `${pastry.nameNl} · ${TIER_LABEL[entry.tier]}` : 'Nog in de kluis'}
               >
-                <span aria-hidden className={`text-xl ${entry ? '' : 'opacity-25 grayscale'}`}>
-                  {pastry.emoji}
-                </span>
+                <PastryIcon
+                  slug={pastry.slug}
+                  size={34}
+                  title={pastry.nameNl}
+                  className={entry ? '' : 'opacity-25 grayscale'}
+                />
                 <span className="text-[12px] uppercase tracking-wide text-dim">
                   {entry ? TIER_LABEL[entry.tier] : `trede ${pastry.rung}`}
                 </span>
